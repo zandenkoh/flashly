@@ -420,7 +420,7 @@ function renderDecks() {
                     <div style="font-size:0.75rem;color:var(--text-secondary)">Due</div>
                 </div>
                 <div style="flex:1">
-                    <div style="font-weight:600; font-size:1.1rem; color:var(--primary)">${mastery}%</div>
+                    <div style="font-weight:600; font-size:1.1rem; color:var(--primary)">${mastery || 0}%</div>
                     <div style="font-size:0.75rem;color:var(--text-secondary)">Mastery</div>
                 </div>
             </div>
@@ -1025,6 +1025,21 @@ document.getElementById('shuffle-study-btn').onclick = () => {
     showToast('Queue shuffled');
 };
 
+document.getElementById('fullscreen-study-btn').onclick = () => {
+    const studyView = document.getElementById('study-view');
+    if (!document.fullscreenElement) {
+        if (studyView.requestFullscreen) {
+            studyView.requestFullscreen().catch(err => {
+                showToast(`Error attempting to enable full-screen mode: ${err.message}`, 'error');
+            });
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+};
+
 // --- Study Logic ---
 
 async function startStudySession() {
@@ -1421,7 +1436,7 @@ function renderGroupMembers() {
                 <div style="font-weight:700">${stats.reviews}</div>
             </div>
             <div style="text-align:center">
-                <div style="font-weight:700; color:var(--primary)">${mastery}%</div>
+                <div style="font-weight:700; color:var(--primary)">${mastery || 0}%</div>
             </div>
             <div style="text-align:right">
                 <span class="badge" style="background:${m.role === 'admin' ? 'var(--primary)' : 'var(--bg-secondary)'}; color: ${m.role === 'admin' ? 'white' : 'var(--text-primary)'}; border:none">${m.role}</span>
@@ -1879,6 +1894,9 @@ function switchView(viewId) {
     document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
     document.getElementById(viewId).classList.remove('hidden');
     stopGame(); // Ensure games stop
+    if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => { });
+    }
 }
 
 function openModal(id) {
