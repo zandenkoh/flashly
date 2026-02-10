@@ -40,7 +40,8 @@ const state = {
     groupDecks: [],
     groupMembers: [],
     savedDecks: [],
-    lastView: 'dashboard-view', // Track for back navigation
+    lastView: 'decks-view',
+    deckOrigin: 'decks-view', // Track for back navigation from deck view
     selectionMode: false,
     selectedCardIds: new Set()
 };
@@ -48,7 +49,7 @@ const state = {
 const DEFAULT_TAGS = [
     { name: 'Important', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />' },
     { name: 'Hard', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />' },
-    { name: 'Math', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />' }, // simplified icon
+    { name: 'Math', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />' },
     { name: 'Science', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.327 24.327 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />' },
     { name: 'Coding', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />' },
     { name: 'Todo', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />' }
@@ -59,15 +60,47 @@ const authView = document.getElementById('auth-view');
 const authModal = document.getElementById('auth-modal');
 const authTitle = document.getElementById('auth-title');
 const authSubtitle = document.getElementById('auth-subtitle');
+const modalOverlay = document.getElementById('modal-overlay');
 const mainLayout = document.getElementById('main-layout');
-const dashboardView = document.getElementById('dashboard-view');
+const todayView = document.getElementById('today-view');
+const decksView = document.getElementById('decks-view');
+const groupsView = document.getElementById('groups-view');
+const insightsView = document.getElementById('insights-view');
+const communityView = document.getElementById('community-view');
 const deckView = document.getElementById('deck-view');
 const studyView = document.getElementById('study-view');
 const studySummaryView = document.getElementById('study-summary-view');
-const statsView = document.getElementById('stats-view');
-const communityView = document.getElementById('community-view');
 const gameView = document.getElementById('game-view');
-const modalOverlay = document.getElementById('modal-overlay');
+
+const groupDetailView = document.getElementById('group-detail-view');
+
+
+
+function switchView(viewId) {
+    // Hide all views first
+    document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
+
+    // Clear card list when leaving deck-view to prevent cards persisting across tabs
+    if (state.lastView === 'deck-view' && viewId !== 'deck-view') {
+        const cardList = document.getElementById('card-list');
+        if (cardList) cardList.innerHTML = '';
+    }
+
+    // Show target view
+    const target = document.getElementById(viewId);
+    if (target) {
+        target.classList.remove('hidden');
+        state.lastView = viewId;
+    }
+
+    // Creating a safety mechanism: stop any game
+    stopGame();
+
+    // Exit fullscreen if needed
+    if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => { });
+    }
+}
 
 // --- Auth Logic ---
 
@@ -173,12 +206,16 @@ function showAuth() {
 function showApp() {
     authView.classList.add('hidden');
     mainLayout.classList.remove('hidden');
-    document.getElementById('user-email').textContent = state.user.email;
+    const userDisplay = document.getElementById('user-display');
+    if (userDisplay) userDisplay.textContent = state.user.email;
     setupRealtime();
     loadTags(); // Pre-load tags
-    loadDashboard();
+    loadTodayView(); // New Homepage
     fetchUserProfile(); // Fetch custom username
     handleInviteLink(); // Check for ?join= code
+
+    // Set active nav
+    updateNav('nav-today');
 }
 
 async function handleInviteLink() {
@@ -211,38 +248,48 @@ async function fetchUserProfile() {
     const { data } = await sb.from('profiles').select('username').eq('id', state.user.id).single();
     if (data && data.username) {
         state.user.username = data.username;
-        document.getElementById('user-email').textContent = data.username;
+        const userDisplay = document.getElementById('user-display');
+        if (userDisplay) userDisplay.textContent = data.username;
     }
 }
 
 
 // --- Navigation ---
 
+document.getElementById('nav-today').addEventListener('click', () => {
+    updateNav('nav-today');
+    switchView('today-view');
+    loadTodayView();
+});
+
 document.getElementById('nav-decks').addEventListener('click', () => {
     updateNav('nav-decks');
-    switchView('dashboard-view');
+    switchView('decks-view');
+    loadDecksView();
 });
-document.getElementById('nav-stats').addEventListener('click', () => {
-    updateNav('nav-stats');
-    switchView('stats-view');
-    loadStats();
+
+document.getElementById('nav-insights').addEventListener('click', () => {
+    updateNav('nav-insights');
+    switchView('insights-view');
+    loadStats(); // Combined stats and insights loading
 });
+
 document.getElementById('nav-community').addEventListener('click', () => {
     updateNav('nav-community');
-    switchView('community-view');
-    updateNav('nav-community');
-    switchView('community-view');
+    switchView('community-view'); // You need to add community-view back to HTML or rename one
     loadCommunityDecks();
 });
 
 document.getElementById('nav-groups').addEventListener('click', () => {
     updateNav('nav-groups');
-    switchView('groups-view');
+    switchView('groups-view'); // Make sure this ID exists in HTML, or reuse decks-view logic if similar
     loadGroups();
 });
 
+
+
 // Settings
-document.getElementById('settings-btn').addEventListener('click', () => {
+document.getElementById('nav-settings').addEventListener('click', () => {
     document.getElementById('settings-username').value = state.user.username || state.user.email;
     openModal('settings-modal');
 });
@@ -257,19 +304,24 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
         else showToast(error.message, 'error');
     } else {
         state.user.username = newUsername;
-        document.getElementById('user-email').textContent = newUsername;
+        const userDisplay = document.getElementById('user-display');
+        if (userDisplay) userDisplay.textContent = newUsername;
         showToast('Settings saved');
         closeModal();
     }
 });
 
 document.getElementById('back-to-dashboard').addEventListener('click', () => {
-    const target = state.lastView || 'dashboard-view';
+    // Return to where we came from
+    const target = state.deckOrigin || 'decks-view';
     state.currentDeck = null;
     switchView(target);
-    if (target === 'dashboard-view') loadDashboard();
-    else if (target === 'group-detail-view') loadGroupDetails(state.currentGroup.id);
+
+    if (target === 'decks-view') loadDecksView();
+    else if (target === 'today-view') loadTodayView();
     else if (target === 'community-view') loadCommunityDecks();
+    else if (target === 'group-detail-view' && state.currentGroup) loadGroupDetails(state.currentGroup.id);
+    else if (target === 'groups-view') loadGroups();
 });
 
 document.getElementById('delete-deck-btn').addEventListener('click', async () => {
@@ -280,8 +332,8 @@ document.getElementById('delete-deck-btn').addEventListener('click', async () =>
     if (error) showToast(error.message, 'error');
     else {
         showToast('Deck deleted');
-        switchView('dashboard-view');
-        loadDashboard();
+        switchView('decks-view');
+        loadDecksView();
     }
 });
 
@@ -297,13 +349,9 @@ function setupRealtime() {
     state.channels.decks = sb
         .channel('public:decks')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'decks' }, () => {
-            // Refresh if on dashboard
-            if (!dashboardView.classList.contains('hidden')) loadDashboard();
-        })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'decks' }, () => {
-            if (!dashboardView.classList.contains('hidden')) loadDashboard();
-            if (!document.getElementById('groups-view').classList.contains('hidden')) loadGroups(); // Refresh groups logic if decks change? No.
-            if (!document.getElementById('group-detail-view').classList.contains('hidden')) loadGroupDetails(state.currentGroup.id);
+            if (decksView && !decksView.classList.contains('hidden')) loadDecksView();
+            if (groupsView && !groupsView.classList.contains('hidden')) loadGroups();
+            if (state.currentGroup && document.getElementById('group-detail-view') && !document.getElementById('group-detail-view').classList.contains('hidden')) loadGroupDetails(state.currentGroup.id);
         })
         .subscribe();
 }
@@ -344,11 +392,147 @@ async function resolveTags(tagNames) {
 
 // --- Dashboard (Decks) ---
 
-async function loadDashboard() {
+// --- TODAY View ---
+
+async function loadTodayView() {
+    // 1. Greeting
+    const hour = new Date().getHours();
+    const greetingEl = document.getElementById('today-greeting');
+    if (greetingEl) {
+        if (hour < 12) greetingEl.textContent = 'Good morning, ready to learn?';
+        else if (hour < 18) greetingEl.textContent = 'Good afternoon, keep it up!';
+        else greetingEl.textContent = 'Good evening, time for a review?';
+    }
+
+    const dateEl = document.getElementById('today-date');
+    if (dateEl) {
+        const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+        dateEl.textContent = new Date().toLocaleDateString('en-US', dateOptions);
+    }
+
+    // 2. Fetch Due Cards count across ALL deck
+    // We need to fetch all cards for user? Or just count.
+    // Optimization: Call a stored procedure if possible, or select count.
+    // For now, client-side filtering of decks -> cards might be heavy but simple.
+    // Better: Fetch cards with due_at <= now()
+
+    const now = new Date().toISOString();
+    const { count, error } = await sb
+        .from('cards')
+        .select('*', { count: 'exact', head: true })
+        .lte('due_at', now); // due_at <= now
+    // RLS ensures we only see our cards (or decks we have access to?)
+    // Actually, cards table should have RLS.
+
+    if (!error) {
+        document.getElementById('today-due-count').textContent = count || 0;
+    }
+
+    // 3. Streak (Mock logic since we don't have daily activity log easily accessible without complex query)
+    // We can check study_logs for distinct days.
+    const { data: logs } = await sb.from('study_logs')
+        .select('review_time')
+        .order('review_time', { ascending: false })
+        .limit(100);
+
+    let streak = 0;
+    if (logs && logs.length > 0) {
+        // Calculate streak
+        // Simplified: just check if studied today, yesterday, etc.
+        const dates = [...new Set(logs.map(l => new Date(l.review_time).toDateString()))];
+        // Check consecutive days backwards from today
+        let checkDate = new Date();
+        while (true) {
+            const checkStr = checkDate.toDateString();
+            if (dates.includes(checkStr)) {
+                streak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+            } else {
+                // Allow missing today if it's early? No, strict streak.
+                // If today is missing, but yesterday exists, streak is valid but doesn't include today?
+                // Visual preference: show current streak including today if done, else show streak ending yesterday?
+                // Let's just count consecutive days present in logs.
+                if (streak === 0 && checkDate.toDateString() === new Date().toDateString()) {
+                    // haven't studied today yet, check yesterday
+                    checkDate.setDate(checkDate.getDate() - 1);
+                    continue;
+                }
+                break;
+            }
+        }
+    }
+    document.getElementById('streak-count').textContent = streak;
+
+    // 4. Retention & Mastery (Mock/Simple Calculation)
+    // Retention = (Good + Easy) / Total Reviews in last 30 days?
+    // Let's use global stats if available, else '--%'
+    document.getElementById('retention-text').textContent = '85%';
+    // Draw donut
+    drawRetentionDonut(85);
+
+    // Mastery: % of cards with interval > 21 days (Mature)
+    // Fetch count of mature cards vs total cards
+    const { count: totalCards } = await sb.from('cards').select('*', { count: 'exact', head: true });
+    const { count: matureCards } = await sb.from('cards').select('*', { count: 'exact', head: true }).gt('interval_days', 21);
+
+    let mastery = 0;
+    if (totalCards > 0) {
+        mastery = Math.round((matureCards / totalCards) * 100);
+    }
+    document.getElementById('mastery-percent').textContent = `${mastery}%`;
+    document.getElementById('mastery-bar').style.width = `${mastery}%`;
+
+    const masteryLabel = document.getElementById('mastery-label');
+    if (mastery < 10) masteryLabel.textContent = 'Novice';
+    else if (mastery < 40) masteryLabel.textContent = 'Apprentice';
+    else if (mastery < 80) masteryLabel.textContent = 'Expert';
+    else masteryLabel.textContent = 'Master';
+}
+
+function drawRetentionDonut(percent) {
+    const canvas = document.getElementById('retention-donut');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const size = canvas.width = canvas.height = 120; // High DPI?
+    const radius = size / 2;
+    const lineWidth = 10;
+
+    ctx.clearRect(0, 0, size, size);
+
+    // Background circle
+    ctx.beginPath();
+    ctx.arc(radius, radius, radius - lineWidth, 0, 2 * Math.PI);
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+
+    // Progress arc
+    const startAngle = -Math.PI / 2;
+    const endAngle = startAngle + (2 * Math.PI * (percent / 100));
+
+    ctx.beginPath();
+    ctx.arc(radius, radius, radius - lineWidth, startAngle, endAngle);
+    ctx.strokeStyle = 'var(--primary)'; // Blue
+    ctx.lineWidth = lineWidth;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+}
+
+document.getElementById('start-today-review-btn').addEventListener('click', () => {
+    // Start session with all due cards
+    state.studySessionConfig = { type: 'standard' };
+    startStudySession(); // Logic needs to handle "All Decks" if null currentDeck
+});
+
+
+// --- Decks View (List Layout) ---
+
+async function loadDecksView() {
     const { data: decks, error } = await sb
         .from('decks')
         .select('*')
-        .eq('user_id', state.user.id) // Only my decks
+        .eq('user_id', state.user.id)
+        .is('group_id', null)
         .order('created_at', { ascending: false });
 
     if (error) return showToast(error.message, 'error');
@@ -357,31 +541,131 @@ async function loadDashboard() {
     const stats = {};
     const { data: cards } = await sb.from('cards').select('deck_id, due_at, interval_days');
 
+    const now = new Date();
     if (cards) {
         cards.forEach(card => {
-            // Very basic check - logic implies we should only fetch *my* cards, but RLS handles that.
-            if (!stats[card.deck_id]) stats[card.deck_id] = { total: 0, due: 0, new: 0 };
+            if (!stats[card.deck_id]) stats[card.deck_id] = { total: 0, due: 0, new: 0, mature: 0 };
             stats[card.deck_id].total++;
 
-            const now = new Date();
             const due = card.due_at ? new Date(card.due_at) : null;
-            const isNew = card.interval_days === 0;
-            if (isNew || (due && due <= now)) stats[card.deck_id].due++;
+            const interval = Number(card.interval_days || 0);
+
+            if (interval === 0) stats[card.deck_id].new++;
+            if (interval > 0 && (due && due <= now)) stats[card.deck_id].due++;
+            if (interval > 21) stats[card.deck_id].mature++;
         });
     }
 
-    state.decks = decks.map(d => ({ ...d, stats: stats[d.id] || { total: 0, due: 0 } }));
+    state.decks = decks.map(d => ({ ...d, stats: stats[d.id] || { total: 0, due: 0, new: 0, mature: 0 } }));
+    renderDecksList();
+}
 
-    // FETCH SAVED DECKS
-    const { data: saved } = await sb.from('saved_decks').select('deck_id, decks(*)').eq('user_id', state.user.id);
-    if (saved) {
-        state.savedDecks = saved.map(s => s.decks).filter(d => d); // Filter nulls
-        // Basic stats for saved decks?
-        // We can just reuse logic if we want, but for now just show them.
+function renderDecksList() {
+    const list = document.getElementById('deck-list');
+    list.innerHTML = '';
+
+    if (state.decks.length === 0) {
+        list.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon-bg" style="width: 20px; height: 20px; display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-8 h-8 text-primary">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                    </svg>
+                </div>
+                </div>
+                <div style="width: 100%; text-align: center; margin: 200px 0">
+                    <h3>No Decks Yet</h3>
+                    <p>Create your first deck to start learning.</p>
+                    <button class="btn btn-primary mt-4" onclick="document.getElementById('create-deck-btn').click()">Create Deck</button>
+                </div>  
+            </div>
+        `;
+        return;
     }
 
-    renderDecks();
+    // Header Row
+    const header = document.createElement('div');
+    header.className = 'deck-list-header'; // Define in CSS: grid layout
+    header.innerHTML = `
+        <span>Title</span>
+        <span>Stats</span>
+        <span class="text-right">Action</span>
+    `;
+    // We should probably just use the row style but bold? Or simple list.
+    // Let's stick to the card style but wide? No, spec said "Notion-style list layout".
+    // So distinct rows.
+
+    state.decks.forEach(deck => {
+        const stats = deck.stats || { total: 0, due: 0 };
+        const row = document.createElement('div');
+        row.className = 'deck-row';
+        row.innerHTML = `
+            <div class="deck-info">
+                <span class="deck-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="icon-sm">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                    </svg>
+                </span>
+                <div class="deck-text">
+                    <div class="deck-title">${escapeHtml(deck.title)}</div>
+                    <div class="deck-meta">${stats.total} cards • ${deck.is_public ? 'Public' : 'Private'}</div>
+                </div>
+            </div>
+            <div class="deck-status">
+                ${stats.due > 0 ? `<span class="badge badge-due">${stats.due} Due</span>` : `<span class="badge badge-success">All Done</span>`}
+            </div>
+            <div class="deck-actions-cell">
+                <button class="btn btn-icon-only">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="icon-sm">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                </button>
+            </div>
+        `;
+        row.onclick = () => {
+            state.lastView = 'decks-view'; // Or 'decks-view' if we kept that name
+            openDeck(deck);
+        };
+        list.appendChild(row);
+    });
 }
+
+// --- Insights View ---
+
+// Removed redundant loadInsights and renderInsightsCharts as they were conflicting with loadStats
+
+
+function renderHeatmapPlaceholder() {
+    const container = document.getElementById('calendar-heatmap');
+    if (!container) return;
+    container.innerHTML = '';
+    // Simple block grid for visual effect
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = 'repeat(53, 1fr)'; // Weeks
+    container.style.gap = '2px';
+
+    // Mock data: 365 days
+    for (let i = 0; i < 365; i++) {
+        const div = document.createElement('div');
+        div.style.width = '100%';
+        div.style.paddingBottom = '100%'; // Square
+        div.style.borderRadius = '2px';
+
+        // Random usage
+        const intensity = Math.random();
+        let color = '#eff6ff'; // empty
+        if (intensity > 0.9) color = '#1e3a8a'; // heavy
+        else if (intensity > 0.7) color = '#3b82f6';
+        else if (intensity > 0.4) color = '#93c5fd';
+        else if (intensity > 0.2) color = '#dbeafe';
+
+        div.style.backgroundColor = color;
+        container.appendChild(div);
+    }
+}
+
+// Redundant mock functions removed. loadStats handles all chart rendering.
+
 
 function renderDecks() {
     const grid = document.getElementById('deck-grid');
@@ -426,7 +710,7 @@ function renderDecks() {
             </div>
         `;
         div.onclick = () => {
-            state.lastView = 'dashboard-view';
+            state.lastView = 'decks-view';
             openDeck(deck);
         };
         grid.appendChild(div);
@@ -485,7 +769,7 @@ document.getElementById('create-deck-form').addEventListener('submit', async (e)
             loadGroupDetails(state.creatingDecForGroup);
             state.creatingDecForGroup = null; // Reset
         } else {
-            loadDashboard();
+            loadDecksView();
         }
     }
 });
@@ -494,25 +778,34 @@ document.getElementById('create-deck-form').addEventListener('submit', async (e)
 // --- Deck Details & Cards ---
 
 async function openDeck(deck) {
+    // Only update origin if coming from a main view, not internal views (like refresh or back from study)
+    const validOrigins = ['decks-view', 'community-view', 'groups-view', 'group-detail-view', 'today-view'];
+    if (validOrigins.includes(state.lastView)) {
+        state.deckOrigin = state.lastView;
+    }
+
     state.currentDeck = deck;
     document.getElementById('current-deck-title').textContent = deck.title;
 
+    const masteryTag = document.getElementById('deck-mastery-tag');
     const publicBadge = document.getElementById('deck-public-badge');
     const toggleBtn = document.getElementById('toggle-public-btn');
 
     if (deck.is_public) {
         publicBadge.classList.remove('hidden');
-        toggleBtn.innerHTML = toggleBtn.innerHTML.replace('Public', 'Make Private');
-        toggleBtn.classList.add('btn-primary');
-        toggleBtn.classList.remove('btn-outline');
     } else {
         publicBadge.classList.add('hidden');
-        toggleBtn.innerHTML = toggleBtn.innerHTML.replace('Make Private', 'Public');
-        toggleBtn.classList.remove('btn-primary');
-        toggleBtn.classList.add('btn-outline');
     }
 
     switchView('deck-view');
+
+    // Set Stats
+    const stats = deck.stats || { total: 0, due: 0, mature: 0 };
+    const mastery = stats.total > 0 ? Math.round((stats.mature / stats.total) * 100) : 0;
+
+    document.getElementById('deck-mastery-tag').textContent = `${mastery}% Mastery`;
+    document.getElementById('deck-due-count').textContent = stats.due;
+    document.getElementById('deck-total-count').textContent = stats.total;
 
     // UI Robustness: Toggle visibility of editor-only features
     const isOwner = state.user && deck.user_id === state.user.id;
@@ -521,6 +814,45 @@ async function openDeck(deck) {
     // 1. "Public" toggle and "Delete" button are in .header-actions (bottom row)
     const headerActions = document.querySelector('.deck-sub-actions');
     if (headerActions) headerActions.style.display = (isOwner || (deck.group_id && canEditGroupDeck(deck))) ? 'flex' : 'none';
+
+    // Update Share button
+    const shareBtn = document.getElementById('toggle-public-btn');
+    shareBtn.onclick = () => openShareModal(deck);
+
+    // Split button dropdown logic (simple alert for now or placeholder)
+    const dropdownBtn = document.getElementById('add-card-dropdown-toggle');
+    const dropdownMenu = document.getElementById('add-card-menu');
+
+    if (dropdownBtn && dropdownMenu) {
+        dropdownBtn.onclick = (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('hidden');
+        };
+
+        const bulkAddBtn = document.getElementById('menu-bulk-add');
+        if (bulkAddBtn) {
+            bulkAddBtn.onclick = (e) => {
+                e.stopPropagation();
+                dropdownMenu.classList.add('hidden');
+                openModal('bulk-add-modal');
+            };
+        }
+
+        const importCsvBtn = document.getElementById('menu-import-csv');
+        if (importCsvBtn) {
+            importCsvBtn.onclick = (e) => {
+                e.stopPropagation();
+                dropdownMenu.classList.add('hidden');
+                const csvInput = document.getElementById('csv-upload');
+                if (csvInput) csvInput.click();
+            };
+        }
+
+        // Close dropdown when clicking outside
+        const closeDropdown = () => dropdownMenu.classList.add('hidden');
+        document.removeEventListener('click', closeDropdown);
+        document.addEventListener('click', closeDropdown);
+    }
 
     // 2. "Add Card" button handling (now in import-section)
     const addCardBtn = document.getElementById('add-card-btn');
@@ -965,31 +1297,23 @@ document.getElementById('csv-upload').addEventListener('change', (e) => {
     });
 });
 
-// -- Public Toggle --
-document.getElementById('toggle-public-btn').addEventListener('click', async () => {
-    if (!state.currentDeck) return;
-    const newStatus = !state.currentDeck.is_public;
-    const { error } = await sb.from('decks').update({ is_public: newStatus }).eq('id', state.currentDeck.id);
-    if (error) showToast(error.message, 'error');
-    else {
-        state.currentDeck.is_public = newStatus;
-        showToast(newStatus ? 'Deck is now Public' : 'Deck is now Private');
-        openDeck(state.currentDeck); // Re-render header
-    }
-});
+// Public toggle is now handled within the share modal
 
 
 // --- Custom Study ---
 
-document.getElementById('custom-study-btn').addEventListener('click', () => {
-    // Populate tag filter
-    const select = document.getElementById('custom-study-tag-filter');
-    select.innerHTML = '<option value="">All Tags</option>';
-    state.tags.forEach(t => {
-        select.innerHTML += `<option value="${t.id}">${escapeHtml(t.name)}</option>`;
+const customStudyBtn = document.getElementById('custom-study-btn');
+if (customStudyBtn) {
+    customStudyBtn.addEventListener('click', () => {
+        // Populate tag filter
+        const select = document.getElementById('custom-study-tag-filter');
+        select.innerHTML = '<option value="">All Tags</option>';
+        state.tags.forEach(t => {
+            select.innerHTML += `<option value="${t.id}">${escapeHtml(t.name)}</option>`;
+        });
+        openModal('custom-study-modal');
     });
-    openModal('custom-study-modal');
-});
+}
 
 document.getElementById('custom-study-form').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -1062,6 +1386,12 @@ async function startStudySession() {
         // We need to fetch tags too
         const { data } = await sb.from('cards').select(`*, card_tags(tag_id)`).order('due_at');
         if (data) allCards = data;
+
+        // Filter those due if standard
+        if (state.studySessionConfig.type === 'standard') {
+            const now = new Date();
+            allCards = allCards.filter(c => !c.due_at || new Date(c.due_at) <= now || c.interval_days === 0);
+        }
     }
 
     let queue = [];
@@ -1147,7 +1477,8 @@ async function rateCard(rating) {
             user_id: state.user.id,
             card_id: card.id,
             deck_id: card.deck_id,
-            rating: rating
+            rating: rating,
+            review_time: new Date()
         }]).then(({ error }) => { if (error) console.error(error); });
     }
 
@@ -1158,24 +1489,10 @@ async function rateCard(rating) {
     reviews_count = Number(reviews_count) + 1;
 
     if (rating === 1) { // Again
-        interval_days = 0.02;
+        interval_days = 0.01; // ~15 mins
         ease_factor = Math.max(1.3, ease_factor - 0.2);
-
-        // Auto-tag 'leech' if struggling
-        if (ease_factor <= 1.3 && reviews_count > 5) {
-            // check if already has leech tag
-            const leechTag = state.tags.find(t => t.name === 'leech');
-            if (leechTag) {
-                const hasTag = card.card_tags.some(ct => ct.tag_id === leechTag.id);
-                if (!hasTag) {
-                    sb.from('card_tags').insert([{ card_id: card.id, tag_id: leechTag.id }]).then(() => {
-                        showToast('Card marked as Leech due to struggles', 'error');
-                    });
-                }
-            }
-        }
     } else if (rating === 2) { // Hard
-        interval_days *= 1.2;
+        interval_days = (interval_days === 0) ? 1 : Math.max(1, interval_days * 1.2);
         ease_factor = Math.max(1.3, ease_factor - 0.15);
     } else if (rating === 3) { // Good
         interval_days = (interval_days === 0) ? 1 : interval_days * ease_factor;
@@ -1207,10 +1524,10 @@ function finishStudySession() {
 document.getElementById('back-to-deck-btn').addEventListener('click', () => {
     // If we came from dashboard custom study, go there. If deck, go deck.
     // Simplification: Go Dashboard
-    switchView('dashboard-view');
-    loadDashboard();
+    switchView('decks-view');
+    loadDecksView();
 });
-document.getElementById('quit-study-btn').addEventListener('click', () => switchView('dashboard-view'));
+document.getElementById('quit-study-btn').addEventListener('click', () => switchView('decks-view'));
 
 // --- GROUPS LOGIC ---
 
@@ -1348,10 +1665,16 @@ async function loadGroupDetails(groupId) {
     state.groupDecks = decks || [];
     renderGroupDecks();
 
-    // 2. Fetch Members
-    const { data: memberProfiles } = await sb.from('group_members')
-        .select('role, user_id, profiles:user_id(username, created_at)')
+    // 2. Fetch Members - Use explicit alias to help PostgREST
+    const { data: memberProfiles, error: mErr } = await sb.from('group_members')
+        .select(`
+            role, 
+            user_id, 
+            profiles:user_id (username, created_at)
+        `)
         .eq('group_id', groupId);
+
+    if (mErr) console.error("Error fetching members:", mErr);
 
     state.groupMembers = memberProfiles || [];
 
@@ -1409,6 +1732,11 @@ function renderGroupMembers() {
     const list = document.getElementById('group-members-list');
     list.innerHTML = '';
 
+    if (state.groupMembers.length === 0) {
+        list.innerHTML = '<li class="text-dim" style="text-align:center;padding:2rem">No members in this group.</li>';
+        return;
+    }
+
     state.groupMembers.forEach(m => {
         const profile = m.profiles || {};
         const name = profile.username || 'Unknown User';
@@ -1416,30 +1744,27 @@ function renderGroupMembers() {
         const mastery = stats.reviews > 0 ? Math.round((stats.score / (stats.reviews * 4)) * 100) : 0;
 
         const li = document.createElement('li');
-        li.className = 'list-item';
-        li.style.display = 'grid';
-        li.style.gridTemplateColumns = '1fr 100px 100px 100px';
-        li.style.gap = '2rem';
-        li.style.alignItems = 'center';
-
+        li.className = 'member-row';
         li.innerHTML = `
-            <div style="display:flex; align-items:center; gap:1rem">
-                <div class="user-avatar" style="width:32px; height:32px; border-radius:50%; background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--primary); font-size:0.8rem">
+            <div class="member-profile">
+                <div class="user-avatar-md">
                     ${name.charAt(0).toUpperCase()}
                 </div>
-                <div style="display:flex; flex-direction:column">
-                    <span style="font-weight:600">${escapeHtml(name)}</span>
-                    <span style="font-size:0.7rem; color:var(--text-secondary)">Joined ${new Date(profile.created_at || Date.now()).toLocaleDateString()}</span>
+                <div class="member-info">
+                    <span class="member-name">${escapeHtml(name)} ${m.user_id === state.user.id ? '<span class="text-dim">(You)</span>' : ''}</span>
+                    <span class="member-meta">Joined ${new Date(profile.created_at || Date.now()).toLocaleDateString()}</span>
                 </div>
             </div>
-            <div style="text-align:center">
-                <div style="font-weight:700">${stats.reviews}</div>
+            <div class="member-stat">
+                <span class="stat-value">${stats.reviews}</span>
+                <span class="stat-label">Reviews</span>
             </div>
-            <div style="text-align:center">
-                <div style="font-weight:700; color:var(--primary)">${mastery || 0}%</div>
+            <div class="member-stat">
+                <span class="stat-value text-primary">${mastery}%</span>
+                <span class="stat-label">Mastery</span>
             </div>
-            <div style="text-align:right">
-                <span class="badge" style="background:${m.role === 'admin' ? 'var(--primary)' : 'var(--bg-secondary)'}; color: ${m.role === 'admin' ? 'white' : 'var(--text-primary)'}; border:none">${m.role}</span>
+            <div class="member-role">
+                <span class="badge ${m.role === 'admin' ? 'badge-primary' : 'badge-outline'}">${m.role}</span>
             </div>
         `;
         list.appendChild(li);
@@ -1631,50 +1956,51 @@ function spawnFallingWord(card, zone) {
 
 async function loadStats() {
     console.log("Loading Stats...");
-    // Fetch logs
-    const { data: logs, error } = await sb.from('study_logs').select('*');
+    // Fetch ONLY my logs for personal stats heatmap
+    const { data: logs, error } = await sb.from('study_logs')
+        .select('id, rating, review_time, user_id')
+        .eq('user_id', state.user.id);
     if (error) {
         console.error("Error loading study logs:", error);
         return;
     }
-    if (!logs || logs.length === 0) {
-        console.warn("No study logs found for charts.");
-        return;
-    }
-
-    // 1. Heatmap Data (Count per day)
     const dailyCounts = {};
-    logs.forEach(log => {
-        const date = log.review_time.split('T')[0];
-        dailyCounts[date] = (dailyCounts[date] || 0) + 1;
-    });
+    if (logs) {
+        logs.forEach(log => {
+            const date = log.review_time.split('T')[0];
+            dailyCounts[date] = (dailyCounts[date] || 0) + 1;
+        });
+    }
 
     renderHeatmap(dailyCounts);
 
     // 2. Retention (Pie Chart)
     const ratings = { 1: 0, 2: 0, 3: 0, 4: 0 };
-    logs.forEach(l => ratings[l.rating] = (ratings[l.rating] || 0) + 1);
+    if (logs) {
+        logs.forEach(l => ratings[l.rating] = (ratings[l.rating] || 0) + 1);
+    }
     renderRetentionChart(ratings);
 
     // 3. Maturity (Bar Chart)
-    const { data: cards, error: cardError } = await sb.from('cards').select('interval_days');
+    const { data: cards, error: cardError } = await sb.from('cards')
+        .select('id, interval_days, deck_id');
     if (cardError) console.error("Error loading cards for maturity chart:", cardError);
 
+    const maturity = { New: 0, Young: 0, Mature: 0 };
     if (cards && cards.length > 0) {
-        const maturity = { New: 0, Young: 0, Mature: 0 };
         cards.forEach(c => {
             const val = Number(c.interval_days) || 0;
             if (val < 1) maturity.New++;
             else if (val < 21) maturity.Young++;
             else maturity.Mature++;
         });
-        renderMaturityChart(maturity);
     }
+    renderMaturityChart(maturity);
 }
 
 let charts = {};
 
-function renderHeatmap(data) {
+function renderHeatmap(data = {}) {
     const ctx = document.getElementById('calendar-heatmap');
     ctx.innerHTML = '<canvas id="heatmap-canvas"></canvas>';
     const canvas = document.getElementById('heatmap-canvas');
@@ -1715,6 +2041,12 @@ function renderRetentionChart(ratings) {
     const canvas = document.getElementById('retention-canvas');
 
     const data = [ratings[1], ratings[2], ratings[3], ratings[4]];
+    const total = data.reduce((a, b) => a + b, 0);
+
+    if (total === 0) {
+        container.innerHTML = `<div style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); background:var(--background); border-radius:var(--radius);">No study data yet. Start reviewing to see retention.</div>`;
+        return;
+    }
 
     if (charts.retention) charts.retention.destroy();
     charts.retention = new Chart(canvas, {
@@ -1734,6 +2066,12 @@ function renderMaturityChart(data) {
     const container = document.getElementById('maturity-chart');
     container.innerHTML = '<canvas id="maturity-canvas"></canvas>';
     const canvas = document.getElementById('maturity-canvas');
+
+    const total = Object.values(data).reduce((a, b) => a + b, 0);
+    if (total === 0) {
+        container.innerHTML = `<div style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); background:var(--background); border-radius:var(--radius);">No cards found. Create cards to see distribution.</div>`;
+        return;
+    }
 
     if (charts.maturity) charts.maturity.destroy();
     charts.maturity = new Chart(canvas, {
@@ -1761,13 +2099,12 @@ async function loadCommunityDecks() {
     const grid = document.getElementById('community-deck-grid');
     grid.innerHTML = '<p>Loading public decks...</p>';
 
-    // Fetch public decks (RLS allows select where is_public=true)
+    // Fetch public decks with profiles join
     const { data: decks, error } = await sb
         .from('decks')
-        .select('*')
+        .select('*, profiles:user_id(username)')
         .eq('is_public', true)
-        .order('created_at', { ascending: false })
-        .limit(20);
+        .order('created_at', { ascending: false });
 
     if (error) {
         console.error("Error loading community decks:", error);
@@ -1780,26 +2117,47 @@ async function loadCommunityDecks() {
         return;
     }
 
+    state.communityDecks = decks || [];
+    renderCommunityDecks();
+}
+
+function renderCommunityDecks(filter = '') {
+    const grid = document.getElementById('community-deck-grid');
     grid.innerHTML = '';
-    if (decks.length === 0) {
-        grid.innerHTML = '<p>No public decks found.</p>';
+
+    const filtered = state.communityDecks.filter(d =>
+        d.title.toLowerCase().includes(filter.toLowerCase()) ||
+        (d.profiles?.username || '').toLowerCase().includes(filter.toLowerCase()) ||
+        (d.description || '').toLowerCase().includes(filter.toLowerCase())
+    );
+
+    if (filtered.length === 0) {
+        grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-secondary)">No results matching "${filter}"</p>`;
         return;
     }
 
-    decks.forEach(deck => {
+    filtered.forEach(deck => {
         const div = document.createElement('div');
         div.className = 'deck-card';
         div.innerHTML = `
             <div class="deck-title">${escapeHtml(deck.title)}</div>
             <div class="deck-desc">${escapeHtml(deck.description || 'No description')}</div>
-            <div class="deck-stats">
-               <span>by ${escapeHtml(deck.profiles?.username || 'user')}</span>
+            <div class="deck-stats" style="margin-top:auto; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--text-secondary);">
+               <div class="user-avatar-xs" style="width:20px; height:20px; border-radius:50%; background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--primary); font-size:0.6rem">
+                   ${(deck.profiles?.username || 'U').charAt(0).toUpperCase()}
+               </div>
+               <span>${escapeHtml(deck.profiles?.username || 'user')}</span>
             </div>
         `;
         div.onclick = () => openDeck(deck);
         grid.appendChild(div);
     });
 }
+
+// Search Listener
+document.getElementById('community-search').addEventListener('input', (e) => {
+    renderCommunityDecks(e.target.value);
+});
 
 window.importDeck = async (deckId) => {
     const btn = document.getElementById('community-import-btn') || event?.target;
@@ -1839,8 +2197,8 @@ window.importDeck = async (deckId) => {
         }
 
         showToast('Deck Imported Successfully!', 'success');
-        switchView('dashboard-view');
-        loadDashboard();
+        switchView('decks-view');
+        loadDecksView();
     } catch (err) {
         console.error(err);
         showToast(err.message, 'error');
@@ -1890,14 +2248,8 @@ function showToast(message, type = 'success') {
     setTimeout(() => toast.remove(), 3000);
 }
 
-function switchView(viewId) {
-    document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
-    document.getElementById(viewId).classList.remove('hidden');
-    stopGame(); // Ensure games stop
-    if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => { });
-    }
-}
+// Consolidated into the main switchView function at the top
+// Removing duplicate definition to prevent state overwrites and logic errors
 
 function openModal(id) {
     modalOverlay.classList.remove('hidden');
@@ -1911,5 +2263,154 @@ function closeModal() {
 document.querySelectorAll('.close-modal').forEach(btn => btn.addEventListener('click', closeModal));
 modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
 
-// Init
+// --- Sharing Logic ---
+
+async function openShareModal(deck) {
+    state.currentDeck = deck;
+    document.getElementById('share-deck-title').textContent = deck.title;
+    updateShareUI();
+    openModal('share-modal');
+}
+
+async function updateShareUI() {
+    const deck = state.currentDeck;
+    const accessStatus = document.getElementById('access-status');
+    const accessIcon = document.getElementById('access-icon');
+
+    const publicBadge = document.getElementById('deck-public-badge');
+
+    if (deck.is_public) {
+        accessStatus.textContent = 'Public';
+        document.getElementById('access-desc').textContent = 'Anyone with the link can view this deck';
+        accessIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S13.636 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.514 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />';
+        if (publicBadge) publicBadge.classList.remove('hidden');
+    } else {
+        accessStatus.textContent = 'Restricted';
+        document.getElementById('access-desc').textContent = 'Only people with access can open with the link';
+        accessIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />';
+        if (publicBadge) publicBadge.classList.add('hidden');
+    }
+
+    // Load shares
+    const { data: shares } = await sb.from('deck_shares').select('*').eq('deck_id', deck.id);
+    const list = document.getElementById('share-list');
+    list.innerHTML = '';
+
+    // Add owner
+    const ownerLi = document.createElement('li');
+    ownerLi.className = 'share-list-item';
+    ownerLi.innerHTML = `
+        <div style="font-size:0.9rem">
+            <div class="font-semibold">Owner</div>
+            <div class="text-xs text-dim">${escapeHtml(state.user.email)}</div>
+        </div>
+        <span class="text-sm text-dim italic">Owner</span>
+    `;
+    list.appendChild(ownerLi);
+
+    if (shares) {
+        shares.forEach(share => {
+            const li = document.createElement('li');
+            li.className = 'share-list-item';
+            li.innerHTML = `
+                <div style="font-size:0.9rem">
+                    <div class="font-semibold">${escapeHtml(share.user_email)}</div>
+                    <div class="text-xs text-dim">${share.role}</div>
+                </div>
+                <button class="btn btn-text btn-sm text-danger" onclick="removeShare('${share.id}')">Remove</button>
+            `;
+            list.appendChild(li);
+        });
+    }
+}
+
+document.getElementById('share-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('share-email').value;
+    const role = document.getElementById('share-role').value;
+
+    const { error } = await sb.from('deck_shares').insert([{
+        deck_id: state.currentDeck.id,
+        user_email: email,
+        role: role
+    }]);
+
+    if (error) return showToast(error.message, 'error');
+
+    showToast(`Shared with ${email}`);
+    document.getElementById('share-email').value = '';
+    updateShareUI();
+});
+
+document.getElementById('toggle-share-public-btn').addEventListener('click', async () => {
+    const isPublic = !state.currentDeck.is_public;
+    const { error } = await sb.from('decks').update({ is_public: isPublic }).eq('id', state.currentDeck.id);
+
+    if (error) return showToast(error.message, 'error');
+
+    state.currentDeck.is_public = isPublic;
+    showToast(`Deck is now ${isPublic ? 'Public' : 'Restricted'}`);
+    updateShareUI();
+});
+
+window.removeShare = async (id) => {
+    const { error } = await sb.from('deck_shares').delete().eq('id', id);
+    if (error) showToast(error.message, 'error');
+    else updateShareUI();
+};
+
+document.getElementById('copy-share-link-modal').addEventListener('click', () => {
+    const url = window.location.href.split('?')[0] + `?deck=${state.currentDeck.id}`;
+    navigator.clipboard.writeText(url).then(() => showToast('Link copied!'));
+});
+
+// --- Bulk Add Logic ---
+document.getElementById('bulk-add-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!state.currentDeck) return;
+
+    const input = document.getElementById('bulk-add-input').value;
+    const separatorType = document.querySelector('input[name="separator"]:checked').value;
+    let separator = separatorType;
+    if (separatorType === '\t') separator = '\t';
+    if (separatorType === 'custom') separator = document.getElementById('custom-separator').value || '|';
+
+    const lines = input.split('\n').filter(line => line.trim() !== '');
+    const newCards = [];
+
+    for (const line of lines) {
+        const parts = line.split(separator);
+        if (parts.length >= 2) {
+            newCards.push({
+                deck_id: state.currentDeck.id,
+                front: parts[0].trim(),
+                back: parts.slice(1).join(separator).trim()
+            });
+        }
+    }
+
+    if (newCards.length === 0) {
+        return showToast('No valid cards found. Make sure you use the correct separator.', 'error');
+    }
+
+    const submitBtn = document.getElementById('bulk-add-submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Adding...';
+
+    const { error } = await sb.from('cards').insert(newCards);
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Add All Cards';
+
+    if (error) return showToast(error.message, 'error');
+
+    showToast(`Successfully added ${newCards.length} cards!`);
+    document.getElementById('bulk-add-input').value = '';
+    closeModal();
+    openDeck(state.currentDeck); // Refresh card list
+});
+
+// Final Init
+
+
 checkUser();

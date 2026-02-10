@@ -14,9 +14,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <link rel="icon" type="image/png" href="./Assets/logo.png">
 </head>
 
 <body>
@@ -66,7 +67,7 @@
                         <div class="feature-card">
                             <div class="feature-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor">
+                                    stroke-width="1.5" stroke="currentColor" class="icon-lg">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                                 </svg>
@@ -77,7 +78,7 @@
                         <div class="feature-card">
                             <div class="feature-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor">
+                                    stroke-width="1.5" stroke="currentColor" class="icon-lg">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                                 </svg>
@@ -88,7 +89,7 @@
                         <div class="feature-card">
                             <div class="feature-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor">
+                                    stroke-width="1.5" stroke="currentColor" class="icon-lg">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -143,531 +144,804 @@
         </section>
 
         <!-- Main App Layout -->
-        <div id="main-layout" class="hidden">
-            <header class="app-header">
-                <div class="header-content">
-                    <div class="logo">Flashly</div>
-                    <div class="user-menu">
-                        <span id="user-email"></span>
-                        <button id="logout-btn" class="btn btn-text" style="color: red; outline: 1px solid red;">
-                            Log Out
-                        </button>
-                        <button id="settings-btn" class="btn btn-icon-only" title="Settings">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                stroke="currentColor" class="icon-sm">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </button>
-                    </div>
+        <div id="main-layout" class="hidden app-shell">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-logo">
+                    <img src="./Assets/logo.png" alt="Flashly Logo" class="logo-img" style="width: 50px; height: 50px;">
                 </div>
-            </header>
 
-            <main class="app-content">
-                <!-- Navigation Tabs (New) -->
-                <nav class="main-nav">
-                    <button id="nav-decks" class="nav-item active">Decks</button>
-                    <button id="nav-groups" class="nav-item">Groups</button>
-                    <button id="nav-stats" class="nav-item">Statistics</button>
-                    <button id="nav-community" class="nav-item">Community</button>
+                <nav class="sidebar-nav">
+                    <button id="nav-today" class="nav-item active">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            class="icon-sm">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.263l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                        </svg>
+                        Today
+                    </button>
+                    <button id="nav-decks" class="nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            class="icon-sm">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6" />
+                        </svg>
+                        Decks
+                    </button>
+                    <button id="nav-community" class="nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            class="icon-sm">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S13.636 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.514 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                        </svg>
+                        Community
+                    </button>
+                    <button id="nav-groups" class="nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            class="icon-sm">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                        </svg>
+                        Groups
+                    </button>
+                    <button id="nav-insights" class="nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            class="icon-sm">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
+                        </svg>
+                        Insights
+                    </button>
+                    <button id="nav-settings" class="nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            class="icon-sm">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Settings
+                    </button>
                 </nav>
 
-                <!-- Dashboard View (Deck List) -->
-                <section id="dashboard-view" class="view">
-                    <div class="section-header">
-                        <h2>Your Decks</h2>
-                        <button id="create-deck-btn" class="btn btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                class="icon-sm">
-                                <path
-                                    d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-                            </svg>
-                            New Deck
-                        </button>
-                    </div>
-                    <div class="section-actions">
-                        <button id="custom-study-btn" class="btn btn-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                class="icon-sm">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-                            </svg>
-                            Custom Study
-                        </button>
-                    </div>
-                    <div id="deck-grid" class="grid-container">
-                        <!-- Decks injected here -->
-                    </div>
-                </section>
+                <div class="sidebar-footer">
+                    <div id="user-display" class="text-sm text-secondary font-medium"></div>
+                    <div id="user-email" class="hidden"></div>
+                    <button id="logout-btn" class="btn btn-text btn-sm justify-start text-danger"
+                        style="color: var(--danger); padding-left: 0;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            class="icon-sm">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                        </svg>
+                        Log Out
+                    </button>
+                </div>
+            </aside>
 
-                <!-- Statistics View -->
-                <section id="stats-view" class="view hidden">
-                    <div class="section-header">
-                        <h2>Statistics</h2>
-                    </div>
-                    <div class="stats-container">
-                        <div class="stat-card">
-                            <h3>Learning Heatmap</h3>
-                            <div id="calendar-heatmap"></div>
+            <main class="main-content">
+                <div class="page-container">
+
+                    <!-- TODAY View (New Homepage) -->
+                    <section id="today-view" class="view">
+                        <div class="greeting-section">
+                            <h1 class="greeting-title" id="today-greeting">Ready to learn?</h1>
+                            <p class="date-label" id="today-date">Monday, 24th October</p>
                         </div>
-                        <div class="charts-grid">
-                            <div class="stat-card">
+
+                        <!-- Primary Action Card -->
+                        <div class="primary-action-card">
+                            <div class="action-content">
+                                <h2 class="text-2xl font-semibold mb-2">Daily Review</h2>
+                                <p class="text-secondary mb-6">You have cards waiting for review.</p>
+                                <div class="due-count-large" id="today-due-count">0</div>
+                                <p class="text-sm text-secondary mt-1">cards due today</p>
+                            </div>
+                            <div class="action-btn">
+                                <button id="start-today-review-btn" class="btn btn-primary btn-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor" class="icon-sm">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                                    </svg>
+                                    Start Session
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Motivation Grid -->
+                        <div class="stats-grid">
+                            <div class="stat-panel">
+                                <h3>Current Streak</h3>
+                                <div class="text-3xl font-bold text-primary mb-2" id="streak-count">0</div>
+                                <p class="text-sm text-secondary">days in a row</p>
+                            </div>
+                            <div class="stat-panel">
                                 <h3>Retention Rate</h3>
-                                <div id="retention-chart"></div>
+                                <div class="relative w-32 h-32">
+                                    <canvas id="retention-donut"></canvas>
+                                    <div class="absolute inset-0 flex items-center justify-center text-xl font-bold"
+                                        id="retention-text">--%</div>
+                                </div>
                             </div>
-                            <div class="stat-card">
-                                <h3>Card Maturity</h3>
-                                <div id="maturity-chart"></div>
+                            <div class="stat-panel">
+                                <h3>Total Mastery</h3>
+                                <div class="w-full px-4">
+                                    <div class="flex justify-between text-sm mb-2">
+                                        <span class="text-secondary">Progress</span>
+                                        <span class="font-bold text-primary" id="mastery-percent">0%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="mastery-bar" style="width: 0%"></div>
+                                    </div>
+                                    <p class="text-xs text-secondary mt-3" id="mastery-label">Beginner</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </section>
-
-                <!-- Community View -->
-                <section id="community-view" class="view hidden">
-                    <div class="section-header">
-                        <h2>Community Decks</h2>
-                        <div class="search-bar">
-                            <input type="text" id="community-search" placeholder="Search public decks...">
-                        </div>
-                    </div>
-                    <div id="community-deck-grid" class="grid-container">
-                        <!-- Public Decks injected here -->
-                    </div>
-                </section>
-
-                <!-- Game View -->
-                <section id="game-view" class="view hidden">
-                    <div class="section-header">
-                        <div class="header-left">
-                            <button id="quit-game-area-btn" class="btn btn-text">Back</button>
-                            <h2 id="game-title-text">Game Mode</h2>
-                        </div>
-                        <div id="game-score-display">Score: 0</div>
-                    </div>
-                    <div id="game-canvas-container" class="game-container">
-                        <!-- Game elements injected here -->
-                        <div id="game-menu" class="game-menu">
-                            <h3>Select a Game</h3>
-                            <button class="btn btn-primary" onclick="startGame('match')">Match Mode</button>
-                            <button class="btn btn-primary" onclick="startGame('gravity')">Gravity Mode</button>
-                        </div>
-                        <div id="match-game-area" class="hidden"></div>
-                        <div id="gravity-game-area" class="hidden">
-                            <div id="falling-words-zone"></div>
-                            <input type="text" id="gravity-input" placeholder="Type answer here..." autofocus>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Groups View -->
-                <section id="groups-view" class="view hidden">
-                    <div class="section-header">
-                        <h2>Your Groups</h2>
-                        <div class="header-actions">
-                            <button id="join-group-btn" class="btn btn-outline">
-                                Join Group
-                            </button>
-                            <button id="create-group-btn" class="btn btn-primary">
-                                Create Group
-                            </button>
-                        </div>
-                    </div>
-                    <div id="groups-grid" class="grid-container">
-                        <!-- Groups injected here -->
-                    </div>
-                </section>
-
-                <section id="group-detail-view" class="view hidden">
-                    <div class="section-header group-detail-header"
-                        style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); padding: 2rem; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 2rem;">
-                        <div style="flex: 1;">
-                            <button id="back-to-groups-btn" class="btn btn-text btn-sm"
-                                style="margin-bottom: 0.5rem; padding-left: 0;">
+                    </section>
+                    <!-- Decks View -->
+                    <section id="decks-view" class="view hidden">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h2 class="text-2xl font-bold">Decks</h2>
+                                <p class="text-secondary">Manage your learning collections</p>
+                            </div>
+                            <button id="create-deck-btn" class="btn btn-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                     class="icon-sm">
-                                    <path fill-rule="evenodd"
-                                        d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z"
-                                        clip-rule="evenodd" />
+                                    <path
+                                        d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                                 </svg>
-                                Groups
+                                New Deck
                             </button>
-                            <h2 id="group-detail-title"
-                                style="font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.75rem;">
-                                Group Name</h2>
-                            <div class="invite-code-container" title="Click icon to copy invite link">
-                                <span
-                                    style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); opacity: 0.6;">Invite
-                                    Code</span>
-                                <code id="group-invite-code">---------</code>
-                                <button id="copy-invite-btn" class="btn-icon-only-sm" style="margin-left: 0.5rem;">
+                        </div>
+
+                        <div id="deck-list" class="deck-list">
+                            <!-- Decks injected here as list rows -->
+                        </div>
+                    </section>
+
+                    <!-- Insights View -->
+                    <section id="insights-view" class="view hidden">
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-bold">Insights</h2>
+                            <p class="text-secondary">Track your learning progress over time</p>
+                        </div>
+                        <div class="insights-stack">
+                            <div class="card">
+                                <h3 class="mb-4 text-lg">Activity Heatmap</h3>
+                                <div id="calendar-heatmap" style="width: 100%; height: 200px;"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-6"
+                                style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                <div class="card">
+                                    <h3 class="mb-4 text-lg">Retention & Maturity</h3>
+                                    <div id="retention-chart"></div>
+                                </div>
+                                <div class="card">
+                                    <h3 class="mb-4 text-lg">Card Maturity Distribution</h3>
+                                    <div id="maturity-chart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Community View -->
+                    <section id="community-view" class="view hidden">
+                        <div class="search-container">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor" class="icon-sm search-icon">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
+                            <input type="text" id="community-search" class="search-input"
+                                placeholder="Search decks by title or creator...">
+                        </div>
+                        <div id="community-deck-grid" class="grid-container">
+                            <!-- Public Decks injected here -->
+                        </div>
+                    </section>
+
+                    <!-- Game View -->
+                    <section id="game-view" class="view hidden">
+                        <div class="section-header">
+                            <div class="header-left">
+                                <button id="quit-game-area-btn" class="btn btn-text">Back</button>
+                                <h2 id="game-title-text">Game Mode</h2>
+                            </div>
+                            <div id="game-score-display">Score: 0</div>
+                        </div>
+                        <div id="game-canvas-container" class="game-container">
+                            <!-- Game elements injected here -->
+                            <div id="game-menu" class="game-menu">
+                                <h3>Select a Game</h3>
+                                <button class="btn btn-primary" onclick="startGame('match')">Match Mode</button>
+                                <button class="btn btn-primary" onclick="startGame('gravity')">Gravity Mode</button>
+                            </div>
+                            <div id="match-game-area" class="hidden"></div>
+                            <div id="gravity-game-area" class="hidden">
+                                <div id="falling-words-zone"></div>
+                                <input type="text" id="gravity-input" placeholder="Type answer here..." autofocus>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Groups View -->
+                    <section id="groups-view" class="view hidden">
+                        <div class="section-header">
+                            <h2>Your Groups</h2>
+                            <div class="header-actions">
+                                <button id="join-group-btn" class="btn btn-outline">
+                                    Join Group
+                                </button>
+                                <button id="create-group-btn" class="btn btn-primary">
+                                    Create Group
+                                </button>
+                            </div>
+                        </div>
+                        <div id="groups-grid" class="grid-container">
+                            <!-- Groups injected here -->
+                        </div>
+                    </section>
+
+                    <section id="group-detail-view" class="view hidden">
+                        <div class="section-header group-detail-header"
+                            style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); padding: 2rem; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 2rem;">
+                            <div style="flex: 1;">
+                                <button id="back-to-groups-btn" class="btn btn-text btn-sm"
+                                    style="margin-bottom: 0.5rem; padding-left: 0;">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                         class="icon-sm">
-                                        <path
-                                            d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" />
-                                        <path
-                                            d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z" />
+                                        <path fill-rule="evenodd"
+                                            d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z"
+                                            clip-rule="evenodd" />
                                     </svg>
+                                    Groups
                                 </button>
+                                <h2 id="group-detail-title"
+                                    style="font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.75rem;">
+                                    Group Name</h2>
+                                <div class="invite-code-container" title="Click icon to copy invite link">
+                                    <span
+                                        style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); opacity: 0.6;">Invite
+                                        Code</span>
+                                    <code id="group-invite-code">---------</code>
+                                    <button id="copy-invite-btn" class="btn-icon-only-sm" style="margin-left: 0.5rem;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                            class="icon-sm">
+                                            <path
+                                                d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" />
+                                            <path
+                                                d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        <button id="create-group-deck-btn" class="btn btn-primary btn-lg"
-                            style="align-items: center; justify-content: center; display: flex;">
-                            Create Group Deck
-                        </button>
-                    </div>
-
-                    <div class="tabs">
-                        <button class="tab-btn active" data-tab="group-decks-tab">Decks</button>
-                        <button class="tab-btn" data-tab="group-members-tab">Members</button>
-                    </div>
-
-                    <div id="group-decks-tab" class="tab-content">
-                        <div id="group-decks-grid" class="grid-container">
-                            <!-- Group decks -->
-                        </div>
-                    </div>
-
-                    <div id="group-members-tab" class="tab-content hidden">
-                        <div class="list-header"
-                            style="padding: 1rem 1.5rem; background: var(--background); border: 1px solid var(--border); border-bottom: none; border-radius: var(--radius) var(--radius) 0 0; display: grid; grid-template-columns: 1fr 100px 100px 100px; gap: 2rem; font-weight: 600; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">
-                            <span>Member</span>
-                            <span style="text-align:center">Reviews</span>
-                            <span style="text-align:center">Mastery</span>
-                            <span style="text-align:right">Role</span>
-                        </div>
-                        <ul id="group-members-list" class="list-container"
-                            style="border-radius: 0 0 var(--radius) var(--radius);">
-                            <!-- Members -->
-                        </ul>
-                    </div>
-                </section>
-
-                <!-- Deck Details View (Card List) -->
-                <section id="deck-view" class="view hidden">
-                    <div class="deck-header">
-                        <div class="deck-header-top">
-                            <div class="deck-title-group">
-                                <button class="btn-icon-only" id="back-to-dashboard" title="Back">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor" class="icon-md">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                                    </svg>
-                                </button>
-                                <h1 id="current-deck-title">Deck Title</h1>
-                                <span id="deck-public-badge" class="badge badge-public hidden">Public</span>
-                            </div>
-                            <div class="deck-main-actions">
-                                <button id="study-deck-btn" class="btn btn-primary">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="icon-sm">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                                    </svg>
-                                    Study
-                                </button>
-                                <button id="play-game-btn" class="btn btn-secondary">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="icon-sm">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                                    </svg>
-                                    Play
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="deck-header-bottom">
-                            <div class="search-wrapper">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="icon-sm search-icon">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                                </svg>
-
-                                <input type="text" id="card-search-input" placeholder="Search cards..."
-                                    class="search-input">
-                            </div>
-                            <div class="header-actions">
-                                <select id="card-sort-select" class="sort-select">
-                                    <option value="newest">Newest</option>
-                                    <option value="oldest">Oldest</option>
-                                    <option value="az">A-Z</option>
-                                    <option value="za">Z-A</option>
-                                </select>
-                            </div>
-                            <div class="deck-sub-actions header-actions">
-                                <button id="toggle-public-btn" class="btn btn-outline btn-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="icon-sm">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S13.636 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.514 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-                                    </svg>
-                                    Public
-                                </button>
-                                <button id="delete-deck-btn" class="btn btn-danger-outline btn-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="icon-sm">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                    </svg>
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="import-section">
-                        <div class="header-actions">
-                            <button id="add-card-btn" class="btn btn-primary btn-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                    stroke="currentColor" class="icon-sm">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                </svg>
-                                Add Card
+                            <button id="create-group-deck-btn" class="btn btn-primary btn-lg"
+                                style="align-items: center; justify-content: center; display: flex;">
+                                Create Group Deck
                             </button>
-                            <label class="file-upload-btn btn btn-outline btn-sm">
+                        </div>
+
+                        <div class="tabs">
+                            <button class="tab-btn active" data-tab="group-decks-tab">Decks</button>
+                            <button class="tab-btn" data-tab="group-members-tab">Members</button>
+                        </div>
+
+                        <div id="group-decks-tab" class="tab-content">
+                            <div id="group-decks-grid" class="grid-container">
+                                <!-- Group decks -->
+                            </div>
+                        </div>
+
+                        <div id="group-members-tab" class="tab-content hidden">
+                            <div class="list-header"
+                                style="padding: 1rem 1.5rem; background: var(--background); border: 1px solid var(--border); border-bottom: none; border-radius: var(--radius) var(--radius) 0 0; display: grid; grid-template-columns: 1fr 100px 100px 100px; gap: 2rem; font-weight: 600; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">
+                                <span>Member</span>
+                                <span style="text-align:center">Reviews</span>
+                                <span style="text-align:center">Mastery</span>
+                                <span style="text-align:right">Role</span>
+                            </div>
+                            <ul id="group-members-list" class="list-container"
+                                style="border-radius: 0 0 var(--radius) var(--radius);">
+                                <!-- Members -->
+                            </ul>
+                        </div>
+                    </section>
+
+                    <!-- Deck Details View (Card List) -->
+                    <section id="deck-view" class="view hidden">
+                        <div class="deck-header">
+                            <div class="deck-header-top">
+                                <div class="deck-title-group">
+                                    <button class="btn-icon-only" id="back-to-dashboard" title="Back">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="icon-md">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                                        </svg>
+                                    </button>
+                                    <div class="deck-title-wrapper">
+                                        <h1 id="current-deck-title">Deck Title</h1>
+                                        <span id="deck-mastery-tag" class="mastery-subtitle">0% Mastery</span>
+                                    </div>
+                                    <span id="deck-public-badge" class="badge badge-public hidden">Public</span>
+                                </div>
+                                <div class="deck-main-actions">
+                                    <button id="study-deck-btn" class="btn btn-primary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="icon-sm">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                                        </svg>
+                                        Study
+                                    </button>
+                                    <button id="play-game-btn" class="btn btn-secondary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="icon-sm">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+                                        </svg>
+                                        Play
+                                    </button>
+                                    <button id="custom-study-btn" class="btn btn-outline btn-sm">
+                                        Custom Study
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="deck-stats-bar">
+                                <div class="deck-stat-item" style="max-width: 120px;">
+                                    <span class="stat-label">Due</span>
+                                    <span id="deck-due-count" class="stat-value font-bold text-lg">0</span>
+                                </div>
+                                <div class="deck-stat-item" style="max-width: 120px;">
+                                    <span class="stat-label">Total</span>
+                                    <span id="deck-total-count" class="stat-value font-bold text-lg">0</span>
+                                </div>
+                            </div>
+
+                            <div class="deck-header-bottom"
+                                style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; gap:0.75rem; width: 100%;">
+                                <div class="deck-header-bottom-left" style="display:flex; gap:0.5rem; flex:1;">
+                                    <div class="search-wrapper" style="flex: 1;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="icon-sm search-icon">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                        </svg>
+                                        <input type="text" id="card-search-input" placeholder="Search cards..."
+                                            class="search-input">
+                                    </div>
+                                    <select id="card-sort-select" class="sort-select" style="width: 120px;">
+                                        <option value="newest">Newest</option>
+                                        <option value="oldest">Oldest</option>
+                                        <option value="az">A-Z</option>
+                                        <option value="za">Z-A</option>
+                                    </select>
+                                </div>
+                                <div class="deck-sub-actions header-actions">
+                                    <button id="toggle-public-btn" class="btn btn-outline btn-sm"
+                                        style="min-width: 90px; justify-content: center;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="icon-sm">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                                        </svg>
+                                        Share
+                                    </button>
+                                    <button id="delete-deck-btn" class="btn btn-danger-outline btn-sm"
+                                        style="min-width: 90px; justify-content: center;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="icon-sm">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.244 2.244 0 01-2.244 2.077H8.084a2.244 2.244 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                        </svg>
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="import-section">
+                            <div class="header-actions">
+                                <div class="btn-split">
+                                    <button id="add-card-btn" class="btn btn-primary btn-sm" style="white-space: nowrap; height: 100%;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="icon-sm">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                        Add Card
+                                    </button>
+                                    <button class="btn btn-primary btn-sm dropdown-btn" id="add-card-dropdown-toggle"
+                                        style="height: 100%; align-self: stretch; position: relative;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="icon-xs">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                        <div id="add-card-menu" class="dropdown-menu hidden"
+                                            style="position: absolute; top: 100%; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); z-index: 50; width: 160px; margin-top: 5px;">
+                                            <button type="button" id="menu-bulk-add" class="dropdown-item"
+                                                style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor" class="icon-xs">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M12 4.5v15m7.5-7.5h-15" />
+                                                </svg>
+                                                Bulk Add
+                                            </button>
+                                            <button type="button" id="menu-import-csv" class="dropdown-item"
+                                                style="height: 100%; width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem; height: 100%;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor" class="icon-xs">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                                </svg>
+                                                Import CSV
+                                            </button>
+                                        </div>
+                                    </button>
+                                </div>
+                                <input type="file" id="csv-upload" accept=".csv" hidden>
+                                <button id="toggle-select-mode-btn" class="btn btn-outline btn-sm">
+                                    Select
+                                </button>
+                            </div>
+                            <div class="divider-vertical"></div>
+                            <span class="text-sm text-dim">Format: Front, Back</span>
+                        </div>
+
+                        <div id="bulk-actions-bar" class="bulk-actions-bar hidden">
+                            <div class="bulk-actions-left">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="select-all-checkbox">
+                                    <span class="checkbox-label">Select All</span>
+                                </label>
+                            </div>
+                            <div class="bulk-actions-right">
+                                <span id="selected-count" class="text-sm text-dim">0 cards selected</span>
+                                <button id="bulk-delete-btn" class="btn btn-danger-outline btn-sm">
+                                    Delete Selected
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="card-list" class="card-list">
+                            <!-- Cards injected here -->
+                        </div>
+                    </section>
+
+                    <!-- Study Mode View -->
+                    <section id="study-view" class="view hidden">
+                        <div class="study-header">
+                            <button id="quit-study-btn" class="btn btn-text">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                    class="icon-sm">
+                                    <path
+                                        d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                                </svg>
+                                Quit
+                            </button>
+                            <span id="study-progress">10 remaining</span>
+                        </div>
+
+                        <div class="study-container">
+                            <div class="flashcard-scene">
+                                <div class="flashcard" id="active-flashcard">
+                                    <div class="card-face card-front">
+                                        <div class="card-content" id="study-front">Front Text</div>
+                                        <div class="card-hint">Click or Space to flip</div>
+                                    </div>
+                                    <div class="card-face card-back">
+                                        <div class="card-content" id="study-back">Back Text</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="study-actions"
+                                style="display:flex; justify-content:center; align-items:center; gap: 1rem; margin-top: 1.5rem;">
+                                <button id="shuffle-study-btn" class="btn-circular" title="Shuffle remaining cards"
+                                    style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background-color: var(--bg-secondary); border: none; cursor: pointer;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="icon-sm">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                    </svg>
+                                </button>
+                                <button id="fullscreen-study-btn" class="btn-circular" title="Toggle Fullscreen"
+                                    style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background-color: var(--bg-secondary); border: none; cursor: pointer;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="icon-sm">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div class="study-controls hidden" id="study-controls">
+                                <button class="btn btn-rate rate-again" data-rating="1">
+                                    <span class="rate-label">Again</span>
+                                    <span class="rate-time">&lt; 1m</span>
+                                </button>
+                                <button class="btn btn-rate rate-hard" data-rating="2">
+                                    <span class="rate-label">Hard</span>
+                                    <span class="rate-time">2d</span>
+                                </button>
+                                <button class="btn btn-rate rate-good" data-rating="3">
+                                    <span class="rate-label">Good</span>
+                                    <span class="rate-time">4d</span>
+                                </button>
+                                <button class="btn btn-rate rate-easy" data-rating="4">
+                                    <span class="rate-label">Easy</span>
+                                    <span class="rate-time">7d</span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Study Summary View -->
+                    <section id="study-summary-view" class="view hidden">
+                        <div class="summary-container">
+                            <h2>Session Complete!</h2>
+                            <div class="summary-stats">
+                                <div class="stat-item">
+                                    <span class="stat-val" id="summary-count">0</span>
+                                    <span class="stat-label">Cards Studied</span>
+                                </div>
+                            </div>
+                            <button id="back-to-deck-btn" class="btn btn-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="icon-sm">
                                     <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                        d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
                                 </svg>
-                                Import CSV
-                                <input type="file" id="csv-upload" accept=".csv" hidden>
-                            </label>
-                            <button id="toggle-select-mode-btn" class="btn btn-outline btn-sm">
-                                Select
+                                Back to Deck
                             </button>
                         </div>
-                        <div class="divider-vertical"></div>
-                        <span class="text-sm text-dim">Format: Front, Back</span>
-                    </div>
-
-                    <div id="bulk-actions-bar" class="bulk-actions-bar hidden">
-                        <div class="bulk-actions-left">
-                            <label class="checkbox-container">
-                                <input type="checkbox" id="select-all-checkbox">
-                                <span class="checkbox-label">Select All</span>
-                            </label>
-                        </div>
-                        <div class="bulk-actions-right">
-                            <span id="selected-count" class="text-sm text-dim">0 cards selected</span>
-                            <button id="bulk-delete-btn" class="btn btn-danger-outline btn-sm">
-                                Delete Selected
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="card-list" class="card-list">
-                        <!-- Cards injected here -->
-                    </div>
-                </section>
-
-                <!-- Study Mode View -->
-                <section id="study-view" class="view hidden">
-                    <div class="study-header">
-                        <button id="quit-study-btn" class="btn btn-text">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                class="icon-sm">
-                                <path
-                                    d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-                            </svg>
-                            Quit
-                        </button>
-                        <span id="study-progress">10 remaining</span>
-                    </div>
-
-                    <div class="study-container">
-                        <div class="flashcard-scene">
-                            <div class="flashcard" id="active-flashcard">
-                                <div class="card-face card-front">
-                                    <div class="card-content" id="study-front">Front Text</div>
-                                    <div class="card-hint">Click or Space to flip</div>
-                                </div>
-                                <div class="card-face card-back">
-                                    <div class="card-content" id="study-back">Back Text</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="study-actions"
-                            style="display:flex; justify-content:center; align-items:center; gap: 1rem; margin-top: 1.5rem;">
-                            <button id="shuffle-study-btn" class="btn-circular" title="Shuffle remaining cards"
-                                style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background-color: var(--bg-secondary); border: none; cursor: pointer;">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-                                </svg>
-                            </button>
-                            <button id="fullscreen-study-btn" class="btn-circular" title="Toggle Fullscreen"
-                                style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background-color: var(--bg-secondary); border: none; cursor: pointer;">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div class="study-controls hidden" id="study-controls">
-                            <button class="btn btn-rate rate-again" data-rating="1">
-                                <span class="rate-label">Again</span>
-                                <span class="rate-time">&lt; 1m</span>
-                            </button>
-                            <button class="btn btn-rate rate-hard" data-rating="2">
-                                <span class="rate-label">Hard</span>
-                                <span class="rate-time">2d</span>
-                            </button>
-                            <button class="btn btn-rate rate-good" data-rating="3">
-                                <span class="rate-label">Good</span>
-                                <span class="rate-time">4d</span>
-                            </button>
-                            <button class="btn btn-rate rate-easy" data-rating="4">
-                                <span class="rate-label">Easy</span>
-                                <span class="rate-time">7d</span>
-                            </button>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Study Summary View -->
-                <section id="study-summary-view" class="view hidden">
-                    <div class="summary-container">
-                        <h2>Session Complete!</h2>
-                        <div class="summary-stats">
-                            <div class="stat-item">
-                                <span class="stat-val" id="summary-count">0</span>
-                                <span class="stat-label">Cards Studied</span>
-                            </div>
-                        </div>
-                        <button id="back-to-deck-btn" class="btn btn-primary">Back to Deck</button>
-                    </div>
-                </section>
+                    </section>
             </main>
+            <!-- End Page Container -->
         </div>
-
-        <!-- Modals -->
-        <div id="modal-overlay" class="modal-overlay hidden">
-            <!-- Create Deck Modal -->
-            <div id="create-deck-modal" class="modal hidden">
-                <h3>Create New Deck</h3>
-                <form id="create-deck-form">
-                    <div class="input-group">
-                        <label>Title</label>
-                        <input type="text" id="new-deck-title" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Description (optional)</label>
-                        <textarea id="new-deck-desc" rows="2"></textarea>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-text close-modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Create</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Create/Edit Card Modal -->
-            <div id="card-modal" class="modal hidden">
-                <h3 id="card-modal-title">Add Card</h3>
-                <form id="card-form">
-                    <input type="hidden" id="card-id">
-                    <div class="input-group">
-                        <label>Front</label>
-                        <textarea id="card-front-input" rows="3" required></textarea>
-                    </div>
-                    <div class="input-group">
-                        <label>Back</label>
-                        <textarea id="card-back-input" rows="3" required></textarea>
-                    </div>
-                    <div class="input-group">
-                        <label>Tags (comma separated)</label>
-                        <input type="text" id="card-tags-input" placeholder="e.g. difficult, math, verb">
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-text close-modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Custom Study Modal -->
-            <div id="custom-study-modal" class="modal hidden">
-                <h3>Custom Study Session</h3>
-                <form id="custom-study-form">
-                    <div class="input-group">
-                        <label>Filter by Tag</label>
-                        <select id="custom-study-tag-filter">
-                            <option value="">All Tags</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Max Cards</label>
-                        <input type="number" id="custom-study-limit" value="20" min="5" max="100">
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-text close-modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Start</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Settings Modal -->
-            <div id="settings-modal" class="modal hidden">
-                <h3>Settings</h3>
-                <form id="settings-form">
-                    <div class="input-group">
-                        <label>Username</label>
-                        <input type="text" id="settings-username" required>
-                    </div>
-                    <!-- Future: Avatar, etc. -->
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-text close-modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Create Group Modal -->
-            <div id="create-group-modal" class="modal hidden">
-                <h3>Create New Group</h3>
-                <form id="create-group-form">
-                    <div class="input-group">
-                        <label>Group Name</label>
-                        <input type="text" id="new-group-name" required>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-text close-modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Create</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Join Group Modal -->
-            <div id="join-group-modal" class="modal hidden">
-                <h3>Join Group</h3>
-                <form id="join-group-form">
-                    <div class="input-group">
-                        <label>Invite Code</label>
-                        <input type="text" id="join-invite-code" placeholder="e.g. abcd1234..." required>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-text close-modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Join</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Toast Notification Container -->
-        <div id="toast-container"></div>
+        </main>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <!-- Create Deck Modal -->
+        <div id="create-deck-modal" class="modal hidden">
+            <h3>Create New Deck</h3>
+            <form id="create-deck-form">
+                <div class="input-group">
+                    <label>Title</label>
+                    <input type="text" id="new-deck-title" required>
+                </div>
+                <div class="input-group">
+                    <label>Description (optional)</label>
+                    <textarea id="new-deck-desc" rows="2"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-text close-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Create/Edit Card Modal -->
+        <div id="card-modal" class="modal hidden">
+            <h3 id="card-modal-title">Add Card</h3>
+            <form id="card-form">
+                <input type="hidden" id="card-id">
+                <div class="input-group">
+                    <label>Front</label>
+                    <textarea id="card-front-input" rows="3" required></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Back</label>
+                    <textarea id="card-back-input" rows="3" required></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Tags (comma separated)</label>
+                    <input type="text" id="card-tags-input" placeholder="e.g. difficult, math, verb">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-text close-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Custom Study Modal -->
+        <div id="custom-study-modal" class="modal hidden">
+            <h3>Custom Study Session</h3>
+            <form id="custom-study-form">
+                <div class="input-group">
+                    <label>Filter by Tag</label>
+                    <select id="custom-study-tag-filter">
+                        <option value="">All Tags</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Max Cards</label>
+                    <input type="number" id="custom-study-limit" value="20" min="5" max="100">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-text close-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Start</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal hidden">
+            <h3>Settings</h3>
+            <form id="settings-form">
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" id="settings-username" required>
+                </div>
+                <!-- Future: Avatar, etc. -->
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-text close-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Create Group Modal -->
+        <div id="create-group-modal" class="modal hidden">
+            <h3>Create New Group</h3>
+            <form id="create-group-form">
+                <div class="input-group">
+                    <label>Group Name</label>
+                    <input type="text" id="new-group-name" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-text close-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Join Group Modal -->
+        <div id="join-group-modal" class="modal hidden">
+            <h3>Join Group</h3>
+            <form id="join-group-form">
+                <div class="input-group">
+                    <label>Invite Code</label>
+                    <input type="text" id="join-invite-code" placeholder="e.g. abcd1234..." required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-text close-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Join</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Share Modal -->
+        <div id="share-modal" class="modal hidden">
+            <div class="modal-header">
+                <h3>Share Deck</h3>
+                <p class="text-dim text-sm" id="share-deck-title">Deck Title</p>
+            </div>
+
+            <form id="share-form" class="mt-4">
+                <div class="input-group">
+                    <label>Add people by email</label>
+                    <div style="display:flex; gap:0.5rem">
+                        <input type="email" id="share-email" placeholder="email@example.com" required style="flex:1">
+                        <select id="share-role" class="form-control" style="width:100px">
+                            <option value="viewer">Viewer</option>
+                            <option value="editor">Editor</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">Invite</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="share-list-container mt-6">
+                <label>People with access</label>
+                <ul id="share-list" class="mt-2" style="max-height:160px; overflow-y:auto">
+                    <!-- Shared users items -->
+                </ul>
+            </div>
+
+            <div class="share-footer"
+                style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                <div class="share-setting-row"
+                    style="display: flex; align-items: center; justify-content: space-between;">
+                    <div class="setting-info" style="display: flex; gap: 1rem; align-items: center;">
+                        <div class="setting-icon-box"
+                            style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" class="icon-sm" id="access-icon">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                            </svg>
+                        </div>
+                        <div class="setting-text">
+                            <h4 id="access-status" style="margin: 0; font-size: 0.95rem;">Restricted</h4>
+                            <p id="access-desc" style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);">Only
+                                people with access can open with the link</p>
+                        </div>
+                    </div>
+                    <button id="toggle-share-public-btn" class="btn btn-text btn-sm text-primary"
+                        style="font-weight: 600;">Change</button>
+                </div>
+            </div>
+
+            <div class="modal-actions"
+                style="border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1rem;">
+                <button type="button" class="btn btn-outline btn-sm" id="copy-share-link-modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        class="icon-sm">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                    </svg>
+                    Copy Link
+                </button>
+                <div style="flex:1"></div>
+                <button type="button" class="btn btn-primary close-modal">Done</button>
+            </div>
+        </div>
+
+        <!-- Bulk Add Modal -->
+        <div id="bulk-add-modal" class="modal hidden" style="max-width: 700px;">
+            <h3>Bulk Add Cards</h3>
+            <p class="text-secondary text-sm mb-4">Add multiple cards at once. One card per line.</p>
+            <form id="bulk-add-form">
+                <div class="input-group">
+                    <label>Cards Data (Front [Separator] Back)</label>
+                    <textarea id="bulk-add-input" rows="12"
+                        placeholder="Example:&#10;Apple | Red fruit&#10;Banana | Yellow fruit" required
+                        style="font-family: monospace;"></textarea>
+                </div>
+
+                <div class="bulk-settings"
+                    style="margin-top: 1.5rem; padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius);">
+                    <label style="font-weight: 600; display: block; margin-bottom: 0.75rem;">Separator</label>
+                    <div class="separator-options"
+                        style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                        <label class="radio-container" style="font-size: 0.875rem;">
+                            <input type="radio" name="separator" value="|" checked> <span>| (Pipe)</span>
+                        </label>
+                        <label class="radio-container" style="font-size: 0.875rem;">
+                            <input type="radio" name="separator" value="-"> <span>- (Dash)</span>
+                        </label>
+                        <label class="radio-container" style="font-size: 0.875rem;">
+                            <input type="radio" name="separator" value=","> <span>, (Comma)</span>
+                        </label>
+                        <label class="radio-container" style="font-size: 0.875rem;">
+                            <input type="radio" name="separator" value="\t"> <span>Tab</span>
+                        </label>
+                        <label class="radio-container" style="font-size: 0.875rem;">
+                            <input type="radio" name="separator" value="custom"> <span>Custom:</span>
+                        </label>
+                        <input type="text" id="custom-separator" placeholder="e.g. ::"
+                            style="padding: 0.25rem 0.5rem; font-size: 0.875rem;">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-text close-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="bulk-add-submit">Add All Cards</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    </div>
+    <!-- End Body Wrapper -->
+
+    </div>
+    <!-- End Body Wrapper -->
+
+    <script src="script.js" defer></script>
 </body>
 
 </html>

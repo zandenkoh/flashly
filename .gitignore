@@ -1,8 +1,4 @@
 
 # Ignore mockup and setup files
-mockup.png
-schema.sql
-schema_update.sql
-schema_update_groups.sql
-SETUP.md
+
 
