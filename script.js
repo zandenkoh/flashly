@@ -790,7 +790,11 @@ function renderDecksViewWithSubjects() {
         ? state.decks.filter(d => d.user_id !== state.user.id)
         : state.decks.filter(d => d.user_id === state.user.id);
 
-    if (filteredDecks.length === 0) {
+    const showEmptyState = state.deckTab === 'shared'
+        ? filteredDecks.length === 0
+        : (filteredDecks.length === 0 && state.subjects.length === 0);
+
+    if (showEmptyState) {
         list.innerHTML = `
             <div class="empty-state">
                 <div style="width: 100%; text-align: center; margin: 100px 0">
@@ -803,10 +807,12 @@ function renderDecksViewWithSubjects() {
         return;
     }
 
-    // 1. Render Subjects (only if they have decks in this tab)
+    // 1. Render Subjects
     state.subjects.forEach(subject => {
         const subjectDecks = filteredDecks.filter(d => d.subject_id === subject.id);
-        if (subjectDecks.length === 0) return;
+
+        // Don't show empty subjects in the shared tab
+        if (state.deckTab === 'shared' && subjectDecks.length === 0) return;
 
         const subjectSection = document.createElement('div');
         subjectSection.className = 'subject-section';
