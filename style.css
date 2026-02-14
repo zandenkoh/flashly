@@ -5261,45 +5261,72 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
-    padding: 1rem 1.5rem;
-    padding-top: max(3.5rem, calc(1rem + env(safe-area-inset-top)));
+    padding: 0.75rem 1rem;
+    padding-top: max(1rem, env(safe-area-inset-top));
+    /* Reduced top padding */
     border-bottom: 1px solid var(--border);
     background: var(--surface);
     flex-shrink: 0;
+    height: 60px;
+    /* Fixed height for consistency */
+}
+
+@media (max-width: 768px) {
+    .pdf-header {
+        padding-top: max(3.5rem, calc(1rem + env(safe-area-inset-top)));
+        /* Mobile padding */
+        height: auto;
+        /* Allow height to grow */
+    }
 }
 
 .pdf-body {
     flex: 1;
     background: #525659;
-    /* Standard PDF viewer background color */
-    position: relative;
-    /* Standard PDF viewer background color */
     position: relative;
     overflow: hidden;
-    padding-bottom: 2rem;
-    /* Give some space */
-}
-
-#pdf-container {
-    width: 100%;
-    margin: 0 auto;
+    padding: 0;
+    /* Remove padding */
     display: flex;
     flex-direction: column;
+}
+
+/* Minimal Fallback Styling */
+#pdf-fallback-container {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    /* Let clicks pass through if covered */
+    display: flex;
+    justify-content: center;
+    padding-bottom: 2rem;
+    z-index: 10;
+}
+
+#pdf-fallback-container>* {
+    pointer-events: auto;
+    /* Re-enable clicks on content */
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    padding: 0.5rem 1rem;
+    border-radius: 99px;
+    color: white;
+    display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.3s;
 }
 
-.pdf-page-wrapper {
-    max-width: 100%;
-    background: white;
-    transition: transform 0.2s;
-}
-
-.pdf-page-wrapper canvas {
-    display: block;
-    max-width: 100%;
-    height: auto !important;
+#pdf-fallback-container p {
+    display: none;
+    /* Hide text, just show button */
 }
 
 /* Grid Layout for Notes (Horizontal on Desktop, Grid on Mobile) */

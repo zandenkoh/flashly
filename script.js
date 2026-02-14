@@ -4810,99 +4810,38 @@ function resetNoteFilters() {
 }
 
 // PDF Viewer Logic
-let pdfRenderTask = null;
-
-async function openNote(note) {
+function openNote(note) {
     const modal = document.getElementById('pdf-viewer-modal');
     const title = document.getElementById('pdf-viewer-title');
-    const container = document.getElementById('pdf-container');
-    const loading = document.getElementById('pdf-loading');
-    const errorDiv = document.getElementById('pdf-error');
-    const fallbackLink = document.getElementById('pdf-fallback-link');
+    const frame = document.getElementById('pdf-frame');
+    const fallbackContainer = document.getElementById('pdf-fallback-container');
+    const directLink = document.getElementById('pdf-direct-link');
 
-    // Set title and fallback link
+    // Set title and direct link
     title.textContent = note.title;
-    fallbackLink.href = note.url;
+    directLink.href = note.url;
 
-    // Reset viewer state
-    container.innerHTML = '';
-    loading.classList.remove('hidden');
-    errorDiv.classList.add('hidden');
+    // Show fallback option
+    // fallbackContainer.classList.remove('hidden');
 
-    // Show modal immediately
+    // Use Google Docs Viewer to bypass CORS and fix iOS rendering issues
+    // This renders the PDF as HTML/Images on Google's side
+    if (note.url.endsWith('.pdf')) {
+        frame.src = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(note.url)}`;
+    } else {
+        // Fallback for non-PDFs (images, etc)
+        frame.src = note.url;
+    }
+
     modal.classList.remove('hidden');
     document.body.classList.add('modal-open');
-
-    // Ensure PDF.js worker is set
-    if (window.pdfjsLib && !window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
-        window.pdfjsLib.GlobalWorkerOptions.workerSrc = window.pdfjsWorkerSrc;
-    }
-
-    try {
-        if (!window.pdfjsLib) {
-            throw new Error("PDF.js library not loaded");
-        }
-
-        const loadingTask = pdfjsLib.getDocument(note.url);
-        const pdf = await loadingTask.promise;
-
-        loading.classList.add('hidden');
-
-        // Render pages sequentially
-        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-            const page = await pdf.getPage(pageNum);
-
-            // Calculate scale to fit container width (with some margin)
-            // Use a base scale of 1.5 for better resolution on retina displays
-            const baseScale = 1.5;
-            const viewport = page.getViewport({ scale: baseScale });
-
-            // Adjust scale to fit container if needed
-            const containerWidth = container.clientWidth || (window.innerWidth - 40);
-            let finalScale = baseScale;
-
-            if (viewport.width > containerWidth) {
-                finalScale = (containerWidth / page.getViewport({ scale: 1 }).width);
-            }
-
-            const scaledViewport = page.getViewport({ scale: finalScale });
-
-            const canvasWrapper = document.createElement('div');
-            canvasWrapper.className = 'pdf-page-wrapper';
-            canvasWrapper.style.marginBottom = '10px';
-            canvasWrapper.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.height = scaledViewport.height;
-            canvas.width = scaledViewport.width;
-
-            // Ensure canvas fits in container visibly
-            canvas.style.maxWidth = '100%';
-            canvas.style.height = 'auto';
-            canvas.style.display = 'block';
-
-            canvasWrapper.appendChild(canvas);
-            container.appendChild(canvasWrapper);
-
-            // Render
-            await page.render({
-                canvasContext: context,
-                viewport: scaledViewport
-            }).promise;
-        }
-    } catch (err) {
-        console.error("PDF Render Error:", err);
-        loading.classList.add('hidden');
-        errorDiv.classList.remove('hidden');
-    }
 }
 
 document.getElementById('close-pdf-btn').addEventListener('click', () => {
     const modal = document.getElementById('pdf-viewer-modal');
     modal.classList.add('hidden');
     document.body.classList.remove('modal-open');
-    document.getElementById('pdf-container').innerHTML = ''; // Clear memory
+    document.getElementById('pdf-frame').src = ''; // Stop loading
 });
 
 // Add Note Logic
