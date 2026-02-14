@@ -186,6 +186,7 @@ document.addEventListener('click', (e) => {
         authMode = 'login';
         updateAuthUI();
         authModal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
         if (document.getElementById('guest-preview-modal')) {
             document.getElementById('guest-preview-modal').classList.add('hidden');
         }
@@ -196,6 +197,7 @@ document.addEventListener('click', (e) => {
         authMode = 'signup';
         updateAuthUI();
         authModal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
         if (document.getElementById('guest-preview-modal')) {
             document.getElementById('guest-preview-modal').classList.add('hidden');
         }
@@ -205,10 +207,14 @@ document.addEventListener('click', (e) => {
 
 document.querySelector('.auth-modal-close').onclick = () => {
     authModal.classList.add('hidden');
+    document.body.classList.remove('modal-open');
 };
 
 authModal.onclick = (e) => {
-    if (e.target === authModal) authModal.classList.add('hidden');
+    if (e.target === authModal) {
+        authModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+    }
 };
 
 // Auth Form Submit
@@ -422,6 +428,7 @@ function showGuestPreview(type, data) {
 
     modal.classList.remove('hidden');
     document.getElementById('modal-overlay').classList.remove('hidden');
+    document.body.classList.add('modal-open');
 }
 
 async function fetchUserProfile() {
@@ -4331,11 +4338,13 @@ function showToast(message, type = 'success') {
 function openModal(id) {
     modalOverlay.classList.remove('hidden');
     document.getElementById(id).classList.remove('hidden');
+    document.body.classList.add('modal-open');
 }
 
 function closeModal() {
     modalOverlay.classList.add('hidden');
     document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+    document.body.classList.remove('modal-open');
 }
 document.querySelectorAll('.close-modal').forEach(btn => btn.addEventListener('click', closeModal));
 modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
@@ -4801,22 +4810,99 @@ function resetNoteFilters() {
 }
 
 // PDF Viewer Logic
-function openNote(note) {
+let pdfRenderTask = null;
+
+async function openNote(note) {
     const modal = document.getElementById('pdf-viewer-modal');
     const title = document.getElementById('pdf-viewer-title');
-    const frame = document.getElementById('pdf-frame');
+    const container = document.getElementById('pdf-container');
+    const loading = document.getElementById('pdf-loading');
+    const errorDiv = document.getElementById('pdf-error');
+    const fallbackLink = document.getElementById('pdf-fallback-link');
 
+    // Set title and fallback link
     title.textContent = note.title;
-    frame.src = note.url;
+    fallbackLink.href = note.url;
 
+    // Reset viewer state
+    container.innerHTML = '';
+    loading.classList.remove('hidden');
+    errorDiv.classList.add('hidden');
+
+    // Show modal immediately
     modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.classList.add('modal-open');
+
+    // Ensure PDF.js worker is set
+    if (window.pdfjsLib && !window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = window.pdfjsWorkerSrc;
+    }
+
+    try {
+        if (!window.pdfjsLib) {
+            throw new Error("PDF.js library not loaded");
+        }
+
+        const loadingTask = pdfjsLib.getDocument(note.url);
+        const pdf = await loadingTask.promise;
+
+        loading.classList.add('hidden');
+
+        // Render pages sequentially
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const page = await pdf.getPage(pageNum);
+
+            // Calculate scale to fit container width (with some margin)
+            // Use a base scale of 1.5 for better resolution on retina displays
+            const baseScale = 1.5;
+            const viewport = page.getViewport({ scale: baseScale });
+
+            // Adjust scale to fit container if needed
+            const containerWidth = container.clientWidth || (window.innerWidth - 40);
+            let finalScale = baseScale;
+
+            if (viewport.width > containerWidth) {
+                finalScale = (containerWidth / page.getViewport({ scale: 1 }).width);
+            }
+
+            const scaledViewport = page.getViewport({ scale: finalScale });
+
+            const canvasWrapper = document.createElement('div');
+            canvasWrapper.className = 'pdf-page-wrapper';
+            canvasWrapper.style.marginBottom = '10px';
+            canvasWrapper.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = scaledViewport.height;
+            canvas.width = scaledViewport.width;
+
+            // Ensure canvas fits in container visibly
+            canvas.style.maxWidth = '100%';
+            canvas.style.height = 'auto';
+            canvas.style.display = 'block';
+
+            canvasWrapper.appendChild(canvas);
+            container.appendChild(canvasWrapper);
+
+            // Render
+            await page.render({
+                canvasContext: context,
+                viewport: scaledViewport
+            }).promise;
+        }
+    } catch (err) {
+        console.error("PDF Render Error:", err);
+        loading.classList.add('hidden');
+        errorDiv.classList.remove('hidden');
+    }
 }
 
 document.getElementById('close-pdf-btn').addEventListener('click', () => {
-    document.getElementById('pdf-viewer-modal').classList.add('hidden');
-    document.getElementById('pdf-frame').src = ''; // Stop loading
-    document.body.style.overflow = '';
+    const modal = document.getElementById('pdf-viewer-modal');
+    modal.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+    document.getElementById('pdf-container').innerHTML = ''; // Clear memory
 });
 
 // Add Note Logic

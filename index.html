@@ -17,6 +17,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+    <script>
+        // Set worker source for PDF.js immediately
+        window.pdfjsWorkerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
     <link rel="icon" type="image/png" href="./Assets/logo.png">
 </head>
 
@@ -722,9 +727,20 @@
                                     </svg>
                                 </button>
                             </div>
-                            <div class="pdf-body" style="overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1;">
-                                <iframe id="pdf-frame" src="" width="100%" height="100%" frameborder="0"
-                                    style="display: block; min-height: 100%;"></iframe>
+                            <div class="pdf-body"
+                                style="overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; display: flex; flex-direction: column; align-items: center; background: #525659; padding: 20px;">
+                                <div id="pdf-container" class="pdf-container"
+                                    style="width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 10px;">
+                                </div>
+                                <div id="pdf-loading" class="hidden" style="color: white; margin-top: 20px;">
+                                    <span class="loading-spinner"></span> Loading PDF...
+                                </div>
+                                <div id="pdf-error" class="hidden"
+                                    style="text-align: center; color: white; margin-top: 20px;">
+                                    <p class="mb-4">Could not render PDF directly.</p>
+                                    <a id="pdf-fallback-link" href="#" target="_blank" class="btn btn-primary">Open in
+                                        Browser</a>
+                                </div>
                             </div>
                         </div>
                     </div>
