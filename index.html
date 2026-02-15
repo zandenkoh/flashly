@@ -103,25 +103,79 @@
             <!-- Landing Navigation -->
             <nav class="landing-nav">
                 <div class="nav-container">
-                    <div class="landing-logo">Flashly</div>
+                    <div class="landing-logo" onclick="window.location.reload()" style="cursor: pointer;">Flashly</div>
                     <div class="nav-actions">
+                        <a href="./about/index.html" class="btn btn-text" style="text-decoration: none;">About</a>
+                        <a href="./support/index.html" class="btn btn-text" style="text-decoration: none;">Support</a>
                         <button class="btn btn-text btn-login-toggle">Sign In</button>
                         <button class="btn btn-primary btn-signup-toggle">Get Started</button>
                     </div>
+                    <button id="mobile-menu-toggle" class="mobile-menu-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="icon-md">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </button>
                 </div>
+
             </nav>
+
+            <!-- Mobile Menu Modal -->
+            <div id="mobile-nav-modal" class="mobile-nav-modal">
+                <div class="mobile-nav-links">
+                    <a href="./about/index.html" class="mobile-nav-item">
+                        About
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                            <path fill-rule="evenodd"
+                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    <a href="./support/index.html" class="mobile-nav-item">
+                        Support
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                            <path fill-rule="evenodd"
+                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    <a href="./privacy/index.html" class="mobile-nav-item">
+                        Privacy
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                            <path fill-rule="evenodd"
+                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    <a href="mailto:team.flashly@gmail.com" class="mobile-nav-item">
+                        Contact
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                            <path
+                                d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.161V6a2 2 0 00-2-2H3z" />
+                            <path
+                                d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
+                        </svg>
+                    </a>
+                </div>
+                <div class="mobile-nav-footer">
+                    <button class="btn btn-outline mobile-login-btn btn-login-toggle">Sign In</button>
+                    <button class="btn btn-primary mobile-signup-btn btn-signup-toggle">Sign Up</button>
+                </div>
+            </div>
 
             <!-- Hero Section -->
             <section class="landing-page-section landing-hero-revamp">
                 <div class="section-content-wrapper">
                     <div class="landing-text-block">
                         <h1>Exams are coming. <span>Your flashcards and notes are here.</span></h1>
-                        <p>Free flashcards and summary notes for O-Level, A-Level, and IB students in Singapore. Curated
+                        <p>Over 15,000 free flashcards and summary notes for O-Level, A-Level, and IB students in
+                            Singapore. Curated
                             by students, for students.</p>
-                        <div class="hero-btns" style="display:flex; gap:1rem;">
-                            <button class="btn btn-primary btn-lg btn-signup-toggle">Start Learning for Free</button>
-                            <button class="btn btn-secondary btn-lg" onclick="state.isGuest = true; showApp();">Browse
-                                Community Decks & Notes</button>
+                        <div class="hero-btns" style="display:flex; gap:1rem; align-items: center; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-lg btn-signup-toggle">Start Learning</button>
+                            <button class="btn btn-secondary btn-lg" onclick="state.isGuest = true; showApp();">
+                                Community Decks and Curated Notes</button>
                         </div>
                     </div>
                     <div class="landing-visual-block">
@@ -322,6 +376,8 @@
                     style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
                     <p>&copy; 2026 Flashly. Built for focused learners.</p>
                     <div class="footer-links" style="display: flex; gap: 2rem;">
+                        <a href="about/index.html"
+                            style="color: var(--text-secondary); text-decoration: none;">About</a>
                         <a href="privacy/index.html"
                             style="color: var(--text-secondary); text-decoration: none;">Privacy</a>
                         <a href="support/index.html"
@@ -812,40 +868,57 @@
                                         <label for="filter-category">Level</label>
                                         <select id="filter-category" class="modern-select">
                                             <option value="all">All Levels</option>
-                                            <option value="O Level">GCE 'O' Level</option>
-                                            <option value="A Level">GCE 'A' Level</option>
+                                            <option value="GCE 'O' Levels">GCE 'O' Level</option>
+                                            <option value="GCE 'A' Levels">GCE 'A' Level</option>
                                             <option value="IB">IB Diploma</option>
-                                            <option value="N Level">GCE 'N' Level</option>
+                                            <option value="GCE 'N' Levels">GCE 'N' Level</option>
                                             <option value="IP">IP Program</option>
-                                            <option value="Sec 1-2">Lower Secondary</option>
+                                            <option value="Sec 1-2 (Non-IP)">Lower Secondary</option>
                                         </select>
                                     </div>
                                     <div class="filter-control">
                                         <label for="filter-subject">Subject</label>
                                         <select id="filter-subject" class="modern-select">
                                             <option value="all">All Subjects</option>
-                                            <option value="Additional Mathematics">Additional Mathematics</option>
-                                            <option value="Elementary Mathematics">Elementary Mathematics</option>
-                                            <option value="Pure Physics">Pure Physics</option>
-                                            <option value="Combined Physics">Combined Physics</option>
-                                            <option value="Pure Chemistry">Pure Chemistry</option>
-                                            <option value="Combined Chemistry">Combined Chemistry</option>
-                                            <option value="Pure Biology">Pure Biology</option>
-                                            <option value="Combined Biology">Combined Biology</option>
-                                            <option value="Computing">Computing</option>
-                                            <option value="English">English</option>
-                                            <option value="Pure Geography">Pure Geography</option>
-                                            <option value="Elective Geography">Elective Geography</option>
-                                            <option value="Pure History">Pure History</option>
-                                            <option value="Elective History">Elective History</option>
-                                            <option value="Social Studies">Social Studies</option>
-                                            <option value="Pure Literature">Pure Literature</option>
-                                            <option value="Elective Literature">Elective Literature</option>
-                                            <option value="Chinese">Chinese</option>
-                                            <option value="Higher Chinese">Higher Chinese</option>
-                                            <option value="Malay">Malay</option>
-                                            <option value="Design and Technology">Design and Technology</option>
-                                            <option value="Principles of Accounting">Principles of Accounting</option>
+                                            <option value="General">General</option>
+                                            <optgroup label="Mathematics">
+                                                <option value="Elementary Mathematics">Elementary Mathematics</option>
+                                                <option value="Additional Mathematics">Additional Mathematics</option>
+                                                <option value="H2 Mathematics">H2 Mathematics</option>
+                                                <option value="HL Mathematics">HL Mathematics</option>
+                                            </optgroup>
+                                            <optgroup label="Sciences">
+                                                <option value="Pure Physics">Pure Physics</option>
+                                                <option value="Pure Chemistry">Pure Chemistry</option>
+                                                <option value="Pure Biology">Pure Biology</option>
+                                                <option value="Combined Physics">Combined Physics</option>
+                                                <option value="Combined Chemistry">Combined Chemistry</option>
+                                                <option value="Combined Biology">Combined Biology</option>
+                                                <option value="H2 Physics">H2 Physics</option>
+                                                <option value="H2 Chemistry">H2 Chemistry</option>
+                                                <option value="H2 Biology">H2 Biology</option>
+                                            </optgroup>
+                                            <optgroup label="Humanities">
+                                                <option value="Social Studies">Social Studies</option>
+                                                <option value="Pure Geography">Pure Geography</option>
+                                                <option value="Elective Geography">Elective Geography</option>
+                                                <option value="Pure History">Pure History</option>
+                                                <option value="Elective History">Elective History</option>
+                                                <option value="Pure Literature">Pure Literature</option>
+                                                <option value="Elective Literature">Elective Literature</option>
+                                                <option value="H2 Economics">H2 Economics</option>
+                                                <option value="General Paper">General Paper</option>
+                                            </optgroup>
+                                            <optgroup label="Others">
+                                                <option value="Computing">Computing</option>
+                                                <option value="Design and Technology">Design and Technology</option>
+                                                <option value="Principles of Accounting">Principles of Accounting
+                                                </option>
+                                                <option value="English">English</option>
+                                                <option value="Chinese">Chinese</option>
+                                                <option value="Higher Chinese">Higher Chinese</option>
+                                                <option value="Malay">Malay</option>
+                                            </optgroup>
                                         </select>
                                     </div>
                                     <div class="filter-control">
@@ -2207,39 +2280,55 @@
                     <div class="input-group">
                         <label>Category (Level)</label>
                         <select id="note-category" class="input-field" required>
-                            <option value="O Level">GCE 'O' Levels</option>
-                            <option value="A Level">GCE 'A' Levels</option>
+                            <option value="GCE 'O' Levels">GCE 'O' Levels</option>
+                            <option value="GCE 'A' Levels">GCE 'A' Levels</option>
                             <option value="IB">IB</option>
-                            <option value="N Level">GCE 'N' Levels</option>
+                            <option value="GCE 'N' Levels">GCE 'N' Levels</option>
                             <option value="IP">IP</option>
-                            <option value="Sec 1-2">Sec 1-2 (Non IP)</option>
+                            <option value="Sec 1-2 (Non-IP)">Sec 1-2 (Non-IP)</option>
                         </select>
                     </div>
                     <div class="input-group">
                         <label>Subject</label>
                         <select id="note-subject" class="input-field" required>
-                            <option value="Additional Mathematics">Additional Mathematics</option>
-                            <option value="Elementary Mathematics">Elementary Mathematics</option>
-                            <option value="Pure Physics">Pure Physics</option>
-                            <option value="Combined Physics">Combined Physics</option>
-                            <option value="Pure Chemistry">Pure Chemistry</option>
-                            <option value="Combined Chemistry">Combined Chemistry</option>
-                            <option value="Pure Biology">Pure Biology</option>
-                            <option value="Combined Biology">Combined Biology</option>
-                            <option value="Computing">Computing</option>
-                            <option value="English">English</option>
-                            <option value="Pure Geography">Pure Geography</option>
-                            <option value="Elective Geography">Elective Geography</option>
-                            <option value="Pure History">Pure History</option>
-                            <option value="Elective History">Elective History</option>
-                            <option value="Social Studies">Social Studies</option>
-                            <option value="Pure Literature">Pure Literature</option>
-                            <option value="Elective Literature">Elective Literature</option>
-                            <option value="Chinese">Chinese</option>
-                            <option value="Higher Chinese">Higher Chinese</option>
-                            <option value="Malay">Malay</option>
-                            <option value="Design and Technology">Design and Technology</option>
-                            <option value="Principles of Accounting">Principles of Accounting</option>
+                            <option value="General">General</option>
+                            <optgroup label="Mathematics">
+                                <option value="Elementary Mathematics">Elementary Mathematics</option>
+                                <option value="Additional Mathematics">Additional Mathematics</option>
+                                <option value="H2 Mathematics">H2 Mathematics</option>
+                                <option value="HL Mathematics">HL Mathematics</option>
+                            </optgroup>
+                            <optgroup label="Sciences">
+                                <option value="Pure Physics">Pure Physics</option>
+                                <option value="Pure Chemistry">Pure Chemistry</option>
+                                <option value="Pure Biology">Pure Biology</option>
+                                <option value="Combined Physics">Combined Physics</option>
+                                <option value="Combined Chemistry">Combined Chemistry</option>
+                                <option value="Combined Biology">Combined Biology</option>
+                                <option value="H2 Physics">H2 Physics</option>
+                                <option value="H2 Chemistry">H2 Chemistry</option>
+                                <option value="H2 Biology">H2 Biology</option>
+                            </optgroup>
+                            <optgroup label="Humanities">
+                                <option value="Social Studies">Social Studies</option>
+                                <option value="Pure Geography">Pure Geography</option>
+                                <option value="Elective Geography">Elective Geography</option>
+                                <option value="Pure History">Pure History</option>
+                                <option value="Elective History">Elective History</option>
+                                <option value="Pure Literature">Pure Literature</option>
+                                <option value="Elective Literature">Elective Literature</option>
+                                <option value="H2 Economics">H2 Economics</option>
+                                <option value="General Paper">General Paper</option>
+                            </optgroup>
+                            <optgroup label="Others">
+                                <option value="Computing">Computing</option>
+                                <option value="Design and Technology">Design and Technology</option>
+                                <option value="Principles of Accounting">Principles of Accounting</option>
+                                <option value="English">English</option>
+                                <option value="Chinese">Chinese</option>
+                                <option value="Higher Chinese">Higher Chinese</option>
+                                <option value="Malay">Malay</option>
+                            </optgroup>
                         </select>
                     </div>
                     <div class="input-group">
@@ -2326,6 +2415,7 @@
     </div> <!-- End App Wrapper -->
 
 
+    <script src="landing-nav.js" defer></script>
     <script src="script.js" defer></script>
 </body>
 

@@ -137,66 +137,121 @@
     gtag('config', 'G-PSQD1QL17E');
 </script>
 
-<body>
-    <div class="legal-container">
-        <a href="../index.html" class="back-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-            Back to Flashly
+<nav class="landing-nav">
+    <div class="nav-container">
+        <a href="../index.html" class="landing-logo" style="text-decoration: none; display: flex; align-items: center;">
+            Flashly
         </a>
-
-        <div class="legal-content">
-            <h1>Privacy Policy</h1>
-            <span class="last-updated">Last updated: February 11, 2026</span>
-
-            <p>At Flashly, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclosure,
-                and safeguard your information when you visit our website and use our application.</p>
-
-            <h2>1. Information We Collect</h2>
-            <p>We collect information that helps us provide you with the best learning experience possible.</p>
-
-            <h3>Personal Data</h3>
-            <p>When you register for Flashly, we may collect personally identifiable information, such as your:</p>
-            <ul>
-                <li>Name</li>
-                <li>Email address</li>
-                <li>Profile preferences</li>
-            </ul>
-
-            <h3>Usage Data</h3>
-            <p>We automatically collect certain information when you visit, use, or navigate the application. This
-                information does not reveal your specific identity but may include:</p>
-            <ul>
-                <li>Learning statistics (cards reviewed, mastery levels)</li>
-                <li>Device information (browser type, operating system)</li>
-                <li>Log data (access times, pages viewed)</li>
-            </ul>
-
-            <h2>2. How We Use Your Information</h2>
-            <p>We use the information we collect or receive to:</p>
-            <ul>
-                <li><strong>Provide services:</strong> To create and manage your account and deliver flashcard
-                    functionality.</li>
-                <li><strong>Improve experience:</strong> To understand how you use Flashly and optimize our spaced
-                    repetition algorithm.</li>
-                <li><strong>Cloud Sync:</strong> To ensure your decks and progress are available across all your
-                    devices.</li>
-            </ul>
-
-            <h2>3. Data Storage and Security</h2>
-            <p>We use industry-standard security measures. Your data is stored securely using Supabase. However, no
-                internet transmission is 100% secure.</p>
-
-            <h2>4. Sharing Your Information</h2>
-            <p>We do not sell, trade, or rent your personal identification information. We may share anonymized
-                aggregated data for research or analysis.</p>
-
-            <h2>5. Contact Us</h2>
-            <p>If you have questions about this Privacy Policy, please contact us at privacy@flashly.app</p>
+        <div class="nav-actions">
+            <a href="../about/index.html" class="btn btn-text" style="text-decoration: none;">About</a>
+            <a href="../support/index.html" class="btn btn-text" style="text-decoration: none;">Support</a>
+            <button class="btn btn-text btn-login-toggle">Sign In</button>
+            <button class="btn btn-primary btn-signup-toggle">Get Started</button>
         </div>
+        <button id="mobile-menu-toggle" class="mobile-menu-toggle">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                stroke="currentColor" class="icon-md">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+        </button>
     </div>
+
+</nav>
+
+<!-- Mobile Menu Modal -->
+<div id="mobile-nav-modal" class="mobile-nav-modal">
+    <div class="mobile-nav-links">
+        <a href="../about/index.html" class="mobile-nav-item">
+            About
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                <path fill-rule="evenodd"
+                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                    clip-rule="evenodd" />
+            </svg>
+        </a>
+        <a href="../support/index.html" class="mobile-nav-item">
+            Support
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                <path fill-rule="evenodd"
+                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                    clip-rule="evenodd" />
+            </svg>
+        </a>
+        <a href="./index.html" class="mobile-nav-item">
+            Privacy
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                <path fill-rule="evenodd"
+                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                    clip-rule="evenodd" />
+            </svg>
+        </a>
+        <a href="mailto:team.flashly@gmail.com" class="mobile-nav-item">
+            Contact
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.161V6a2 2 0 00-2-2H3z" />
+                <path d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
+            </svg>
+        </a>
+    </div>
+    <div class="mobile-nav-footer">
+        <button class="btn btn-outline mobile-login-btn btn-login-toggle">Sign In</button>
+        <button class="btn btn-primary mobile-signup-btn btn-signup-toggle">Sign Up</button>
+    </div>
+</div>
+
+<div class="legal-container">
+
+    <div class="legal-content">
+        <h1>Privacy Policy</h1>
+        <span class="last-updated">Last updated: February 11, 2026</span>
+
+        <p>At Flashly, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclosure,
+            and safeguard your information when you visit our website and use our application.</p>
+
+        <h2>1. Information We Collect</h2>
+        <p>We collect information that helps us provide you with the best learning experience possible.</p>
+
+        <h3>Personal Data</h3>
+        <p>When you register for Flashly, we may collect personally identifiable information, such as your:</p>
+        <ul>
+            <li>Name</li>
+            <li>Email address</li>
+            <li>Profile preferences</li>
+        </ul>
+
+        <h3>Usage Data</h3>
+        <p>We automatically collect certain information when you visit, use, or navigate the application. This
+            information does not reveal your specific identity but may include:</p>
+        <ul>
+            <li>Learning statistics (cards reviewed, mastery levels)</li>
+            <li>Device information (browser type, operating system)</li>
+            <li>Log data (access times, pages viewed)</li>
+        </ul>
+
+        <h2>2. How We Use Your Information</h2>
+        <p>We use the information we collect or receive to:</p>
+        <ul>
+            <li><strong>Provide services:</strong> To create and manage your account and deliver flashcard
+                functionality.</li>
+            <li><strong>Improve experience:</strong> To understand how you use Flashly and optimize our spaced
+                repetition algorithm.</li>
+            <li><strong>Cloud Sync:</strong> To ensure your decks and progress are available across all your
+                devices.</li>
+        </ul>
+
+        <h2>3. Data Storage and Security</h2>
+        <p>We use industry-standard security measures. Your data is stored securely using Supabase. However, no
+            internet transmission is 100% secure.</p>
+
+        <h2>4. Sharing Your Information</h2>
+        <p>We do not sell, trade, or rent your personal identification information. We may share anonymized
+            aggregated data for research or analysis.</p>
+
+        <h2>5. Contact Us</h2>
+        <p>If you have questions about this Privacy Policy, please contact us at privacy@flashly.app</p>
+    </div>
+</div>
+<script src="../landing-nav.js" defer></script>
 </body>
 
 </html>

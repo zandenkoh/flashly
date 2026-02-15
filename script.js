@@ -158,6 +158,21 @@ function switchView(viewId) {
 // --- Auth Logic ---
 
 async function checkUser() {
+    // Check for query params (from modular landing nav)
+    const urlParams = new URLSearchParams(window.location.search);
+    const authAction = urlParams.get('auth');
+    if (authAction === 'login') {
+        authMode = 'login';
+        updateAuthUI();
+        authModal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+    } else if (authAction === 'signup') {
+        authMode = 'signup';
+        updateAuthUI();
+        authModal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+    }
+
     // Check for redirect params to show loader immediately
     const isRedirect = window.location.hash && (window.location.hash.includes('access_token') || window.location.hash.includes('type=recovery'));
     const loader = document.getElementById('loading-overlay');
@@ -2527,6 +2542,14 @@ async function openDeck(deck) {
 
     // Set Stats
     const stats = deck.stats || { total: 0, due: 0, new: 0, mature: 0 };
+
+    // For guests or new users browsing public/community decks, 
+    // if stats are missing but we know the card count, populate them so they can see what's available
+    if (stats.total === 0 && deck.card_count > 0) {
+        stats.total = deck.card_count;
+        stats.new = deck.card_count;
+    }
+
     const mastery = stats.total > 0 ? Math.round((stats.mature / stats.total) * 100) : 0;
 
     const masteryPercentEl = document.getElementById('deck-mastery-percent');
@@ -2542,21 +2565,53 @@ async function openDeck(deck) {
     const dueEl = document.getElementById('deck-due-count');
     if (dueEl) {
         dueEl.textContent = stats.due || 0;
-        dueEl.parentElement.style.cursor = 'pointer';
-        dueEl.parentElement.onclick = () => {
-            state.studySessionConfig = { type: 'due' };
-            startStudySession();
-        };
+        // Make clickable only if guest (to trigger modal) OR if there are actually cards due
+        if (state.isGuest || stats.due > 0) {
+            // Guest can always click if there's any content, but user's rule: if 0, not clickable.
+            // Wait, if I'm a guest, stats.due is likely 0.
+            // If I'm a guest, I should at least be able to click "New" if that has cards.
+            if (stats.due > 0) {
+                dueEl.parentElement.style.cursor = 'pointer';
+                dueEl.parentElement.onclick = () => {
+                    if (state.isGuest) {
+                        showGuestPreview('deck', deck);
+                        return;
+                    }
+                    state.studySessionConfig = { type: 'due' };
+                    startStudySession();
+                };
+            } else {
+                dueEl.parentElement.style.cursor = 'default';
+                dueEl.parentElement.onclick = null;
+            }
+        } else {
+            dueEl.parentElement.style.cursor = 'default';
+            dueEl.parentElement.onclick = null;
+        }
     }
 
     const newEl = document.getElementById('deck-new-count');
     if (newEl) {
         newEl.textContent = stats.new || 0;
-        newEl.parentElement.style.cursor = 'pointer';
-        newEl.parentElement.onclick = () => {
-            state.studySessionConfig = { type: 'new' };
-            startStudySession();
-        };
+        if (state.isGuest || stats.new > 0) {
+            if (stats.new > 0) {
+                newEl.parentElement.style.cursor = 'pointer';
+                newEl.parentElement.onclick = () => {
+                    if (state.isGuest) {
+                        showGuestPreview('deck', deck);
+                        return;
+                    }
+                    state.studySessionConfig = { type: 'new' };
+                    startStudySession();
+                };
+            } else {
+                newEl.parentElement.style.cursor = 'default';
+                newEl.parentElement.onclick = null;
+            }
+        } else {
+            newEl.parentElement.style.cursor = 'default';
+            newEl.parentElement.onclick = null;
+        }
     }
 
     const totalEl = document.getElementById('deck-total-count');
@@ -3341,6 +3396,17 @@ if (fullscreenBtn) {
 // --- Study Logic ---
 
 async function startStudySession(restart = false) {
+    if (!state.user) {
+        if (state.currentDeck) {
+            showGuestPreview('deck', state.currentDeck);
+        } else {
+            authMode = 'login';
+            updateAuthUI();
+            authModal.classList.remove('hidden');
+        }
+        return;
+    }
+
     if (!restart) {
         state.studyOrigin = state.lastView;
         // Default Settings if not set
@@ -3860,8 +3926,42 @@ async function refreshDeckStatsOnly(deckId) {
         const masteryEl = document.getElementById('deck-mastery-percent');
         const circleFill = document.getElementById('deck-mastery-circle-fill');
 
-        if (dueEl) dueEl.textContent = stats.due;
-        if (newEl) newEl.textContent = stats.new;
+        if (dueEl) {
+            dueEl.textContent = stats.due;
+            // Update clickability
+            if (stats.due > 0) {
+                dueEl.parentElement.style.cursor = 'pointer';
+                dueEl.parentElement.onclick = () => {
+                    if (state.isGuest) {
+                        showGuestPreview('deck', state.currentDeck);
+                        return;
+                    }
+                    state.studySessionConfig = { type: 'due' };
+                    startStudySession();
+                };
+            } else {
+                dueEl.parentElement.style.cursor = 'default';
+                dueEl.parentElement.onclick = null;
+            }
+        }
+        if (newEl) {
+            newEl.textContent = stats.new;
+            // Update clickability
+            if (stats.new > 0) {
+                newEl.parentElement.style.cursor = 'pointer';
+                newEl.parentElement.onclick = () => {
+                    if (state.isGuest) {
+                        showGuestPreview('deck', state.currentDeck);
+                        return;
+                    }
+                    state.studySessionConfig = { type: 'new' };
+                    startStudySession();
+                };
+            } else {
+                newEl.parentElement.style.cursor = 'default';
+                newEl.parentElement.onclick = null;
+            }
+        }
         if (totalEl) totalEl.textContent = stats.total;
 
         const mastery = stats.total > 0 ? Math.round((stats.mature / stats.total) * 100) : 0;
@@ -5566,7 +5666,23 @@ function renderNotes(notes) {
         return;
     }
 
+    const CATEGORY_DISPLAY = {
+        "GCE 'O' Levels": "GCE 'O' Level",
+        "GCE 'A' Levels": "GCE 'A' Level",
+        "IB": 'IB Diploma',
+        "GCE 'N' Levels": "GCE 'N' Level",
+        "IP": 'IP Program',
+        "Sec 1-2 (Non-IP)": 'Lower Secondary'
+    };
+
     notes.forEach(note => {
+        // Clean class name: "GCE 'A' Levels" -> "a-levels"
+        const cleanCat = note.category ? note.category.replace(/GCE\s+/i, '').replace(/'/g, '').toLowerCase().replace(/\s+/g, '-') : 'general';
+        const catClass = cleanCat.includes('a-level') ? 'a-level' : (cleanCat.includes('ib') ? 'ib' : cleanCat);
+
+        const displayCat = CATEGORY_DISPLAY[note.category] || note.category || 'General';
+        const displaySub = note.subject === 'General' ? '' : note.subject;
+
         const card = document.createElement('div');
         card.className = 'note-card';
         card.innerHTML = `
@@ -5577,10 +5693,10 @@ function renderNotes(notes) {
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                         </svg>
                     </div>
-                    <span class="note-type-badge">${note.category}</span>
+                    <span class="note-type-badge ${catClass}">${displayCat}</span>
                 </div>
                 <h3 class="note-title" title="${note.title}">${note.title}</h3>
-                <p class="text-sm text-secondary mb-2">${note.subject}</p>
+                <p class="text-sm text-secondary mb-2">${displaySub || displayCat}</p>
             </div>
             <div class="note-meta">
                 <span class="note-tag">${note.type}</span>
