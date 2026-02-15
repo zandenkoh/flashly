@@ -2324,7 +2324,7 @@ async function openDeck(deck) {
 
     // Check direct share permission
     let shareRole = null;
-    if (!isOwner) {
+    if (state.user && !isOwner) {
         const { data: share } = await sb.from('deck_shares')
             .select('role')
             .eq('deck_id', deck.id)
@@ -2486,6 +2486,7 @@ async function openDeck(deck) {
 
     // Initial Search for Related Notes
     loadRelatedNotesSuggestion(deck);
+
 }
 
 // Global variable to store current suggested keywords
@@ -2659,6 +2660,7 @@ async function importDeck(deckId) {
 }
 
 function canEditGroupDeck(deck) {
+    if (!state.user) return false;
     // If deck belongs to a group, check if user is admin
     if (!deck.group_id) return false;
     const membership = state.groups.find(g => g.id === deck.group_id); // This might be stale if logic strictly separates lists
@@ -2672,6 +2674,12 @@ function canEditGroupDeck(deck) {
 
 async function updateSaveDeckButton(deck) {
     let saveBtn = document.getElementById('save-deck-btn');
+
+    if (!state.user) {
+        if (saveBtn) saveBtn.remove();
+        return;
+    }
+
     const mainActions = document.querySelector('.deck-main-actions');
 
     // Check if valid to save: Not my deck, and not already saved
@@ -5532,14 +5540,12 @@ if (downloadBtn) {
 const similarMoreBtn = document.getElementById('view-more-similar-btn');
 if (similarMoreBtn) {
     similarMoreBtn.onclick = () => {
-        if (state.currentNote) {
-            const subjectEl = document.getElementById('filter-subject');
-            if (subjectEl) {
-                subjectEl.value = state.currentNote.subject;
-                initNotes(false);
-                switchView('notes-view');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+        const subjectEl = document.getElementById('filter-subject');
+        if (subjectEl) {
+            subjectEl.value = 'all'; // Reset to all subjects as requested
+            initNotes(false);
+            switchView('notes-view');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 }
