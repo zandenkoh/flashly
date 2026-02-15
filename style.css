@@ -2976,19 +2976,19 @@ body {
 }
 
 .rate-again {
-    border-bottom: 1px solid var(--danger);
+    border-bottom: 4px solid var(--danger);
 }
 
 .rate-hard {
-    border-bottom: 1px solid var(--accent);
+    border-bottom: 4px solid var(--accent);
 }
 
 .rate-good {
-    border-bottom: 1px solid var(--success);
+    border-bottom: 4px solid var(--success);
 }
 
 .rate-easy {
-    border-bottom: 1px solid var(--primary);
+    border-bottom: 4px solid var(--primary);
 }
 
 .rate-label {

@@ -154,18 +154,18 @@
                     </div>
                     <div class="landing-visual-block">
                         <div class="community-mockup">
-                            <div class="grid grid-cols-2 gap-2">
-                                <div class="card p-4 text-center">
+                            <div class="grid grid-cols-2 gap-2" style="gap: 5px;">
+                                <div class="card p-4 text-center" style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
                                     <div class="text-2xl mb-1">🧪</div>
                                     <div class="text-sm font-bold">Pure Chemistry</div>
                                     <div class="text-xs text-secondary">1.2k Cards</div>
                                 </div>
-                                <div class="card p-4 text-center">
+                                <div class="card p-4 text-center" style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
                                     <div class="text-2xl mb-1">📐</div>
                                     <div class="text-sm font-bold">A-Maths</div>
                                     <div class="text-xs text-secondary">850 Cards</div>
                                 </div>
-                                <div class="card p-4 text-center">
+                                <div class="card p-4 text-center" style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
                                     <div class="text-2xl mb-1">🌍</div>
                                     <div class="text-sm font-bold">Geography</div>
                                     <div class="text-xs text-secondary">430 Cards</div>
@@ -427,7 +427,8 @@
                             <div class="section-header-compact">
                                 <h3 class="text-lg font-semibold">Ready to Learn</h3>
                                 <button class="btn btn-text btn-sm"
-                                    onclick="switchView('decks-view'); updateNav('nav-decks');">View All</button>
+                                    onclick="switchView('decks-view'); updateNav('nav-decks'); loadDecksView();">View
+                                    All</button>
                             </div>
                             <div id="today-my-decks-grid" class="grid-container"></div>
                         </div>
@@ -437,7 +438,7 @@
                             <div class="section-header-compact">
                                 <h3 class="text-lg font-semibold">From the Community</h3>
                                 <button class="btn btn-text btn-sm"
-                                    onclick="switchView('community-view'); updateNav('nav-community');">Explore</button>
+                                    onclick="switchView('community-view'); updateNav('nav-community'); loadCommunityDecks();">Explore</button>
                             </div>
                             <div id="today-community-grid" class="grid-container"></div>
                         </div>
@@ -447,7 +448,7 @@
                             <div class="section-header-compact">
                                 <h3 class="text-lg font-semibold">Notes that suit you</h3>
                                 <button class="btn btn-text btn-sm"
-                                    onclick="switchView('notes-view'); updateNav('nav-notes');">Marketplace</button>
+                                    onclick="switchView('notes-view'); updateNav('nav-notes'); loadNotesView();">Marketplace</button>
                             </div>
                             <div id="today-notes-grid" class="grid-container"></div>
                         </div>
@@ -709,7 +710,8 @@
                         <div class="flex justify-between items-center mb-6">
                             <div>
                                 <h2 class="text-2xl font-bold">Notes Marketplace</h2>
-                                <p class="text-secondary" style="margin-bottom: 1rem;">Explore high-quality notes from the holy grail.</p>
+                                <p class="text-secondary" style="margin-bottom: 1rem;">Explore high-quality notes from
+                                    the holy grail.</p>
                             </div>
                             <button id="add-note-btn" class="btn btn-primary hidden">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
