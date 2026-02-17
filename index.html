@@ -101,6 +101,45 @@
         </div>
     </div>
 
+    <!-- Onboarding Modal -->
+    <div id="onboarding-modal" class="modal-overlay hidden" style="z-index: 2000;">
+        <div class="onboarding-card">
+            <div class="mb-6 text-center">
+                <div
+                    style="width: 60px; height: 60px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="icon-lg">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold mb-2">Let's set a goal.</h2>
+                <p class="text-secondary">To help the algorithm prioritize your learning, tell us how much you want to
+                    study each day.</p>
+            </div>
+
+            <div class="grid gap-4 mb-4" style="display: grid; gap: 1rem; margin-top: 10px;">
+                <button class="onboarding-option" onclick="selectDailyGoal(30)">
+                    <div class="font-bold text-lg">Light</div>
+                    <div class="text-sm text-secondary">~15 mins / 30 cards</div>
+                </button>
+                <button class="onboarding-option" onclick="selectDailyGoal(100)">
+                    <div class="font-bold text-lg">Standard</div>
+                    <div class="text-sm text-secondary">~30 mins / 100 cards</div>
+                </button>
+                <button class="onboarding-option" onclick="selectDailyGoal(9999)">
+                    <div class="font-bold text-lg">Intense</div>
+                    <div class="text-sm text-secondary">Unlimited reviewing</div>
+                </button>
+            </div>
+
+            <div class="text-center" style="text-align: center;">
+                <button class="btn btn-text btn-sm"
+                    onclick="document.getElementById('onboarding-modal').classList.add('hidden')">Skip for now</button>
+            </div>
+        </div>
+    </div>
+
     <div id="app">
         <!-- Landing & Auth View -->
         <section id="auth-view" class="view hidden">
@@ -407,6 +446,7 @@
             </header>
 
             <!-- Sidebar -->
+            <div id="sidebar-overlay" class="sidebar-overlay"></div>
             <aside class="sidebar">
                 <div class="sidebar-header-mobile">
                     <div class="sidebar-logo">
@@ -514,8 +554,21 @@
                             <div class="action-content">
                                 <h2 class="text-2xl font-semibold mb-2">Daily Review</h2>
                                 <p class="text-secondary mb-6">You have cards waiting for review.</p>
-                                <div class="due-count-large" id="today-due-count">0</div>
-                                <p class="text-sm text-secondary mt-1">cards due today</p>
+                                <div class="action-main">
+                                    <div class="due-count-large" id="today-due-count">0</div>
+                                    <!-- Card Difficulty Breakdown - inline to the right -->
+                                    <div class="due-breakdown hidden" id="due-breakdown">
+                                        <span class="breakdown-item difficult" title="Cards still learning">
+                                            <span class="breakdown-dot"></span>
+                                            <span id="today-difficult-count">0</span> difficult
+                                        </span>
+                                        <span class="breakdown-item easy" title="Cards ready for review">
+                                            <span class="breakdown-dot"></span>
+                                            <span id="today-easy-count">0</span> easy
+                                        </span>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-secondary mt-1" id="today-due-label">cards due today</p>
                             </div>
                             <div class="action-btn">
                                 <button id="start-today-review-btn" class="btn btn-primary btn-lg">
@@ -1038,20 +1091,25 @@
                                         style="display: flex; text-decoration: none;">
                                         Download PDF
                                     </a>
-                                    <button id="note-detail-ai-summary-btn" class="btn btn-ai flex-1 justify-center"
-                                        style="display: flex;">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="2" stroke="currentColor" class="icon-sm">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9Z" />
-                                        </svg>
-                                        AI Summary
-                                    </button>
                                     <button id="note-detail-share-btn" class="btn btn-secondary flex-1 justify-center"
                                         style="display: flex;">
                                         Share Note
                                     </button>
+                                    <button id="note-detail-ai-summary-btn"
+                                        class="btn btn-surface flex-1 justify-center"
+                                        style="display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border);">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+                                        </svg>
+
+                                        Summarise
+                                    </button>
                                 </div>
+
+                                <div id="ai-summary-container" class="hidden mb-6" style="margin-bottom: 20px;">
+                                    <!-- Summary Content or Skeleton injected here -->
+                                </div>
+
 
                                 <div class="note-snippet-card" id="note-snippet-trigger">
                                     <div class="note-snippet-overlay">
@@ -1208,17 +1266,19 @@
                                     <div class="deck-stat-divider"></div>
                                     <div class="deck-stat-item">
                                         <span id="deck-new-count" class="stat-value-large">0</span>
-                                        <span class="stat-label-small">New Cards</span>
+                                        <span class="stat-label-small">New</span>
                                     </div>
                                     <div class="deck-stat-divider"></div>
                                     <div class="deck-stat-item">
-                                        <span id="deck-due-count" class="stat-value-large">0</span>
-                                        <span class="stat-label-small">Cards Due</span>
+                                        <span id="deck-difficult-count" class="stat-value-large"
+                                            style="color: var(--danger);">0</span>
+                                        <span class="stat-label-small">Difficult</span>
                                     </div>
                                     <div class="deck-stat-divider"></div>
                                     <div class="deck-stat-item">
-                                        <span id="deck-total-count" class="stat-value-large">0</span>
-                                        <span class="stat-label-small">Total Cards</span>
+                                        <span id="deck-easy-count" class="stat-value-large"
+                                            style="color: var(--success);">0</span>
+                                        <span class="stat-label-small">Easy</span>
                                     </div>
                                 </div>
 
@@ -1386,7 +1446,11 @@
                                 </button>
                             </div>
                             <div class="study-header-center">
-                                <span id="study-progress-text">1 / 10</span>
+                                <div class="study-stats-counter" title="New / Difficult / Review">
+                                    <span class="stat-count stat-new" id="study-count-new">0</span>
+                                    <span class="stat-count stat-learn" id="study-count-learn">0</span>
+                                    <span class="stat-count stat-review" id="study-count-review">0</span>
+                                </div>
                                 <span id="study-deck-title" class="study-deck-title">Deck Title</span>
                             </div>
                             <div class="study-header-right">
@@ -2360,38 +2424,23 @@
                     <!-- View 1: Input -->
                     <div id="ai-modal-input-view" class="space-y-6">
 
-                        <!-- File Upload Zone -->
-                        <div class="ai-upload-zone" id="ai-pdf-dropzone" style="padding: 0.75rem 0;">
-                            <!-- Invisible file input covering the button area -->
-                            <input type="file" id="ai-pdf-upload" accept="application/pdf"
-                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-
-                            <!-- Main upload trigger (looks like a clean button) -->
-                            <button type="button" class="w-full flex items-center justify-center gap-2.5
-               py-3.5 px-5
-               bg-[var(--primary-light)] hover:bg-[var(--primary)]/15
-               text-[var(--primary)] font-medium text-sm
-               border border-[var(--primary)]/30 rounded-xl
-               transition-all duration-200
-               shadow-sm hover:shadow active:scale-[0.985]">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        <!-- File Upload Section -->
+                        <div class="ai-upload-section" style="margin-bottom: 1.5rem;">
+                            <input type="file" id="ai-pdf-upload" accept="application/pdf" class="hidden">
+                            <button type="button" id="ai-pdf-upload-trigger"
+                                class="w-full flex items-center justify-center gap-2.5 py-3.5 px-5 bg-[var(--primary-light)] hover:bg-[var(--primary)]/10 text-[var(--primary)] font-semibold text-sm border border-[var(--primary)]/30 rounded-xl transition-all duration-200 shadow-sm hover:shadow active:scale-[0.985]">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
                                     <path d="M12 12v9"></path>
                                     <path d="m16 16-4-4-4 4"></path>
                                 </svg>
-                                Upload PDF
+                                Upload PDF Study Notes
                             </button>
 
-                            <!-- Optional subtle hint -->
-                            <div class="text-center text-xs text-[var(--text-tertiary)] mt-2.5 opacity-75">
-                                or paste your text below
-                            </div>
-
-                            <!-- Selected file feedback (clean & compact) -->
-                            <div id="ai-file-success" class="hidden mt-3 flex items-center justify-between 
-                                      bg-[var(--success)]/10 text-[var(--success)] 
-                                      text-sm font-medium px-4 py-2.5 rounded-lg border border-[var(--success)]/20">
+                            <!-- Selected file feedback -->
+                            <div id="ai-file-success"
+                                class="hidden mt-3 flex items-center justify-between bg-[var(--success)]/10 text-[var(--success)] text-sm font-medium px-4 py-2.5 rounded-lg border border-[var(--success)]/20">
                                 <div class="flex items-center gap-2">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2.5">
@@ -2400,9 +2449,13 @@
                                     <span class="truncate max-w-[220px]" id="ai-filename-display">file.pdf</span>
                                 </div>
                                 <button id="ai-remove-file"
-                                    class="text-[var(--danger)] hover:text-[var(--danger)]/80 text-base leading-none px-1">
+                                    class="text-[var(--danger)] hover:text-[var(--danger)]/80 text-lg leading-none px-1">
                                     ×
                                 </button>
+                            </div>
+
+                            <div class="text-center text-xs text-[var(--text-tertiary)] mt-3 opacity-75">
+                                or paste your text below
                             </div>
                         </div>
 

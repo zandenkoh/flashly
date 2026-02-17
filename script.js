@@ -99,6 +99,13 @@ const groupDetailView = document.getElementById('group-detail-view');
 
 
 
+function closeMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    if (sidebar) sidebar.classList.remove('active');
+    if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+}
+
 function switchView(viewId) {
     // Hide all views first
     document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
@@ -146,8 +153,7 @@ function switchView(viewId) {
     }
 
     // Close mobile sidebar on navigation
-    const sidebar = document.querySelector('.sidebar');
-    if (sidebar) sidebar.classList.remove('active');
+    closeMobileSidebar();
 }
 
 // --- Auth Logic ---
@@ -485,12 +491,17 @@ function initMobileUI() {
     const settingsMenuToggle = document.getElementById('mobile-settings-menu-toggle');
     const settingsSidebar = document.querySelector('.settings-sidebar');
 
-    if (menuToggle && sidebar) {
-        menuToggle.onclick = () => sidebar.classList.add('active');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    if (menuToggle && sidebar && sidebarOverlay) {
+        menuToggle.onclick = () => {
+            sidebar.classList.add('active');
+            sidebarOverlay.classList.add('active');
+        };
     }
 
-    if (closeSidebar && sidebar) {
-        closeSidebar.onclick = () => sidebar.classList.remove('active');
+    if ((closeSidebar || sidebarOverlay) && sidebar) {
+        if (closeSidebar) closeSidebar.onclick = closeMobileSidebar;
+        if (sidebarOverlay) sidebarOverlay.onclick = closeMobileSidebar;
     }
 
     if (settingsMenuToggle && settingsSidebar) {
@@ -679,7 +690,7 @@ function showGuestPreview(type, data) {
 async function fetchUserProfile() {
     // Try to fetch all settings, but handle cases where columns might be missing (400 error)
     const { data, error } = await sb.from('profiles')
-        .select('username, theme, reduced_motion, compact_sidebar, daily_limit, default_separator, auto_flip, show_progress')
+        .select('username, theme, reduced_motion, compact_sidebar, daily_limit, default_separator, auto_flip, show_progress, last_ai_deck_at, daily_ai_summaries, last_summary_at')
         .eq('id', state.user.id)
         .maybeSingle();
 
@@ -735,12 +746,28 @@ async function fetchUserProfile() {
         state.settings.autoFlip = data.auto_flip ?? (localStorage.getItem('flashly-auto-flip') === 'true');
         state.settings.showProgress = data.show_progress ?? (localStorage.getItem('flashly-show-progress') !== 'false');
 
+        // AI Usage limits tracking
+        state.ai_usage = {
+            last_ai_deck_at: data.last_ai_deck_at,
+            daily_ai_summaries: data.daily_ai_summaries || 0,
+            last_summary_at: data.last_summary_at
+        };
+
         // Sync to local storage
         syncToLocal();
 
         // Apply settings
         applyTheme(state.settings.theme, false);
         applyInterfaceSettings();
+        checkAIUsageLimits(); // Refresh AI button states
+
+        // Onboarding Check
+        if (!localStorage.getItem('flashly-onboarding-seen')) {
+            setTimeout(() => {
+                const modal = document.getElementById('onboarding-modal');
+                if (modal) modal.classList.remove('hidden');
+            }, 1000);
+        }
     } else {
         // No profile found or other error, load from local
         loadLocalSettings();
@@ -793,9 +820,7 @@ document.getElementById('nav-today').addEventListener('click', () => {
         updateAuthUI();
         authModal.classList.remove('hidden');
         document.body.classList.add('modal-open');
-        // Close sidebar on mobile
-        const sidebar = document.querySelector('.sidebar');
-        if (sidebar && window.innerWidth <= 768) sidebar.classList.remove('active');
+        closeMobileSidebar();
         return;
     }
     updateNav('nav-today');
@@ -809,16 +834,13 @@ document.getElementById('nav-decks').addEventListener('click', () => {
         updateAuthUI();
         authModal.classList.remove('hidden');
         document.body.classList.add('modal-open');
-        // Close sidebar on mobile
-        const sidebar = document.querySelector('.sidebar');
-        if (sidebar && window.innerWidth <= 768) sidebar.classList.remove('active');
+        closeMobileSidebar();
         return;
     }
     updateNav('nav-decks');
     switchView('decks-view');
-    loadDecksView();
+    loadDecksView(true); // Force full fetch to ensure both tabs have data
 });
-
 const myDecksTab = document.getElementById('my-decks-tab');
 const sharedDecksTab = document.getElementById('shared-decks-tab');
 
@@ -827,7 +849,16 @@ if (myDecksTab) {
         state.deckTab = 'my';
         myDecksTab.classList.add('active');
         sharedDecksTab.classList.remove('active');
-        loadDecksView();
+        renderDecksViewWithSubjects(); // Instant render
+    });
+}
+
+if (sharedDecksTab) {
+    sharedDecksTab.addEventListener('click', () => {
+        state.deckTab = 'shared';
+        sharedDecksTab.classList.add('active');
+        myDecksTab.classList.remove('active');
+        renderDecksViewWithSubjects(); // Instant render
     });
 }
 
@@ -846,9 +877,7 @@ document.getElementById('nav-insights').addEventListener('click', () => {
         updateAuthUI();
         authModal.classList.remove('hidden');
         document.body.classList.add('modal-open');
-        // Close sidebar on mobile
-        const sidebar = document.querySelector('.sidebar');
-        if (sidebar && window.innerWidth <= 768) sidebar.classList.remove('active');
+        closeMobileSidebar();
         return;
     }
     updateNav('nav-insights');
@@ -868,9 +897,7 @@ document.getElementById('nav-groups').addEventListener('click', () => {
         updateAuthUI();
         authModal.classList.remove('hidden');
         document.body.classList.add('modal-open');
-        // Close sidebar on mobile
-        const sidebar = document.querySelector('.sidebar');
-        if (sidebar && window.innerWidth <= 768) sidebar.classList.remove('active');
+        closeMobileSidebar();
         return;
     }
     updateNav('nav-groups');
@@ -893,9 +920,7 @@ document.getElementById('nav-settings').addEventListener('click', () => {
         updateAuthUI();
         authModal.classList.remove('hidden');
         document.body.classList.add('modal-open');
-        // Close sidebar on mobile
-        const sidebar = document.querySelector('.sidebar');
-        if (sidebar && window.innerWidth <= 768) sidebar.classList.remove('active');
+        closeMobileSidebar();
         return;
     }
     initSettingsModal();
@@ -1490,20 +1515,81 @@ async function loadTodayView() {
 
     // 2. Fetch Due Cards count across ALL deck
     // We need to fetch all cards for user? Or just count.
-    // Optimization: Call a stored procedure if possible, or select count.
-    // For now, client-side filtering of decks -> cards might be heavy but simple.
+// Optimization: Call a stored procedure if possible, or select count.
+// For now, client-side filtering of decks -> cards might be heavy but simple.
     // Better: Fetch cards with due_at <= now()
 
     const now = new Date().toISOString();
-    const { count, error } = await sb
+    
+    // Fetch cards with due_at <= now to calculate breakdown
+    const { data: dueCards, error: cardsError } = await sb
         .from('cards')
-        .select('*', { count: 'exact', head: true })
+        .select('id, interval_days, reviews_count')
         .lte('due_at', now); // due_at <= now
-    // RLS ensures we only see our cards (or decks we have access to?)
-    // Actually, cards table should have RLS.
 
-    if (!error) {
-        document.getElementById('today-due-count').textContent = count || 0;
+    let totalDue = 0;
+    let difficultCount = 0;
+    let easyCount = 0;
+
+    if (!cardsError && dueCards) {
+        totalDue = dueCards.length;
+        
+        // Define limit here before using it
+        let limit = state.settings.dailyLimit || 20;
+        if (limit > 1000) limit = totalDue;
+        
+        // Sort cards by due date to get the ones that will be reviewed
+        dueCards.sort((a, b) => new Date(a.due_at || 0) - new Date(b.due_at || 0));
+        
+        // Get only the cards within the daily limit
+        const cardsToReview = dueCards.slice(0, limit);
+        
+        // Calculate difficult (learning) and easy (review) counts from limited cards
+        cardsToReview.forEach(card => {
+            const interval = Number(card.interval_days || 0);
+            const reviews = Number(card.reviews_count || 0);
+            
+            if (reviews === 0) {
+                // New card - count as difficult for now
+                difficultCount++;
+            } else if (interval < 1) {
+                // Learning (interval < 1 day) - difficult
+                difficultCount++;
+            } else {
+                // Review (interval >= 1 day) - easy
+                easyCount++;
+            }
+        });
+        
+        const displayCount = Math.min(totalDue, limit);
+        document.getElementById('today-due-count').textContent = displayCount;
+
+        // Update subtitle to show context
+        const subText = document.getElementById('today-due-label');
+        if (subText) {
+            if (limit < totalDue) {
+                subText.innerHTML = `cards to review (Goal: ${limit}) <span style="font-size:0.85em; opacity:0.7; display:block; margin-top:4px;">Total backlog: ${totalDue}</span>`;
+            } else {
+                subText.textContent = 'cards due today';
+            }
+        }
+
+        // Update difficult/easy breakdown
+        const difficultEl = document.getElementById('today-difficult-count');
+        const easyEl = document.getElementById('today-easy-count');
+        const breakdownEl = document.getElementById('due-breakdown');
+        
+        if (difficultEl) difficultEl.textContent = difficultCount;
+        if (easyEl) easyEl.textContent = easyCount;
+        
+        // Show/hide breakdown based on whether there are any cards
+        if (breakdownEl) {
+            if (totalDue > 0) {
+                breakdownEl.classList.remove('hidden');
+            } else {
+                breakdownEl.classList.add('hidden');
+            }
+        }
     }
 
     // 3. Streak (Mock logic since we don't have daily activity log easily accessible without complex query)
@@ -1867,30 +1953,64 @@ document.getElementById('start-today-review-btn').addEventListener('click', () =
 // --- Decks View (List Layout) ---
 
 async function loadDecksView(force = false) {
-    if (state.decks.length > 0 && !force) {
+    const list = document.getElementById('deck-list');
+
+    // Instant toggle if data is present and not forced
+    if (!force && state.decks && state.decks.length > 0 && state.subjects && state.subjects.length > 0) {
         renderDecksViewWithSubjects();
         return;
     }
 
-    const list = document.getElementById('deck-list');
     if (list) list.innerHTML = getComponentLoader('Syncing your decks...');
 
-    const { data: decks, error } = await sb.from('decks')
+    // 1. Fetch access rights first (Shared & Groups)
+    const [gpRes, dsRes] = await Promise.all([
+        sb.from('group_members').select('group_id').eq('user_id', state.user.id),
+        sb.from('deck_shares').select('deck_id').eq('user_email', state.user.email)
+    ]);
+
+    state.myGroupIds = gpRes.data ? gpRes.data.map(gm => gm.group_id) : [];
+    state.sharedDeckIds = dsRes.data ? dsRes.data.map(ds => ds.deck_id) : [];
+
+    // 2. Fetch ALL relevant decks (Owned + Shared + Community shared via Group)
+    let decks;
+    const conditions = [`user_id.eq.${state.user.id}`];
+    if (state.sharedDeckIds.length > 0) conditions.push(`id.in.(${state.sharedDeckIds.join(',')})`);
+    if (state.myGroupIds.length > 0) conditions.push(`group_id.in.(${state.myGroupIds.join(',')})`);
+
+    const { data: deckData, error: deckErr } = await sb.from('decks')
         .select('*, subjects(name)')
+        .or(conditions.join(','))
         .order('created_at', { ascending: false });
 
-    if (error) return showToast(error.message, 'error');
+    if (deckErr) return showToast(deckErr.message, 'error');
+    state.decks = deckData || [];
 
-    // Fetch stats for decks
+    if (state.decks.length === 0) {
+        // Fetch subjects even if no decks (to handle subject-only views)
+        const { data: subjects } = await sb.from('subjects')
+            .select('*')
+            .eq('user_id', state.user.id)
+            .order('name');
+        state.subjects = subjects || [];
+
+        if (list) list.innerHTML = `<div class="p-8 text-center text-secondary">No decks found. Create one to get started!</div>`;
+        return;
+    }
+
+    // 3. Fetch stats for all fetched decks
+    const deckIds = state.decks.map(d => d.id);
     const stats = {};
-    const { data: cards } = await sb.from('cards').select('id, deck_id, due_at, interval_days');
+    const { data: cards } = await sb.from('cards')
+        .select('id, deck_id, due_at, interval_days, reviews_count')
+        .in('deck_id', deckIds);
 
-    // Fetch logs to calculate mastery
-    const { data: logs } = await sb.from('study_logs')
+    const user_id = state.user?.id;
+    const { data: logs } = user_id ? await sb.from('study_logs')
         .select('card_id, rating')
-        .eq('user_id', state.user.id)
+        .eq('user_id', user_id)
         .order('review_time', { ascending: false })
-        .limit(5000);
+        .limit(5000) : { data: [] };
 
     const cardMastery = new Map();
     if (logs) {
@@ -1906,35 +2026,32 @@ async function loadDecksView(force = false) {
     const now = new Date();
     if (cards) {
         cards.forEach(card => {
-            if (!stats[card.deck_id]) stats[card.deck_id] = { total: 0, due: 0, new: 0, mature: 0 };
+            if (!stats[card.deck_id]) stats[card.deck_id] = { total: 0, due: 0, new: 0, learn: 0, review: 0, mature: 0 };
             stats[card.deck_id].total++;
             const due = card.due_at ? new Date(card.due_at) : null;
             const interval = Number(card.interval_days || 0);
-            if (interval === 0) stats[card.deck_id].new++;
-            if (interval > 0 && (due && due <= now)) stats[card.deck_id].due++;
-            if (cardMastery.get(card.id)) stats[card.deck_id].mature++;
+            const reviews = Number(card.reviews_count || 0);
+            const isDue = (interval === 0) || (due && due <= now);
+            if (isDue) {
+                if (reviews === 0) { stats[card.deck_id].new++; }
+                else {
+                    stats[card.deck_id].due++;
+                    if (interval < 1) stats[card.deck_id].learn++;
+                    else stats[card.deck_id].review++;
+                }
+            }
+            if (cardMastery.has(card.id)) stats[card.deck_id].mature++;
         });
     }
 
-    state.decks = (decks || []).map(d => ({ ...d, stats: stats[d.id] || { total: 0, due: 0, new: 0, mature: 0 } }));
+    state.decks = state.decks.map(d => ({ ...d, stats: stats[d.id] || { total: 0, due: 0, new: 0, learn: 0, review: 0, mature: 0 } }));
 
-    // Fetch Subjects - Only the user's subjects
+    // 4. Fetch Subjects
     const { data: subjects } = await sb.from('subjects')
         .select('*')
         .eq('user_id', state.user.id)
         .order('name');
     state.subjects = subjects || [];
-
-    // 4. Fetch Group Memberships & Direct Shares for "Shared with me" logic
-    // We need to know which decks are shared via groups I'm in vs just public decks
-    const { data: groupMembers } = await sb.from('group_members').select('group_id').eq('user_id', state.user.id);
-    const myGroupIds = groupMembers ? groupMembers.map(gm => gm.group_id) : [];
-
-    const { data: directShares } = await sb.from('deck_shares').select('deck_id').eq('user_email', state.user.email);
-    const sharedDeckIds = directShares ? directShares.map(ds => ds.deck_id) : [];
-
-    state.myGroupIds = myGroupIds;
-    state.sharedDeckIds = sharedDeckIds;
 
     renderDecksViewWithSubjects();
 }
@@ -2110,8 +2227,14 @@ function renderDeckRow(deck, container) {
                 <div class="deck-meta">${stats.total} cards • ${deck.is_public ? 'Public' : 'Private'}</div>
             </div>
         </div>
-        <div class="deck-status">
-            ${stats.due > 0 ? `<span class="badge badge-due">${stats.due} Due</span>` : `<span class="badge badge-success">All Done</span>`}
+        <div class="deck-status" style="white-space: nowrap;">
+            ${(stats.due > 0 || stats.new > 0 || stats.learn > 0) ? `
+                <div style="display:inline-flex; gap:6px; font-weight:600; font-size: 0.85rem; background: var(--surface-hover); padding: 4px 8px; border-radius: 6px;">
+                    <span style="color:#3b82f6;" title="New">${stats.new || 0}</span>
+                    <span style="color:#ef4444;" title="Learning">${stats.learn || 0}</span>
+                    <span style="color:#22c55e;" title="Review">${stats.review || 0}</span>
+                </div>
+            ` : `<span class="badge badge-success">Done</span>`}
         </div>
         <div class="deck-actions-cell" onclick="event.stopPropagation()">
             <button class="btn btn-icon-only context-trigger" onclick="openDeckContext(event, '${deck.id}')" style="width: 24px; height: 24px; padding: 0;">
@@ -2651,16 +2774,43 @@ async function openDeck(deck) {
     window.history.pushState({ deckId: deck.id }, '', url);
 
     // Set Stats
-    const stats = deck.stats || { total: 0, due: 0, new: 0, mature: 0 };
+    // Set Stats - Prioritize state.decks for accurate stats from loadDecksView
+    let stats = deck.stats;
+    if (!stats || stats.total === 0) {
+        const dInState = state.decks.find(d => d.id === deck.id);
+        if (dInState && dInState.stats && dInState.stats.total > 0) stats = dInState.stats;
+    }
+    if (!stats) stats = { total: 0, due: 0, new: 0, mature: 0, learn: 0, review: 0 };
 
-    // For guests or new users browsing public/community decks, 
-    // if stats are missing but we know the card count, populate them so they can see what's available
-    if (stats.total === 0 && deck.card_count > 0) {
-        stats.total = deck.card_count;
-        stats.new = deck.card_count;
+    // PROACTIVE REFRESH for owned decks or if stats look stale/missing
+    if (isOwner) {
+        // We call it but don't necessarily await it here to keep UI snappy, 
+        // unless they are completely missing.
+        if (stats.total === 0) {
+            const freshStats = await refreshDeckStatsOnly(deck.id);
+            if (freshStats) stats = freshStats;
+
+            // Re-fetch deck from state after refresh
+            const updatedDeck = state.decks.find(d => d.id === deck.id);
+            if (updatedDeck && updatedDeck.stats) {
+                // Keep the reference updated if possible
+                Object.assign(updatedDeck.stats, stats);
+            }
+        } else {
+            refreshDeckStatsOnly(deck.id); // Background refresh
+        }
     }
 
-    const mastery = stats.total > 0 ? Math.round((stats.mature / stats.total) * 100) : 0;
+    // For guests browsing public/community decks, 
+    // if stats are still missing (total is 0), populate them from card_count as a fallback.
+    // OWNERS should have their stats refreshed by now via refreshDeckStatsOnly.
+    if (!isOwner && stats.total === 0 && deck.card_count > 0) {
+        stats.total = deck.card_count;
+        stats.new = deck.card_count;
+        stats.due = deck.card_count;
+    }
+
+    const mastery = stats.total > 0 ? Math.round(((stats.mature || 0) / stats.total) * 100) : 0;
 
     const masteryPercentEl = document.getElementById('deck-mastery-percent');
     if (masteryPercentEl) masteryPercentEl.textContent = `${mastery}%`;
@@ -2672,60 +2822,62 @@ async function openDeck(deck) {
         circleFill.style.strokeDashoffset = offset;
     }
 
-    const dueEl = document.getElementById('deck-due-count');
-    if (dueEl) {
-        dueEl.textContent = stats.due || 0;
-        // Make clickable only if guest (to trigger modal) OR if there are actually cards due
-        if (state.isGuest || stats.due > 0) {
-            // Guest can always click if there's any content, but user's rule: if 0, not clickable.
-            // Wait, if I'm a guest, stats.due is likely 0.
-            // If I'm a guest, I should at least be able to click "New" if that has cards.
-            if (stats.due > 0) {
-                dueEl.parentElement.style.cursor = 'pointer';
-                dueEl.parentElement.onclick = () => {
-                    if (state.isGuest) {
-                        showGuestPreview('deck', deck);
-                        return;
-                    }
-                    state.studySessionConfig = { type: 'due' };
-                    startStudySession();
-                };
-            } else {
-                dueEl.parentElement.style.cursor = 'default';
-                dueEl.parentElement.onclick = null;
-            }
-        } else {
-            dueEl.parentElement.style.cursor = 'default';
-            dueEl.parentElement.onclick = null;
-        }
-    }
-
     const newEl = document.getElementById('deck-new-count');
     if (newEl) {
         newEl.textContent = stats.new || 0;
         if (state.isGuest || stats.new > 0) {
-            if (stats.new > 0) {
-                newEl.parentElement.style.cursor = 'pointer';
-                newEl.parentElement.onclick = () => {
-                    if (state.isGuest) {
-                        showGuestPreview('deck', deck);
-                        return;
-                    }
-                    state.studySessionConfig = { type: 'new' };
-                    startStudySession();
-                };
-            } else {
-                newEl.parentElement.style.cursor = 'default';
-                newEl.parentElement.onclick = null;
-            }
+            newEl.parentElement.style.cursor = 'pointer';
+            newEl.parentElement.onclick = () => {
+                if (state.isGuest) {
+                    showGuestPreview('deck', deck);
+                    return;
+                }
+                state.studySessionConfig = { type: 'new' };
+                startStudySession();
+            };
         } else {
             newEl.parentElement.style.cursor = 'default';
             newEl.parentElement.onclick = null;
         }
     }
 
-    const totalEl = document.getElementById('deck-total-count');
-    if (totalEl) totalEl.textContent = stats.total || 0;
+    const diffEl = document.getElementById('deck-difficult-count');
+    if (diffEl) {
+        diffEl.textContent = stats.learn || 0;
+        if (state.isGuest || stats.learn > 0) {
+            diffEl.parentElement.style.cursor = 'pointer';
+            diffEl.parentElement.onclick = () => {
+                if (state.isGuest) {
+                    showGuestPreview('deck', deck);
+                    return;
+                }
+                state.studySessionConfig = { type: 'difficult' };
+                startStudySession();
+            };
+        } else {
+            diffEl.parentElement.style.cursor = 'default';
+            diffEl.parentElement.onclick = null;
+        }
+    }
+
+    const easyEl = document.getElementById('deck-easy-count');
+    if (easyEl) {
+        easyEl.textContent = stats.review || 0;
+        if (state.isGuest || stats.review > 0) {
+            easyEl.parentElement.style.cursor = 'pointer';
+            easyEl.parentElement.onclick = () => {
+                if (state.isGuest) {
+                    showGuestPreview('deck', deck);
+                    return;
+                }
+                state.studySessionConfig = { type: 'easy' };
+                startStudySession();
+            };
+        } else {
+            easyEl.parentElement.style.cursor = 'default';
+            easyEl.parentElement.onclick = null;
+        }
+    }
 
     // UI Robustness: Toggle visibility of editor-only features
 
@@ -3535,12 +3687,18 @@ async function startStudySession(restart = false) {
     let queue = [];
     const config = state.studySessionConfig || { type: 'standard' };
 
+    const now = new Date();
     if (config.type === 'due') {
-        const now = new Date();
-        // Match stats logic: interval > 0 AND due <= now
-        queue = allCards.filter(c => c.interval_days > 0 && c.due_at && new Date(c.due_at) <= now);
+        // Match updated stats logic: Only cards with reviews that are due or in learning
+        queue = allCards.filter(c => c.reviews_count > 0 && (c.interval_days === 0 || (c.due_at && new Date(c.due_at) <= now)));
+    } else if (config.type === 'difficult') {
+        // Learning cards (Red)
+        queue = allCards.filter(c => c.reviews_count > 0 && c.interval_days < 1 && (c.due_at && new Date(c.due_at) <= now));
+    } else if (config.type === 'easy') {
+        // Review cards (Green)
+        queue = allCards.filter(c => c.reviews_count > 0 && c.interval_days >= 1 && (c.due_at && new Date(c.due_at) <= now));
     } else if (config.type === 'new') {
-        queue = allCards.filter(c => !c.interval_days || c.interval_days === 0);
+        queue = allCards.filter(c => !c.reviews_count || c.reviews_count === 0);
     } else if (config.type === 'custom') {
         queue = allCards;
         if (config.tagId) {
@@ -3590,94 +3748,29 @@ async function startStudySession(restart = false) {
 
 
 
-async function showNextCard(animate = true) {
-    if (state.currentCardIndex >= state.studyQueue.length) {
-        finishStudySession();
+
+// Study Interactions Delegate
+document.body.addEventListener('click', (e) => {
+    // 1. Rating Buttons
+    const rateBtn = e.target.closest('.btn-rate');
+    if (rateBtn) {
+        const rating = parseInt(rateBtn.dataset.rating);
+        if (rating) rateCard(rating);
         return;
     }
 
-    const flashcard = document.getElementById('active-flashcard');
-
-    // Fade out transition
-    if (animate && !state.settings.reducedMotion) {
-        flashcard.classList.add('fading-out');
-        await new Promise(r => setTimeout(r, 300));
+    // 2. Flashcard Flip (Target the whole card)
+    if (e.target.closest('#active-flashcard')) {
+        flipCard();
+        return;
     }
 
-    const card = state.studyQueue[state.currentCardIndex];
-    const side = state.studySettings.cardSide; // front or back
-    const showBoth = state.studySettings.showBoth;
-
-    const frontEl = document.getElementById('study-front');
-    const backEl = document.getElementById('study-back');
-
-    if (side === 'back') {
-        frontEl.textContent = card.back;
-        backEl.textContent = card.front;
-    } else {
-        frontEl.textContent = card.front;
-        backEl.textContent = card.back;
-    }
-
-    if (showBoth) {
-        // If show both, we can append the other side to the front
-        frontEl.innerHTML = `<div>${renderContent(side === 'back' ? card.back : card.front)}</div>
-                             <hr style="margin: 1rem 0; border: 0; border-top: 1px dashed var(--border);">
-                             <div>${renderContent(side === 'back' ? card.front : card.back)}</div>`;
-        backEl.textContent = ""; // Empty back if shown on front? Or just duplicate.
-    } else {
-        frontEl.textContent = side === 'back' ? card.back : card.front;
-        renderMath(frontEl);
-        renderMath(backEl);
-    }
-
-    // Update Progress Text
-    document.getElementById('study-progress-text').textContent = `${state.currentCardIndex + 1} / ${state.studyQueue.length}`;
-
-    // Update Progress Bar
-    const pct = ((state.currentCardIndex) / state.studyQueue.length) * 100;
-    document.getElementById('study-progress-bar').style.width = `${pct}%`;
-
-    // Make state reset instant
-    flashcard.style.transition = 'none';
-    flashcard.classList.remove('is-flipped');
-    state.isFlipped = false;
-    void flashcard.offsetWidth; // force reflow
-    flashcard.style.transition = '';
-
-    // Hide controls initially
-    toggleStudyControls(false);
-
-    // Fade in animation
-    if (animate && !state.settings.reducedMotion) {
-        flashcard.classList.remove('fading-out');
-        flashcard.classList.add('anim-in');
-        setTimeout(() => flashcard.classList.remove('anim-in'), 400);
-    }
-
-    if (state.game.timer) clearTimeout(state.game.timer);
-    if (state.settings.autoFlip) {
-        state.game.timer = setTimeout(() => {
-            if (!state.isFlipped) flipCard();
-        }, 5000);
-    }
-}
-
-function prevCard() {
-    if (state.currentCardIndex > 0) {
-        state.currentCardIndex--;
+    // 3. Continue Button (No Track mode)
+    if (e.target.id === 'study-continue-btn') {
+        state.currentCardIndex++;
         showNextCard();
-    } else {
-        showToast('This is the first card', 'info');
     }
-}
-
-
-// Flip/Rate Interactions (Reuse existing logic mostly)
-const activeFlashcard = document.getElementById('active-flashcard');
-if (activeFlashcard) {
-    activeFlashcard.addEventListener('click', flipCard);
-}
+});
 
 document.body.addEventListener('keydown', (e) => {
     if (!document.getElementById('study-view').classList.contains('hidden')) {
@@ -3690,7 +3783,10 @@ document.body.addEventListener('keydown', (e) => {
 });
 
 
+
+
 function flipCard() {
+    if (state.isTransitioning) return; // Prevent flipping while card is loading
     if (state.game.timer) clearTimeout(state.game.timer);
     const cardElement = document.getElementById('active-flashcard');
 
@@ -3807,9 +3903,142 @@ if (questionsBtn) {
 
 
 
-document.querySelectorAll('.btn-rate').forEach(btn => {
-    btn.addEventListener('click', () => rateCard(parseInt(btn.dataset.rating)));
-});
+
+// --- SRS Logic & Stats ---
+
+function determineCardType(card) {
+    if (!card.reviews_count || card.reviews_count === 0) return 'new';
+    if (card.interval_days < 1) return 'learn';
+    return 'review';
+}
+
+function updateStudyStats() {
+    // Count remaining cards in queue based on their type
+    // Note: studyQueue shrinks as we go? NO, current implementation uses currentCardIndex.
+    // So we count from currentCardIndex to end.
+
+    let newCount = 0;
+    let learnCount = 0;
+    let reviewCount = 0;
+
+    for (let i = state.currentCardIndex; i < state.studyQueue.length; i++) {
+        const card = state.studyQueue[i];
+        const type = determineCardType(card);
+        if (type === 'new') newCount++;
+        else if (type === 'learn') learnCount++;
+        else reviewCount++;
+    }
+
+    const newEl = document.getElementById('study-count-new');
+    const learnEl = document.getElementById('study-count-learn');
+    const reviewEl = document.getElementById('study-count-review');
+
+    if (newEl) { newEl.textContent = newCount; newEl.classList.toggle('hidden', newCount === 0); }
+    if (learnEl) { learnEl.textContent = learnCount; learnEl.classList.toggle('hidden', learnCount === 0); }
+    if (reviewEl) { reviewEl.textContent = reviewCount; reviewEl.classList.toggle('hidden', reviewCount === 0); }
+}
+
+function calculateNextReview(card, rating) {
+    let interval = Number(card.interval_days) || 0;
+    let ease = Number(card.ease_factor) || 2.5;
+
+    // Anki-like Logic
+    if (rating === 1) { // Again
+        interval = 0.01; // < 1 min (Reset)
+        ease = Math.max(1.3, ease - 0.2);
+    } else if (rating === 2) { // Hard
+        interval = (interval === 0) ? 0.5 : Math.max(0.02, interval * 1.2);
+        ease = Math.max(1.3, ease - 0.15);
+    } else if (rating === 3) { // Good
+        if (interval === 0) interval = 1; // Graduate to 1 day
+        else if (interval < 1) interval = 1; // Graduate from learning step
+        else interval = interval * ease;
+    } else if (rating === 4) { // Easy
+        if (interval === 0) interval = 4;
+        else if (interval < 1) interval = 4;
+        else interval = interval * ease * 1.3;
+        ease += 0.15;
+    }
+
+    return { interval, ease };
+}
+
+function formatInterval(interval) {
+    if (interval < 0.001) return '< 1m';
+    if (interval < 1 / 24) return Math.round(interval * 24 * 60) + 'm';
+    if (interval < 1) return Math.round(interval * 24) + 'h';
+    if (interval >= 365) return Math.round(interval / 365) + 'y';
+    if (interval >= 30) return Math.round(interval / 30) + 'mo';
+    return Math.round(interval) + 'd';
+}
+
+async function showNextCard(animate = true) {
+    if (state.currentCardIndex >= state.studyQueue.length) {
+        finishStudySession();
+        return;
+    }
+
+    // Safety: prevent multiple clicks/flips during transition
+    state.isTransitioning = true;
+
+    // Reset flip status for new card
+    state.isFlipped = false;
+    const flashcard = document.getElementById('active-flashcard');
+    if (flashcard) {
+        flashcard.classList.remove('is-flipped');
+        flashcard.style.transform = ''; // Clear manual overrides
+    }
+
+    // Update Stats
+    updateStudyStats();
+
+    const card = state.studyQueue[state.currentCardIndex];
+
+    // Predict Intervals for Buttons
+    const btnAgain = document.querySelector('.rate-again .rate-time');
+    const btnHard = document.querySelector('.rate-hard .rate-time');
+    const btnGood = document.querySelector('.rate-good .rate-time');
+    const btnEasy = document.querySelector('.rate-easy .rate-time');
+
+    if (btnAgain) btnAgain.textContent = formatInterval(calculateNextReview(card, 1).interval);
+    if (btnHard) btnHard.textContent = formatInterval(calculateNextReview(card, 2).interval);
+    if (btnGood) btnGood.textContent = formatInterval(calculateNextReview(card, 3).interval);
+    if (btnEasy) btnEasy.textContent = formatInterval(calculateNextReview(card, 4).interval);
+
+    // Close controls
+    toggleStudyControls(false);
+
+    const progressFill = document.getElementById('study-progress-bar');
+    if (progressFill) {
+        const pct = ((state.currentCardIndex) / state.studyQueue.length) * 100;
+        progressFill.style.width = `${pct}%`;
+    }
+
+    // Content Injection
+    const frontEl = document.getElementById('study-front');
+    const backEl = document.getElementById('study-back');
+
+    if (animate) {
+        flashcard.style.opacity = '0';
+        setTimeout(() => {
+            frontEl.innerHTML = renderContent(card.front);
+            backEl.innerHTML = renderContent(card.back);
+            renderMath(frontEl);
+            renderMath(backEl);
+
+            flashcard.style.opacity = '1';
+            flashcard.style.transform = '';
+            state.isTransitioning = false;
+        }, 200);
+    } else {
+        frontEl.innerHTML = renderContent(card.front);
+        backEl.innerHTML = renderContent(card.back);
+        renderMath(frontEl);
+        renderMath(backEl);
+        flashcard.style.transform = '';
+        state.isTransitioning = false;
+    }
+}
 
 async function rateCard(rating) {
     const card = state.studyQueue[state.currentCardIndex];
@@ -3829,35 +4058,22 @@ async function rateCard(rating) {
         }]).then(({ error }) => { if (error) console.error(error); });
     }
 
-    // SRS Calc (Simple)
-    let { interval_days, ease_factor, reviews_count } = card;
-    interval_days = Number(interval_days);
-    ease_factor = Number(ease_factor);
-    reviews_count = Number(reviews_count) + 1;
-
-    if (rating === 1) { // Again
-        interval_days = 0.01; // ~15 mins
-        ease_factor = Math.max(1.3, ease_factor - 0.2);
-    } else if (rating === 2) { // Hard
-        interval_days = (interval_days === 0) ? 1 : Math.max(1, interval_days * 1.2);
-        ease_factor = Math.max(1.3, ease_factor - 0.15);
-    } else if (rating === 3) { // Good
-        interval_days = (interval_days === 0) ? 1 : interval_days * ease_factor;
-    } else if (rating === 4) { // Easy
-        interval_days = (interval_days === 0) ? 4 : interval_days * ease_factor * 1.3;
-        ease_factor += 0.15;
-    }
+    // SRS Calc (Advanced)
+    const { interval, ease } = calculateNextReview(card, rating);
+    const interval_days = interval;
+    const ease_factor = ease;
+    const reviews_count = Number(card.reviews_count || 0) + 1;
 
     const due_at = new Date();
     due_at.setMinutes(due_at.getMinutes() + (interval_days * 24 * 60));
 
-    // Update DB if owner
+    // Update DB if owner (non-blocking)
     if (isOwner) {
-        await sb.from('cards').update({
+        sb.from('cards').update({
             interval_days, ease_factor, reviews_count,
             last_reviewed: new Date(),
             due_at: due_at
-        }).eq('id', card.id);
+        }).eq('id', card.id).then(({ error }) => { if (error) console.error("SRS Update Error:", error); });
     }
 
     // Update local card object for accurate summary stats
@@ -3974,7 +4190,7 @@ async function refreshDeckStatsOnly(deckId) {
 
     // Fetch just cards for this deck to get fresh due/new counts
     const { data: cards } = await sb.from('cards')
-        .select('id, interval_days, due_at')
+        .select('id, interval_days, due_at, reviews_count')
         .eq('deck_id', deckId);
 
     if (!cards) return;
@@ -4004,44 +4220,42 @@ async function refreshDeckStatsOnly(deckId) {
         });
     }
 
-    let stats = { total: cards.length, due: 0, new: 0, mature: 0 };
+    let stats = { total: cards.length, due: 0, new: 0, mature: 0, learn: 0, review: 0 };
     cards.forEach(card => {
         const interval = Number(card.interval_days || 0);
-        if (interval === 0) stats.new++;
-        if (interval > 0 && (card.due_at && new Date(card.due_at) <= now)) stats.due++;
+        const due = card.due_at ? new Date(card.due_at) : null;
+        const reviews = Number(card.reviews_count || 0);
+
+        const isDue = (interval === 0) || (due && due <= now);
+
+        if (isDue) {
+            if (reviews === 0) {
+                stats.new++;
+            } else {
+                stats.due++;
+                if (interval < 1) stats.learn++;
+                else stats.review++;
+            }
+        }
         if (cardMastery.has(card.id)) stats.mature++;
     });
 
     // Directly update DOM elements if we are still on the deck view
     if (state.currentDeck && state.currentDeck.id === deckId && !document.getElementById('deck-view').classList.contains('hidden')) {
-        const dueEl = document.getElementById('deck-due-count');
+        const diffEl = document.getElementById('deck-difficult-count');
+        const easyEl = document.getElementById('deck-easy-count');
         const newEl = document.getElementById('deck-new-count');
-        const totalEl = document.getElementById('deck-total-count');
         const masteryEl = document.getElementById('deck-mastery-percent');
         const circleFill = document.getElementById('deck-mastery-circle-fill');
+        const metaEl = document.querySelector('.deck-meta');
 
-        if (dueEl) {
-            dueEl.textContent = stats.due;
-            // Update clickability
-            if (stats.due > 0) {
-                dueEl.parentElement.style.cursor = 'pointer';
-                dueEl.parentElement.onclick = () => {
-                    if (state.isGuest) {
-                        showGuestPreview('deck', state.currentDeck);
-                        return;
-                    }
-                    state.studySessionConfig = { type: 'due' };
-                    startStudySession();
-                };
-            } else {
-                dueEl.parentElement.style.cursor = 'default';
-                dueEl.parentElement.onclick = null;
-            }
+        if (metaEl && state.currentDeck) {
+            metaEl.textContent = `${stats.total} cards • ${state.currentDeck.is_public ? 'Public' : 'Private'}`;
         }
+
         if (newEl) {
             newEl.textContent = stats.new;
-            // Update clickability
-            if (stats.new > 0) {
+            if (state.isGuest || stats.new > 0) {
                 newEl.parentElement.style.cursor = 'pointer';
                 newEl.parentElement.onclick = () => {
                     if (state.isGuest) {
@@ -4056,9 +4270,42 @@ async function refreshDeckStatsOnly(deckId) {
                 newEl.parentElement.onclick = null;
             }
         }
-        if (totalEl) totalEl.textContent = stats.total;
+        if (diffEl) {
+            diffEl.textContent = stats.learn;
+            if (state.isGuest || stats.learn > 0) {
+                diffEl.parentElement.style.cursor = 'pointer';
+                diffEl.parentElement.onclick = () => {
+                    if (state.isGuest) {
+                        showGuestPreview('deck', state.currentDeck);
+                        return;
+                    }
+                    state.studySessionConfig = { type: 'difficult' };
+                    startStudySession();
+                };
+            } else {
+                diffEl.parentElement.style.cursor = 'default';
+                diffEl.parentElement.onclick = null;
+            }
+        }
+        if (easyEl) {
+            easyEl.textContent = stats.review;
+            if (state.isGuest || stats.review > 0) {
+                easyEl.parentElement.style.cursor = 'pointer';
+                easyEl.parentElement.onclick = () => {
+                    if (state.isGuest) {
+                        showGuestPreview('deck', state.currentDeck);
+                        return;
+                    }
+                    state.studySessionConfig = { type: 'easy' };
+                    startStudySession();
+                };
+            } else {
+                easyEl.parentElement.style.cursor = 'default';
+                easyEl.parentElement.onclick = null;
+            }
+        }
 
-        const mastery = stats.total > 0 ? Math.round((stats.mature / stats.total) * 100) : 0;
+        const mastery = stats.total > 0 ? Math.round(((stats.mature || 0) / stats.total) * 100) : 0;
         if (masteryEl) masteryEl.textContent = `${mastery}%`;
         if (circleFill) {
             const circumference = 283;
@@ -4076,6 +4323,7 @@ async function refreshDeckStatsOnly(deckId) {
             deckInList.stats = stats;
         }
     }
+    return stats;
 }
 
 const backToDeckBtn = document.getElementById('back-to-deck-btn');
@@ -5384,11 +5632,12 @@ function openModal(id) {
     // Check if it's a custom overlay wrapper
     const isCustom = modal.classList.contains('custom-overlay') || modal.id === 'auth-modal';
 
-    if (id !== 'redirect-modal' && !isCustom) {
-        modalOverlay.classList.remove('hidden');
+    if (id !== 'redirect-modal') {
+        document.body.classList.add('modal-open');
+        if (!isCustom) {
+            modalOverlay.classList.remove('hidden');
+        }
     }
-
-    document.body.classList.add('modal-open');
 
     modal.classList.remove('hidden');
 
@@ -5992,7 +6241,11 @@ function loadNotesView() {
     if (!state.notes || state.notes.length === 0) {
         initNotes(false);
     } else {
-        renderNotes(state.notes);
+        const grid = document.getElementById('notes-grid');
+        // Only render if the grid is empty, to prevent flickering/reloading when switching tabs
+        if (grid && !grid.innerHTML.trim()) {
+            renderNotes(state.notes);
+        }
     }
 }
 
@@ -6139,7 +6392,29 @@ function openNote(note) {
     const newUrl = baseUrl + '?note=' + note.id;
     window.history.pushState({ noteId: note.id }, '', newUrl);
 
+    // Clear existing AI summary
+    const container = document.getElementById('ai-summary-container');
+    if (container) {
+        container.innerHTML = '';
+        container.classList.add('hidden');
+    }
+
+    const summaryBtn = document.getElementById('note-detail-ai-summary-btn');
+    if (summaryBtn) {
+        summaryBtn.style.display = 'flex'; // Default to visible, checkExistingSummary will hide if needed
+        summaryBtn.disabled = false;
+        summaryBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+            </svg>
+            Summarise
+        `;
+    }
+
+    checkExistingSummary(note.id);
+
     switchView('note-detail-view');
+    checkAIUsageLimits();
 }
 
 async function renderPDFSnippet(url) {
@@ -6148,13 +6423,45 @@ async function renderPDFSnippet(url) {
 
     if (!content) return;
 
-    if (loader) loader.classList.remove('hidden');
+    // Show skeleton loader
+    if (loader) {
+        loader.classList.remove('hidden');
+        loader.innerHTML = `
+            <div class="pdf-skeleton-loader" style="
+                width: 100%;
+                height: 100%;
+                background: white;
+                padding: 2rem;
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            ">
+                <div class="skeleton-text" style="width: 70%; height: 24px; background: #e2e8f0; border-radius: 4px; animation: shimmer 1.5s infinite;"></div>
+                <div class="skeleton-text" style="width: 50%; height: 16px; background: #e2e8f0; border-radius: 4px; animation: shimmer 1.5s infinite; animation-delay: 0.1s;"></div>
+                <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div class="skeleton-text" style="width: 100%; height: 12px; background: #e2e8f0; border-radius: 4px; animation: shimmer 1.5s infinite; animation-delay: 0.2s;"></div>
+                    <div class="skeleton-text" style="width: 95%; height: 12px; background: #e2e8f0; border-radius: 4px; animation: shimmer 1.5s infinite; animation-delay: 0.3s;"></div>
+                    <div class="skeleton-text" style="width: 98%; height: 12px; background: #e2e8f0; border-radius: 4px; animation: shimmer 1.5s infinite; animation-delay: 0.4s;"></div>
+                    <div class="skeleton-text" style="width: 92%; height: 12px; background: #e2e8f0; border-radius: 4px; animation: shimmer 1.5s infinite; animation-delay: 0.5s;"></div>
+                </div>
+                <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div class="skeleton-text" style="width: 100%; height: 12px; background: #e2e8f0; border-radius: 4px; animation: shimmer 1.5s infinite; animation-delay: 0.6s;"></div>
+                    <div class="skeleton-text" style="width: 97%; height: 12px; background: #e2e8f0; border-radius: 4px; animation: shimmer 1.5s infinite; animation-delay: 0.7s;"></div>
+                    <div class="skeleton-text" style="width: 94%; height: 12px; background: #e2e8f0; border-radius: 4px; animation: shimmer 1.5s infinite; animation-delay: 0.8s;"></div>
+                </div>
+            </div>
+        `;
+    }
     content.innerHTML = '';
 
-    // URL Parameters: 
-    // page=1 (Stay on first page)
-    // view=Fit (Fit the entire page in the frame height/width)
-    const previewUrl = url.includes('#') ? url : url + '#page=1&view=Fit&toolbar=0&navpanes=0&scrollbar=0';
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+
+    let previewUrl;
+    if (isMobile) {
+        previewUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+    } else {
+        previewUrl = url.includes('#') ? url : url + '#page=1&view=Fit&toolbar=0&navpanes=0&scrollbar=0';
+    }
 
     const iframe = document.createElement('iframe');
     iframe.id = 'note-snippet-frame';
@@ -6216,8 +6523,14 @@ async function renderPDF(url) {
     if (loader) loader.classList.remove('hidden');
     if (pageIndicator) pageIndicator.classList.add('hidden');
 
-    // PDF viewer URL: Use FitV (Fit Vertical/Height) as requested
-    const viewerUrl = url.includes('#') ? url : url + '#view=FitV&navpanes=0';
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+
+    let viewerUrl;
+    if (isMobile) {
+        viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+    } else {
+        viewerUrl = url.includes('#') ? url : url + '#view=FitV&navpanes=0';
+    }
 
     const iframe = document.createElement('iframe');
     iframe.src = viewerUrl;
@@ -6458,6 +6771,7 @@ if (window.location.hostname === 'zandenkoh.github.io' || window.location.href.i
     // Function to handle dismissal
     window.dismissRedirectModal = () => {
         document.getElementById('redirect-modal').classList.add('hidden');
+        document.body.classList.remove('modal-open');
         localStorage.setItem(REDIRECT_DISMISSED_KEY, '1'); // Start counting reloads
     };
 }
@@ -6468,14 +6782,17 @@ if (window.location.hostname === 'zandenkoh.github.io' || window.location.href.i
 let aiPdfText = "";
 
 function initAIPdfUpload() {
-    const dropzone = document.getElementById('ai-pdf-dropzone');
+    const trigger = document.getElementById('ai-pdf-upload-trigger');
     const input = document.getElementById('ai-pdf-upload');
     const success = document.getElementById('ai-file-success');
     const filename = document.getElementById('ai-filename-display');
     const removeBtn = document.getElementById('ai-remove-file');
     const textArea = document.getElementById('ai-input-text');
 
-    if (!dropzone || !input) return;
+    if (!trigger || !input) return;
+
+    // Manual trigger for file input
+    trigger.onclick = () => input.click();
 
     // Reset state
     aiPdfText = "";
@@ -6495,7 +6812,8 @@ function initAIPdfUpload() {
         }
 
         // Add loading state
-        dropzone.classList.add('opacity-50', 'pointer-events-none');
+        trigger.classList.add('opacity-50', 'pointer-events-none');
+        trigger.innerHTML = '<span class="loading-spinner"></span> Extracting...';
         textArea.value = "Extracting text from PDF...";
         textArea.disabled = true;
 
@@ -6530,15 +6848,23 @@ function initAIPdfUpload() {
             textArea.value = "";
             textArea.disabled = false;
         } finally {
-            dropzone.classList.remove('opacity-50', 'pointer-events-none');
+            trigger.classList.remove('opacity-50', 'pointer-events-none');
+            trigger.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+                    <path d="M12 12v9"></path>
+                    <path d="m16 16-4-4-4 4"></path>
+                </svg>
+                Upload PDF Study Notes
+            `;
         }
     };
 
-    input.addEventListener('change', (e) => {
+    input.onchange = (e) => {
         if (e.target.files[0]) handleFile(e.target.files[0]);
-    });
+    };
 
-    removeBtn.addEventListener('click', (e) => {
+    removeBtn.onclick = (e) => {
         e.stopPropagation();
         e.preventDefault();
         input.value = "";
@@ -6547,7 +6873,7 @@ function initAIPdfUpload() {
         textArea.value = "";
         textArea.disabled = false;
         textArea.placeholder = "Paste your study notes, an article, or topic here...";
-    });
+    };
 }
 
 
@@ -6592,27 +6918,88 @@ function openAIModal() {
 }
 
 async function checkAIUsageLimits() {
-    if (!state.user) return;
+    // If guest or no user, hide AI entry points
+    if (!state.user || state.isGuest) {
+        const genBtn = document.getElementById('ai-generate-btn');
+        if (genBtn) genBtn.style.display = 'none';
 
-    const { data: profile } = await sb.from('profiles').select('last_ai_deck_at, daily_ai_summaries, last_summary_at').eq('id', state.user.id).maybeSingle();
+        const sumBtn = document.getElementById('note-detail-ai-summary-btn');
+        if (sumBtn) sumBtn.classList.add('hidden');
+        return;
+    }
 
-    if (profile) {
-        // Deck Limit: 1 per week
-        if (profile.last_ai_deck_at) {
-            const lastDeck = new Date(profile.last_ai_deck_at);
-            const now = new Date();
-            const diffDays = (now - lastDeck) / (1000 * 60 * 60 * 24);
+    // Always show the entry points for logged in users
+    const genBtn = document.getElementById('ai-generate-btn');
+    if (genBtn) genBtn.style.display = 'none';
 
-            const limitText = document.getElementById('ai-deck-limit-text');
-            if (diffDays < 7) {
-                const daysLeft = Math.ceil(7 - diffDays);
-                if (limitText) limitText.textContent = `Limit reached. New AI deck available in ${daysLeft} days.`;
-                document.getElementById('ai-generate-submit').disabled = true;
-                document.getElementById('ai-generate-submit').style.opacity = '0.5';
+    const sumBtn = document.getElementById('note-detail-ai-summary-btn');
+    if (sumBtn) sumBtn.classList.remove('hidden');
+
+    // Fetch profile if not already in state (though usually it is via fetchUserProfile)
+    let usage = state.ai_usage;
+    if (!usage) {
+        const { data: profile } = await sb.from('profiles')
+            .select('last_ai_deck_at, daily_ai_summaries, last_summary_at')
+            .eq('id', state.user.id)
+            .maybeSingle();
+        if (profile) {
+            usage = {
+                last_ai_deck_at: profile.last_ai_deck_at,
+                daily_ai_summaries: profile.daily_ai_summaries || 0,
+                last_summary_at: profile.last_summary_at
+            };
+            state.ai_usage = usage;
+        }
+    }
+
+    if (usage) {
+        const now = new Date();
+
+        // 1. Deck Limit: 1 per week
+        const lastDeck = usage.last_ai_deck_at ? new Date(usage.last_ai_deck_at) : null;
+        const diffDays = lastDeck ? (now - lastDeck) / (1000 * 60 * 60 * 24) : 99;
+
+        const limitText = document.getElementById('ai-deck-limit-text');
+        const submitBtn = document.getElementById('ai-generate-submit');
+
+        if (diffDays < 7) {
+            const daysLeft = Math.ceil(7 - diffDays);
+            if (limitText) limitText.textContent = `Limit reached. New AI deck available in ${daysLeft} days.`;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.5';
+            }
+            if (genBtn) {
+                genBtn.title = `Limit reached. New AI deck in ${daysLeft} days.`;
+                genBtn.style.opacity = '0.7';
+            }
+        } else {
+            if (limitText) limitText.textContent = `Free: 1 AI deck per week (Available now!)`;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            }
+            if (genBtn) {
+                genBtn.title = "Generate a flashcard deck using AI";
+                genBtn.style.opacity = '1';
+            }
+        }
+
+        // 2. Summary Limit: 5 per day
+        const SUMMARY_LIMIT = 5;
+        const lastSummary = usage.last_summary_at ? new Date(usage.last_summary_at) : null;
+        const isSameDay = lastSummary && lastSummary.toDateString() === now.toDateString();
+        const currentSummaries = isSameDay ? (usage.daily_ai_summaries || 0) : 0;
+
+        if (sumBtn) {
+            if (currentSummaries >= SUMMARY_LIMIT) {
+                sumBtn.disabled = true;
+                sumBtn.style.opacity = '0.5';
+                sumBtn.title = `Daily limit reached (${SUMMARY_LIMIT}/${SUMMARY_LIMIT})`;
             } else {
-                if (limitText) limitText.textContent = `Free: 1 AI deck per week (Available now!)`;
-                document.getElementById('ai-generate-submit').disabled = false;
-                document.getElementById('ai-generate-submit').style.opacity = '1';
+                sumBtn.disabled = false;
+                sumBtn.style.opacity = '1';
+                sumBtn.title = `AI Summary (${SUMMARY_LIMIT - currentSummaries} left today)`;
             }
         }
     }
@@ -6656,6 +7043,7 @@ document.getElementById('ai-generate-submit')?.addEventListener('click', async (
         });
 
         if (error) throw error;
+        if (data && data.error) throw new Error(data.error);
 
         updateAIStatus("Crafting cards...", 60);
 
@@ -6688,6 +7076,12 @@ document.getElementById('ai-generate-submit')?.addEventListener('click', async (
             document.getElementById('ai-modal').classList.add('hidden');
             document.getElementById('modal-overlay').classList.add('hidden');
 
+            // Update local state to reflect the new limit
+            if (state.ai_usage) {
+                state.ai_usage.last_ai_deck_at = new Date().toISOString();
+                checkAIUsageLimits();
+            }
+
             // Navigate to the new deck
             loadDecksView();
             openDeck(deck);
@@ -6719,11 +7113,13 @@ document.getElementById('note-detail-ai-summary-btn')?.addEventListener('click',
 
     if (!state.currentNote) return;
 
-    const btn = document.getElementById('note-detail-ai-summary-btn');
-    const originalContent = btn.innerHTML;
 
-    btn.disabled = true;
-    btn.innerHTML = '<span class="loading-spinner"></span> Summarizing...';
+    // Use the container for output
+    const container = document.getElementById('ai-summary-container');
+    const summaryBtn = document.getElementById('note-detail-ai-summary-btn');
+
+    if (summaryBtn) summaryBtn.style.display = 'none';
+    renderSkeletonSummary(container); // Show skeleton immediately
 
     try {
         const { data, error } = await sb.functions.invoke('ai-generator', {
@@ -6738,78 +7134,203 @@ document.getElementById('note-detail-ai-summary-btn')?.addEventListener('click',
             }
         });
 
-        if (error) throw error;
-
-        // Handle the new structured format: { title, key_points }
-        let summaryTitle = state.currentNote.title;
-        let keyPoints = [];
-
-        if (data.title && data.key_points && Array.isArray(data.key_points)) {
-            // New structured format
-            summaryTitle = data.title;
-            keyPoints = data.key_points;
-        } else if (data.summary) {
-            // Legacy format - parse as before
-            const rawSummary = data.summary;
-            if (typeof rawSummary === 'string') {
-                keyPoints = rawSummary.split('\n')
-                    .map(line => line.trim())
-                    .filter(line => line.length > 0)
-                    .map(line => line.replace(/^[•\-\*]\s*/, ''));
-            } else if (Array.isArray(rawSummary)) {
-                keyPoints = rawSummary.map(item => {
-                    if (typeof item === 'string') return item.replace(/^[•\-\*]\s*/, '');
-                    return Object.entries(item).map(([k, v]) => `${k}: ${v}`).join(' ');
-                });
+        if (error) {
+            try {
+                const body = await error.context.json();
+                throw new Error(body.error || error.message);
+            } catch (e) {
+                throw error;
             }
+        }
+        if (data && data.error) throw new Error(data.error);
+
+        // Normalize data for renderSummary
+        let contentToRender = {};
+        if (data.title && data.key_points) {
+            contentToRender = { title: data.title, key_points: data.key_points };
+        } else if (data.summary) {
+            contentToRender = { summary: data.summary };
+        }
+
+        // Render the result
+        renderSummary(contentToRender, container);
+        showToast('AI Summary generated!', 'success');
+
+        // Save to DB (note_summaries) - The Edge Function might do this, but if not, we do it here.
+        // Assuming Edge Function returns the generated summary but DOES NOT save to note_summaries table yet?
+        // Let's safe-guard and save it here to be sure, or rely on the function.
+        // Given I cannot see the Edge Function code fully (only listed files), I will upsert here to be safe and ensure caching works next time.
+
+        await sb.from('note_summaries').upsert({
+            note_id: state.currentNote.id,
+            user_id: state.user.id,
+            content: contentToRender
+        }, { onConflict: 'note_id' });
+
+
+        // Update local state usage limits
+        if (state.ai_usage) {
+            const now = new Date();
+            const lastSummary = state.ai_usage.last_summary_at ? new Date(state.ai_usage.last_summary_at) : null;
+            const isSameDay = lastSummary && lastSummary.toDateString() === now.toDateString();
+
+            state.ai_usage.daily_ai_summaries = isSameDay ? (state.ai_usage.daily_ai_summaries + 1) : 1;
+            state.ai_usage.last_summary_at = now.toISOString();
+            checkAIUsageLimits();
+        }
+
+    } catch (err) {
+        console.error("AI Summary Error:", err);
+        showToast(err.message || "Summary failed.", "error");
+
+        // Restore button on error
+        if (summaryBtn) summaryBtn.style.display = 'flex';
+        container.classList.add('hidden');
+        container.innerHTML = '';
+    }
+});
+
+// --- Onboarding Logic ---
+async function selectDailyGoal(cards) {
+    state.settings.dailyLimit = cards;
+    syncToLocal();
+    localStorage.setItem('flashly-onboarding-seen', 'true');
+    localStorage.setItem('flashly-daily-limit', cards); // Ensure persistence
+
+    const modal = document.getElementById('onboarding-modal');
+    if (modal) modal.classList.add('hidden');
+
+    if (state.user) {
+        const { error } = await sb.from('profiles').upsert({ id: state.user.id, daily_limit: cards });
+        if (error) console.warn("Failed to save daily goal preference:", error);
+    }
+
+    // Update Today View
+    loadTodayView();
+    showToast(`Daily goal set to ${cards >= 1000 ? 'Unlimited' : cards + ' cards'}!`, 'success');
+}
+
+// --- End of Script ---
+
+async function checkExistingSummary(noteId) {
+    const container = document.getElementById('ai-summary-container');
+    const summaryBtn = document.getElementById('note-detail-ai-summary-btn');
+
+    if (!state.user && !state.isGuest) {
+        return;
+    }
+
+
+    // Do NOT show skeleton immediately. Wait for DB check first.
+    // If we find data -> Show data.
+    // If no data -> Show button (already visible).
+
+    try {
+        const { data, error } = await sb
+            .from('note_summaries')
+            .select('*')
+            .eq('note_id', noteId)
+            .maybeSingle();
+
+        if (error) {
+            console.error('Error checking summary:', error);
+            return;
+        }
+
+        if (data) {
+            // Found summary
+            if (summaryBtn) summaryBtn.style.display = 'none';
+            renderSummary(data.content, container);
         } else {
-            throw new Error("Invalid summary format received");
+            // No summary - Hide skeleton and show button
+            if (container) {
+                container.innerHTML = '';
+                container.classList.add('hidden');
+            }
+            if (summaryBtn) summaryBtn.style.display = 'flex';
         }
 
-        // Ensure we have at least some content
-        if (keyPoints.length === 0) {
-            throw new Error("No summary content generated");
+    } catch (err) {
+        console.warn('Failed to check summary:', err);
+        // On error, default to button
+        if (container) {
+            container.innerHTML = '';
+            container.classList.add('hidden');
+        }
+        if (summaryBtn) summaryBtn.style.display = 'flex';
+    }
+}
+
+function renderSummary(content, container) {
+    if (!container) return;
+    container.classList.remove('hidden');
+
+    let keyPoints = [];
+    let summaryTitle = "Flashly AI Insight"; // Default title
+
+    // Handle content format (JSONB or old format if any)
+    if (content.key_points && Array.isArray(content.key_points)) {
+        keyPoints = content.key_points;
+        summaryTitle = content.title || summaryTitle;
+    } else if (Array.isArray(content)) {
+        keyPoints = content;
+    } else if (typeof content === 'string') {
+        // Fallback for raw string
+        keyPoints = [content];
+    } else if (content.summary) {
+        // Legacy wrapper
+        if (Array.isArray(content.summary)) keyPoints = content.summary;
+        else keyPoints = [content.summary];
+    }
+
+    const listHtml = keyPoints.map((point) => {
+        let text = point;
+        if (typeof point === 'object' && point !== null) {
+            // Handle {point: "..."} or similar objects
+            text = Object.values(point).join(' ');
         }
 
-        const listHtml = keyPoints.map((point, index) => {
-            // Process bold text (**text**)
-            const processedLine = point.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold" style="color: var(--primary);">$1</strong>');
+        // Process bold text (**text**)
+        const processedLine = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold" style="color: var(--primary);">$1</strong>');
 
-            return `
-            <li style="display: flex; gap: 0.75rem; margin-bottom: 1rem; align-items: flex-start;">
-                <span style="line-height: 1.6; color: var(--text-primary);">${processedLine}</span>
-            </li>
-        `}).join('');
+        return `
+        <li style="display: flex; gap: 0.75rem; margin-bottom: 1rem; align-items: flex-start;">
+            <span style="line-height: 1.6; color: var(--text-primary);">${processedLine}</span>
+        </li>
+    `}).join('');
 
-        const summaryHtml = `
-            <div class="ai-summary-result" style="
-                background: var(--surface);
-                border: 1px solid var(--border);
-                border-radius: 16px;
-                padding: 1rem;
-                margin-top: 2rem;
-                position: relative;
-                overflow: hidden;
-                animation: fadeIn 0.4s ease-in-out;
-            ">
-                <div style="position: absolute; top: 0; right: 0; padding: 1.5rem; opacity: 0.03; pointer-events: none;">
-                    <svg style="width: 5rem; height: 5rem;" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L14.4 9.6H22L15.8 14.2L18.2 21.8L12 17.2L5.8 21.8L8.2 14.2L2 9.6H9.6L12 2Z"/>
+    const summaryHtml = `
+        <div class="ai-summary-result" style="
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.4s ease-in-out;
+        ">
+            <div style="position: absolute; top: 0; right: 0; padding: 1.5rem; opacity: 0.03; pointer-events: none;">
+                <svg style="width: 5rem; height: 5rem;" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L14.4 9.6H22L15.8 14.2L18.2 21.8L12 17.2L5.8 21.8L8.2 14.2L2 9.6H9.6L12 2Z"/>
+                </svg>
+            </div>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; cursor: pointer;" onclick="toggleSummaryCollapse(this)">
+                <h4 style="
+                    font-weight: 700;
+                    font-size: 1.1rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    margin: 0;
+                    color: var(--text-primary);
+                ">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                     </svg>
-                </div>
-                
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-                    <h4 style="
-                        font-weight: 700;
-                        font-size: 1.1rem;
-                        display: flex;
-                        align-items: center;
-                        gap: 0.5rem;
-                        margin: 0;
-                        color: #000;
-                    ">
-                        Flashly AI Insight
-                    </h4>
+                    ${summaryTitle}
+                </h4>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <span style="
                         font-size: 0.65rem;
                         text-transform: uppercase;
@@ -6817,53 +7338,89 @@ document.getElementById('note-detail-ai-summary-btn')?.addEventListener('click',
                         font-weight: 700;
                         padding: 0.35rem 0.75rem;
                         border-radius: 6px;
-                        background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(168, 85, 247, 0.05));
-                        color: #000;
-                        border: 1px solid rgba(168, 85, 247, 0.2);
+                        background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(37, 99, 235, 0.05));
+                        color: var(--primary);
+                        border: 1px solid rgba(37, 99, 235, 0.2);
                     ">AI Generated</span>
-                </div>
-                
-                <ul style="
-                    list-style: none;
-                    padding: 0;
-                    margin: 0;
-                    font-size: 0.95rem;
-                    line-height: 1.7;
-                ">
-                    ${listHtml}
-                </ul>
-                
-                <div style="
-                    margin-top: 1.5rem;
-                    padding-top: 1rem;
-                    border-top: 1px solid var(--border);
-                    display: flex;
-                    justify-content: flex-end;
-                ">
-                    <p style="
-                        font-size: 0.7rem;
-                        color: var(--text-tertiary);
-                        margin: 0;
-                        opacity: 0.7;
-                    ">Generated by Flashly AI • Optimized for Academic Retention</p>
+                    <svg class="summary-toggle-icon" style="width: 20px; height: 20px; transition: transform 0.3s ease; color: var(--text-secondary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
                 </div>
             </div>
-        `;
+            
+            <ul class="summary-content" style="
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                font-size: 0.95rem;
+                line-height: 1.7;
+                max-height: 1000px;
+                overflow: hidden;
+                transition: max-height 0.4s ease, opacity 0.3s ease;
+                opacity: 1;
+            ">
+                ${listHtml}
+            </ul>
+        </div>
+    `;
 
-        // Remove existing summary if any
-        const existing = document.querySelector('.ai-summary-result');
-        if (existing) existing.remove();
+    container.innerHTML = summaryHtml;
+}
 
-        document.getElementById('note-detail-tags').insertAdjacentHTML('afterend', summaryHtml);
-        showToast('AI Summary generated!', 'success');
+// Toggle function for collapsible summary
+function toggleSummaryCollapse(headerElement) {
+    const summaryContent = headerElement.nextElementSibling;
+    const toggleIcon = headerElement.querySelector('.summary-toggle-icon');
+    const summaryContainer = headerElement.closest('.ai-summary-result');
 
-    } catch (err) {
-        console.error("AI Summary Error:", err);
-        showToast(err.message || "Summary failed.", "error");
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalContent;
+    if (!summaryContent || !toggleIcon || !summaryContainer) return;
+
+    const isCollapsed = summaryContent.style.maxHeight === '0px';
+
+    if (isCollapsed) {
+        // Expand
+        summaryContent.style.maxHeight = '1000px';
+        summaryContent.style.opacity = '1';
+        toggleIcon.style.transform = 'rotate(0deg)';
+        summaryContainer.style.padding = '1.5rem';
+    } else {
+        // Collapse
+        summaryContent.style.maxHeight = '0px';
+        summaryContent.style.opacity = '0';
+        toggleIcon.style.transform = 'rotate(-90deg)';
+        summaryContainer.style.padding = '1.5rem';
+        summaryContainer.style.paddingBottom = '0';
     }
-});
+}
 
-// --- End of Script ---
+function renderSkeletonSummary(container) {
+    if (!container) return;
+    container.classList.remove('hidden');
+    container.innerHTML = `
+        <div class="ai-summary-result" style="
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        ">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+                </svg>
+                <span style="font-weight: 600; color: var(--text-secondary);">Summarising...</span>
+            </div>
+            
+            <div class="skeleton-shimmer"></div>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div class="skeleton-text title gradient-text-anim"></div>
+                <div class="skeleton-text desc gradient-text-anim" style="width: 100%;"></div>
+                <div class="skeleton-text desc gradient-text-anim" style="width: 95%;"></div>
+                <div class="skeleton-text desc gradient-text-anim" style="width: 90%;"></div>
+            </div>
+             <p class="text-xs text-dim mt-4">Generating smart insights from your note...</p>
+        </div>
+    `;
+}

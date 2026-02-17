@@ -76,6 +76,16 @@ serve(async (req) => {
             }
         }
 
+        if (action === 'summarize') {
+            const lastSummary = profile.last_summary_at ? new Date(profile.last_summary_at) : null;
+            const isSameDay = lastSummary && lastSummary.toDateString() === now.toDateString();
+            const currentCount = isSameDay ? (profile.daily_ai_summaries || 0) : 0;
+
+            if (currentCount >= 5) {
+                return new Response(JSON.stringify({ error: "Daily Limit: 5 AI summaries per day." }), { status: 429, headers: corsHeaders });
+            }
+        }
+
         const api_key = getApiKey();
         if (!api_key) throw new Error("No Groq API keys found in secrets.");
 
