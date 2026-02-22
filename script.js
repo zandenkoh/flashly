@@ -65,7 +65,9 @@ const state = {
         userRank: null,
         userXP: 0,
         userLeague: 'Bronze'
-    }
+    },
+    loadingToday: false,
+    loadingDecks: false
 };
 
 const DEFAULT_TAGS = [
@@ -657,21 +659,31 @@ async function detectLinksEarly() {
     if (!joinCode && !deckId && !noteId) return;
 
     if (joinCode) {
+        // Groups require an account to join and view
         const { data: group } = await sb.from('groups').select('id, name').eq('invite_code', joinCode).maybeSingle();
         if (group) showGuestPreview('group', group);
     } else if (deckId) {
-        const { data: deck } = await sb.from('decks').select('id, title, description').eq('id', deckId).maybeSingle();
-        if (deck) showGuestPreview('deck', deck);
+        // Try to fetch deck. If it exists and is public, Supabase will return it even for guests.
+        const { data: deck } = await sb.from('decks').select('*').eq('id', deckId).maybeSingle();
+        if (deck) {
+            state.isGuest = true;
+            state.lastView = 'deck-view'; // Pre-set to avoid default guest redirect to community
+            await showApp();
+            openDeck(deck);
+        } else {
+            // Probably private or doesn't exist, show the preview modal which prompts sign-in
+            showGuestPreview('deck', { id: deckId });
+        }
     } else if (noteId) {
-        try {
-            const { data: note } = await sb.from('notes').select('id, title').eq('id', noteId).maybeSingle();
-            if (note) {
-                showGuestPreview('note', note);
-            } else {
-                // Show generic note preview if RLS blocked the fetch
-                showGuestPreview('note', { id: noteId, title: 'Shared Note' });
-            }
-        } catch (e) {
+        // For notes, try to fetch full data. 
+        const { data: note } = await sb.from('notes').select('*').eq('id', noteId).maybeSingle();
+        if (note) {
+            state.isGuest = true;
+            state.lastView = 'note-detail-view'; // Pre-set to avoid default guest redirect to community
+            await showApp();
+            openNote(note);
+        } else {
+            // Note restricted or doesn't exist, show generic preview
             showGuestPreview('note', { id: noteId, title: 'Shared Note' });
         }
     }
@@ -1465,7 +1477,7 @@ async function deleteDeck(deckId) {
         showToast('Deck deleted');
         closeModal();
         switchView('decks-view');
-        loadDecksView();
+        debouncedLoadDecks();
     }
 }
 
@@ -1483,6 +1495,12 @@ function updateNav(activeId) {
 
 // --- Realtime ---
 
+const debouncedLoadDecks = debounce(() => loadDecksView(true), 1200);
+const debouncedLoadToday = debounce(() => loadTodayView(), 1200);
+const debouncedLoadGroups = debounce(() => loadGroups(), 1200);
+const debouncedLoadStats = debounce(() => loadStats(), 1200);
+const debouncedFetchProfile = debounce(() => fetchUserProfile(), 2000);
+
 function setupRealtime() {
     cleanupRealtime();
 
@@ -1491,9 +1509,9 @@ function setupRealtime() {
     channel
         .on('postgres_changes', { event: '*', schema: 'public', table: 'decks' }, (payload) => {
             console.log('Realtime change [decks]:', payload);
-            if (state.lastView === 'decks-view') loadDecksView(true);
-            if (state.lastView === 'today-view') loadTodayView();
-            if (state.lastView === 'groups-view') loadGroups();
+            if (state.lastView === 'decks-view') debouncedLoadDecks();
+            if (state.lastView === 'today-view') debouncedLoadToday();
+            if (state.lastView === 'groups-view') debouncedLoadGroups();
             if (state.lastView === 'group-detail-view' && state.currentGroup) loadGroupDetails(state.currentGroup.id);
             if (state.lastView === 'deck-view' && state.currentDeck && (payload.new?.id === state.currentDeck.id || payload.old?.id === state.currentDeck.id)) {
                 if (payload.eventType === 'UPDATE') {
@@ -1506,7 +1524,7 @@ function setupRealtime() {
                 } else if (payload.eventType === 'DELETE') {
                     showToast('This deck has been deleted', 'info');
                     switchView(state.deckOrigin || 'decks-view');
-                    loadDecksView(true);
+                    debouncedLoadDecks();
                 }
             }
         })
@@ -1515,19 +1533,19 @@ function setupRealtime() {
             if (state.lastView === 'deck-view' && state.currentDeck && (payload.new?.deck_id === state.currentDeck.id || payload.old?.deck_id === state.currentDeck.id)) {
                 openDeck(state.currentDeck);
             }
-            if (state.lastView === 'today-view') loadTodayView();
-            if (state.lastView === 'decks-view') loadDecksView(true);
+            if (state.lastView === 'today-view') debouncedLoadToday();
+            if (state.lastView === 'decks-view') debouncedLoadDecks();
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'subjects' }, (payload) => {
-            if (state.lastView === 'decks-view') loadDecksView(true);
+            if (state.lastView === 'decks-view') debouncedLoadDecks();
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'study_logs' }, (payload) => {
-            if (state.lastView === 'today-view') loadTodayView();
-            if (state.lastView === 'insights-view') loadStats();
+            if (state.lastView === 'today-view') debouncedLoadToday();
+            if (state.lastView === 'insights-view') debouncedLoadStats();
             if (state.lastView === 'deck-view' && state.currentDeck) openDeck(state.currentDeck);
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'groups' }, (payload) => {
-            if (state.lastView === 'groups-view') loadGroups();
+            if (state.lastView === 'groups-view') debouncedLoadGroups();
             if (state.lastView === 'group-detail-view' && state.currentGroup && payload.new?.id === state.currentGroup.id) {
                 if (payload.eventType === 'UPDATE') {
                     document.getElementById('group-detail-title').textContent = payload.new.name;
@@ -1536,14 +1554,15 @@ function setupRealtime() {
             }
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'group_members' }, (payload) => {
-            if (state.lastView === 'groups-view') loadGroups();
+            if (state.lastView === 'groups-view') debouncedLoadGroups();
             if (state.lastView === 'group-detail-view' && state.currentGroup && (payload.new?.group_id === state.currentGroup.id || payload.old?.group_id === state.currentGroup.id)) {
                 loadGroupDetails(state.currentGroup.id);
             }
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
             if (payload.new?.id === state.user?.id) {
-                fetchUserProfile();
+                // Throttle profile refreshes to avoid loops during XP updates or username setting
+                debouncedFetchProfile();
             }
         })
         .subscribe();
@@ -1552,7 +1571,10 @@ function setupRealtime() {
 }
 
 function cleanupRealtime() {
-    if (state.channels.main) sb.removeChannel(state.channels.main);
+    if (state.channels.main) {
+        sb.removeChannel(state.channels.main);
+        state.channels.main = null;
+    }
 }
 
 
@@ -1590,324 +1612,329 @@ async function resolveTags(tagNames) {
 // --- TODAY View ---
 
 async function loadTodayView() {
-    // 1. Greeting & Date
-    const hour = new Date().getHours();
-    const greetingEl = document.getElementById('today-greeting');
-    if (greetingEl) {
-        if (hour < 12) greetingEl.textContent = 'Good morning, ready to learn?';
-        else if (hour < 18) greetingEl.textContent = 'Good afternoon, keep it up!';
-        else greetingEl.textContent = 'Good evening, time for a review?';
-    }
+    if (state.loadingToday) return;
+    state.loadingToday = true;
+    try {
+        // 1. Greeting & Date
+        const hour = new Date().getHours();
+        const greetingEl = document.getElementById('today-greeting');
+        if (greetingEl) {
+            if (hour < 12) greetingEl.textContent = 'Good morning, ready to learn?';
+            else if (hour < 18) greetingEl.textContent = 'Good afternoon, keep it up!';
+            else greetingEl.textContent = 'Good evening, time for a review?';
+        }
 
-    const dateEl = document.getElementById('today-date');
-    if (dateEl) {
-        const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
-        dateEl.textContent = new Date().toLocaleDateString('en-US', dateOptions);
-    }
+        const dateEl = document.getElementById('today-date');
+        if (dateEl) {
+            const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+            dateEl.textContent = new Date().toLocaleDateString('en-US', dateOptions);
+        }
 
-    // 1.5. Render Leaderboard Widget
-    renderTodayLeaderboard();
+        // 1.5. Render Leaderboard Widget
+        renderTodayLeaderboard();
 
-    // 2. Fetch Accessible Decks (Owned, Shared, Group)
-    const myDeckIds = await getMyDeckIds();
+        // 2. Fetch Accessible Decks (Owned, Shared, Group)
+        const myDeckIds = await getMyDeckIds();
 
-    let totalAvailable = 0;
-    let difficultCount = 0;
-    let easyCount = 0;
-    let actualCount = 0;
-    let completedTodayCount = 0;
-    const totalLimit = state.settings.dailyLimit || 50;
+        let totalAvailable = 0;
+        let difficultCount = 0;
+        let easyCount = 0;
+        let actualCount = 0;
+        let completedTodayCount = 0;
+        const totalLimit = state.settings.dailyLimit || 50;
 
-    if (myDeckIds.length > 0) {
-        // Get today's start (midnight)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayISO = today.toISOString();
-        const nowISO = new Date().toISOString();
+        if (myDeckIds.length > 0) {
+            // Get today's start (midnight)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayISO = today.toISOString();
+            const nowISO = new Date().toISOString();
 
-        // Fetch ALL candidate cards to ensure accurate quota and priority handling
-        const { data: allUserCards, error: cardsError } = await sb
-            .from('cards')
-            .select('id, interval_days, reviews_count, due_at, last_reviewed')
-            .in('deck_id', myDeckIds);
+            // Fetch ALL candidate cards to ensure accurate quota and priority handling
+            const { data: allUserCards, error: cardsError } = await sb
+                .from('cards')
+                .select('id, interval_days, reviews_count, due_at, last_reviewed')
+                .in('deck_id', myDeckIds);
 
-        if (!cardsError && allUserCards) {
-            const now = new Date();
-            const todayStart = new Date();
-            todayStart.setHours(0, 0, 0, 0);
+            if (!cardsError && allUserCards) {
+                const now = new Date();
+                const todayStart = new Date();
+                todayStart.setHours(0, 0, 0, 0);
 
-            // 1. Calculate cards already completed TODAY (from owned or studied decks)
+                // 1. Calculate cards already completed TODAY (from owned or studied decks)
 
-            // Get user's OWNED decks
-            const { data: ownedDecksData } = await sb.from('decks').select('id').eq('user_id', state.user.id);
-            const ownedDeckIds = new Set(ownedDecksData ? ownedDecksData.map(d => d.id) : []);
+                // Get user's OWNED decks
+                const { data: ownedDecksData } = await sb.from('decks').select('id').eq('user_id', state.user.id);
+                const ownedDeckIds = new Set(ownedDecksData ? ownedDecksData.map(d => d.id) : []);
 
-            // Get decks SHARED with user explicitly
-            const { data: sharedDecksData } = await sb.from('deck_shares').select('deck_id').eq('user_email', state.user.email);
-            const sharedDeckIds = new Set(sharedDecksData ? sharedDecksData.map(d => d.deck_id) : []);
+                // Get decks SHARED with user explicitly
+                const { data: sharedDecksData } = await sb.from('deck_shares').select('deck_id').eq('user_email', state.user.email);
+                const sharedDeckIds = new Set(sharedDecksData ? sharedDecksData.map(d => d.deck_id) : []);
 
-            // Identify "active" community/group decks (where user has studied at least one card)
-            const otherDeckIds = myDeckIds.filter(id => !ownedDeckIds.has(id) && !sharedDeckIds.has(id));
-            const activeCommunityDecks = new Set();
+                // Identify "active" community/group decks (where user has studied at least one card)
+                const otherDeckIds = myDeckIds.filter(id => !ownedDeckIds.has(id) && !sharedDeckIds.has(id));
+                const activeCommunityDecks = new Set();
 
-            if (otherDeckIds.length > 0) {
-                const deckReviewCounts = {};
-                allUserCards.forEach(c => {
-                    if (c.reviews_count > 0) {
-                        deckReviewCounts[c.deck_id] = (deckReviewCounts[c.deck_id] || 0) + 1;
-                    }
-                });
-                otherDeckIds.forEach(id => {
-                    // If any card in the deck has been reviewed, the specific deck is "active"
-                    if (deckReviewCounts[id] && deckReviewCounts[id] > 0) {
-                        activeCommunityDecks.add(id);
-                    }
-                });
-            }
-
-            // FILTER CARDS:
-            // Include if:
-            // 1. Deck is OWNED
-            // 2. OR Deck is explicitly SHARED
-            // 3. OR Deck is ACTIVE COMMUNITY (has >0 reviews)
-            const pertinentCards = allUserCards.filter(c => {
-                if (ownedDeckIds.has(c.deck_id)) return true;
-                if (sharedDeckIds.has(c.deck_id)) return true;
-                if (activeCommunityDecks.has(c.deck_id)) return true;
-
-                // Also, if a specific card has reviews, it should definitely count (safety check)
-                if (c.reviews_count > 0) return true;
-
-                return false;
-            });
-
-
-            const reviewedTodayCount = pertinentCards.filter(c => {
-                if (!c.last_reviewed) return false;
-                const lastReviewDate = new Date(c.last_reviewed);
-                lastReviewDate.setHours(0, 0, 0, 0);
-                return lastReviewDate.getTime() === todayStart.getTime();
-            }).length;
-
-            // 2. Identify candidates for study (Not reviewed today)
-            // 2. Identify candidates for study (Not reviewed today, or Learning cards due again)
-            const stillDue = pertinentCards.filter(c => {
-                const interval = Number(c.interval_days || 0);
-                const due = c.due_at ? new Date(c.due_at) : null;
-                const isLearning = (interval < 1 && c.reviews_count > 0);
-
-                // Include if never reviewed today
-                if (!c.last_reviewed) return true;
-                const lastReviewDate = new Date(c.last_reviewed);
-                lastReviewDate.setHours(0, 0, 0, 0);
-                const reviewedToday = lastReviewDate.getTime() === todayStart.getTime();
-
-                if (!reviewedToday) return true;
-
-                // SPECIAL CASE: Learning cards that are due again TODAY should stay in 'stillDue'
-                if (isLearning && due && due <= now) return true;
-
-                return false;
-            });
-
-            // 3. Classify and Prioritize
-            let learningQueue = stillDue.filter(c => c.reviews_count > 0 && Number(c.interval_days) < 1);
-            let reviewQueue = stillDue.filter(c => c.reviews_count > 0 && Number(c.interval_days) >= 1 && (c.due_at && new Date(c.due_at) <= now));
-            let newQueue = stillDue.filter(c => !c.reviews_count || c.reviews_count === 0);
-
-            learningQueue.sort((a, b) => new Date(a.due_at || 0) - new Date(b.due_at || 0));
-            reviewQueue.sort((a, b) => new Date(a.due_at || 0) - new Date(b.due_at || 0));
-
-            const totalDueQueue = [...learningQueue, ...reviewQueue];
-
-            // Store for quick access in startStudySession
-            state.todayQueue = totalDueQueue;
-            // Also store pertinentCards (or relevant subset) if we need to fall back or "Study More"
-            // Actually, simply storing the queues is enough.
-            state.newQueue = newQueue;
-
-            // 4. Calculate Remaining Quota based on Daily Limit
-            completedTodayCount = reviewedTodayCount;
-            const remainingQuota = Math.max(0, totalLimit - completedTodayCount);
-            actualCount = remainingQuota;
-
-            let dueQueue = totalDueQueue; // For compatibility with following loops
-
-            let sessionSelection = [];
-            let addedCount = 0;
-            // Preview shown in breakdown: current quota or 20 (if Study More will be used)
-            const breakdownLimit = actualCount > 0 ? actualCount : 20;
-
-            for (const card of dueQueue) {
-                if (addedCount >= breakdownLimit) break;
-                sessionSelection.push(card);
-                addedCount++;
-            }
-            for (const card of newQueue) {
-                if (addedCount >= breakdownLimit) break;
-                sessionSelection.push(card);
-                addedCount++;
-            }
-
-            // Calculate EXACT counts based on FULL QUEUES for accurate breakdown labels
-            difficultCount = learningQueue.length;
-            easyCount = reviewQueue.length;
-            const newCount = newQueue.length;
-
-            // Total cards available to study today (even if past limit)
-            const totalAvailableCount = difficultCount + easyCount + newCount;
-
-            // UI Updates for the Daily Review Card
-            const progressCircleNumber = document.getElementById('progress-circle-number');
-            const progressRing = document.getElementById('progress-ring');
-            const startBtn = document.getElementById('start-today-review-btn');
-            const actionTitle = document.getElementById('action-card-title');
-            const actionDesc = document.getElementById('action-card-desc');
-
-            if (myDeckIds.length === 0) {
-                // No decks state
-                if (progressCircleNumber) progressCircleNumber.textContent = '0/' + totalLimit;
-                if (actionTitle) actionTitle.textContent = 'Start Your Journey';
-                if (actionDesc) actionDesc.textContent = 'Explore community decks to begin learning.';
-                if (startBtn) {
-                    startBtn.innerHTML = 'Explore Community';
-                }
-                document.getElementById('due-breakdown')?.classList.add('hidden');
-            } else {
-                // Has decks state
-                // Progress circle shows completed/goal
-                if (progressCircleNumber) progressCircleNumber.textContent = completedTodayCount + '/' + totalLimit;
-
-                // Update progress ring stroke-dashoffset
-                if (progressRing) {
-                    const circumference = 2 * Math.PI * 54; // radius 54
-                    const progress = Math.min(completedTodayCount / totalLimit, 1); // 0-1
-                    const offset = circumference * (1 - progress);
-                    progressRing.style.strokeDashoffset = offset;
-
-                    // Change color based on progress (green if goal met)
-                    progressRing.style.stroke = progress >= 1 ? 'var(--success)' : 'var(--primary)';
+                if (otherDeckIds.length > 0) {
+                    const deckReviewCounts = {};
+                    allUserCards.forEach(c => {
+                        if (c.reviews_count > 0) {
+                            deckReviewCounts[c.deck_id] = (deckReviewCounts[c.deck_id] || 0) + 1;
+                        }
+                    });
+                    otherDeckIds.forEach(id => {
+                        // If any card in the deck has been reviewed, the specific deck is "active"
+                        if (deckReviewCounts[id] && deckReviewCounts[id] > 0) {
+                            activeCommunityDecks.add(id);
+                        }
+                    });
                 }
 
-                // Status Messaging and Button logic
-                if (actualCount > 0) {
-                    if (actionTitle) actionTitle.textContent = completedTodayCount > 0 ? `On track! ${completedTodayCount} done` : 'Daily Review';
-                    if (actionDesc) actionDesc.textContent = `Keep going — ${actualCount} cards left to reach your goal.`;
-                    if (startBtn) startBtn.innerHTML = `
+                // FILTER CARDS:
+                // Include if:
+                // 1. Deck is OWNED
+                // 2. OR Deck is explicitly SHARED
+                // 3. OR Deck is ACTIVE COMMUNITY (has >0 reviews)
+                const pertinentCards = allUserCards.filter(c => {
+                    if (ownedDeckIds.has(c.deck_id)) return true;
+                    if (sharedDeckIds.has(c.deck_id)) return true;
+                    if (activeCommunityDecks.has(c.deck_id)) return true;
+
+                    // Also, if a specific card has reviews, it should definitely count (safety check)
+                    if (c.reviews_count > 0) return true;
+
+                    return false;
+                });
+
+
+                const reviewedTodayCount = pertinentCards.filter(c => {
+                    if (!c.last_reviewed) return false;
+                    const lastReviewDate = new Date(c.last_reviewed);
+                    lastReviewDate.setHours(0, 0, 0, 0);
+                    return lastReviewDate.getTime() === todayStart.getTime();
+                }).length;
+
+                // 2. Identify candidates for study (Not reviewed today)
+                // 2. Identify candidates for study (Not reviewed today, or Learning cards due again)
+                const stillDue = pertinentCards.filter(c => {
+                    const interval = Number(c.interval_days || 0);
+                    const due = c.due_at ? new Date(c.due_at) : null;
+                    const isLearning = (interval < 1 && c.reviews_count > 0);
+
+                    // Include if never reviewed today
+                    if (!c.last_reviewed) return true;
+                    const lastReviewDate = new Date(c.last_reviewed);
+                    lastReviewDate.setHours(0, 0, 0, 0);
+                    const reviewedToday = lastReviewDate.getTime() === todayStart.getTime();
+
+                    if (!reviewedToday) return true;
+
+                    // SPECIAL CASE: Learning cards that are due again TODAY should stay in 'stillDue'
+                    if (isLearning && due && due <= now) return true;
+
+                    return false;
+                });
+
+                // 3. Classify and Prioritize
+                let learningQueue = stillDue.filter(c => c.reviews_count > 0 && Number(c.interval_days) < 1);
+                let reviewQueue = stillDue.filter(c => c.reviews_count > 0 && Number(c.interval_days) >= 1 && (c.due_at && new Date(c.due_at) <= now));
+                let newQueue = stillDue.filter(c => !c.reviews_count || c.reviews_count === 0);
+
+                learningQueue.sort((a, b) => new Date(a.due_at || 0) - new Date(b.due_at || 0));
+                reviewQueue.sort((a, b) => new Date(a.due_at || 0) - new Date(b.due_at || 0));
+
+                const totalDueQueue = [...learningQueue, ...reviewQueue];
+
+                // Store for quick access in startStudySession
+                state.todayQueue = totalDueQueue;
+                // Also store pertinentCards (or relevant subset) if we need to fall back or "Study More"
+                // Actually, simply storing the queues is enough.
+                state.newQueue = newQueue;
+
+                // 4. Calculate Remaining Quota based on Daily Limit
+                completedTodayCount = reviewedTodayCount;
+                const remainingQuota = Math.max(0, totalLimit - completedTodayCount);
+                actualCount = remainingQuota;
+
+                let dueQueue = totalDueQueue; // For compatibility with following loops
+
+                let sessionSelection = [];
+                let addedCount = 0;
+                // Preview shown in breakdown: current quota or 20 (if Study More will be used)
+                const breakdownLimit = actualCount > 0 ? actualCount : 20;
+
+                for (const card of dueQueue) {
+                    if (addedCount >= breakdownLimit) break;
+                    sessionSelection.push(card);
+                    addedCount++;
+                }
+                for (const card of newQueue) {
+                    if (addedCount >= breakdownLimit) break;
+                    sessionSelection.push(card);
+                    addedCount++;
+                }
+
+                // Calculate EXACT counts based on FULL QUEUES for accurate breakdown labels
+                difficultCount = learningQueue.length;
+                easyCount = reviewQueue.length;
+                const newCount = newQueue.length;
+
+                // Total cards available to study today (even if past limit)
+                const totalAvailableCount = difficultCount + easyCount + newCount;
+
+                // UI Updates for the Daily Review Card
+                const progressCircleNumber = document.getElementById('progress-circle-number');
+                const progressRing = document.getElementById('progress-ring');
+                const startBtn = document.getElementById('start-today-review-btn');
+                const actionTitle = document.getElementById('action-card-title');
+                const actionDesc = document.getElementById('action-card-desc');
+
+                if (myDeckIds.length === 0) {
+                    // No decks state
+                    if (progressCircleNumber) progressCircleNumber.textContent = '0/' + totalLimit;
+                    if (actionTitle) actionTitle.textContent = 'Start Your Journey';
+                    if (actionDesc) actionDesc.textContent = 'Explore community decks to begin learning.';
+                    if (startBtn) {
+                        startBtn.innerHTML = 'Explore Community';
+                    }
+                    document.getElementById('due-breakdown')?.classList.add('hidden');
+                } else {
+                    // Has decks state
+                    // Progress circle shows completed/goal
+                    if (progressCircleNumber) progressCircleNumber.textContent = completedTodayCount + '/' + totalLimit;
+
+                    // Update progress ring stroke-dashoffset
+                    if (progressRing) {
+                        const circumference = 2 * Math.PI * 54; // radius 54
+                        const progress = Math.min(completedTodayCount / totalLimit, 1); // 0-1
+                        const offset = circumference * (1 - progress);
+                        progressRing.style.strokeDashoffset = offset;
+
+                        // Change color based on progress (green if goal met)
+                        progressRing.style.stroke = progress >= 1 ? 'var(--success)' : 'var(--primary)';
+                    }
+
+                    // Status Messaging and Button logic
+                    if (actualCount > 0) {
+                        if (actionTitle) actionTitle.textContent = completedTodayCount > 0 ? `On track! ${completedTodayCount} done` : 'Daily Review';
+                        if (actionDesc) actionDesc.textContent = `Keep going — ${actualCount} cards left to reach your goal.`;
+                        if (startBtn) startBtn.innerHTML = `
                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="icon-sm">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
                         </svg>
                         ${completedTodayCount > 0 ? 'Continue Session' : 'Start Studying'}
                     `;
-                } else if (stillDue.length > 0) {
-                    if (actionTitle) actionTitle.textContent = "Goal Reached!";
-                    if (actionDesc) actionDesc.textContent = `You've hit your ${totalLimit} card goal, but there are still ${stillDue.length} cards waiting.`;
-                    if (startBtn) startBtn.innerHTML = `
+                    } else if (stillDue.length > 0) {
+                        if (actionTitle) actionTitle.textContent = "Goal Reached!";
+                        if (actionDesc) actionDesc.textContent = `You've hit your ${totalLimit} card goal, but there are still ${stillDue.length} cards waiting.`;
+                        if (startBtn) startBtn.innerHTML = `
                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="icon-sm">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
                         Study More
                     `;
-                } else {
-                    if (actionTitle) actionTitle.textContent = "All Caught Up!";
-                    if (actionDesc) actionDesc.textContent = `Excellent! You've finished all your cards for today.`;
-                    if (startBtn) startBtn.innerHTML = `
+                    } else {
+                        if (actionTitle) actionTitle.textContent = "All Caught Up!";
+                        if (actionDesc) actionDesc.textContent = `Excellent! You've finished all your cards for today.`;
+                        if (startBtn) startBtn.innerHTML = `
                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="icon-sm">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                         </svg>
                         All Done
                     `;
+                    }
+
+                    if (startBtn) startBtn.onclick = null;
+
+                    const newEl = document.getElementById('today-new-count');
+                    const difficultEl = document.getElementById('today-difficult-count');
+                    const easyEl = document.getElementById('today-easy-count');
+                    const breakdownEl = document.getElementById('due-breakdown');
+
+                    if (newEl) newEl.textContent = newCount;
+                    if (difficultEl) difficultEl.textContent = difficultCount;
+                    if (easyEl) easyEl.textContent = easyCount;
+
+                    // Always show breakdown, even if 0, so user knows status
+                    if (breakdownEl) breakdownEl.classList.remove('hidden');
                 }
-
-                if (startBtn) startBtn.onclick = null;
-
-                const newEl = document.getElementById('today-new-count');
-                const difficultEl = document.getElementById('today-difficult-count');
-                const easyEl = document.getElementById('today-easy-count');
-                const breakdownEl = document.getElementById('due-breakdown');
-
-                if (newEl) newEl.textContent = newCount;
-                if (difficultEl) difficultEl.textContent = difficultCount;
-                if (easyEl) easyEl.textContent = easyCount;
-
-                // Always show breakdown, even if 0, so user knows status
-                if (breakdownEl) breakdownEl.classList.remove('hidden');
             }
         }
-    }
 
-    // 3. Streak & Mastery ...
+        // 3. Streak & Mastery ...
 
-    const { data: logs } = await sb.from('study_logs')
-        .select('review_time, rating')
-        .eq('user_id', state.user.id)
-        .order('review_time', { ascending: false })
-        .limit(2000);
+        const { data: logs } = await sb.from('study_logs')
+            .select('review_time, rating')
+            .eq('user_id', state.user.id)
+            .order('review_time', { ascending: false })
+            .limit(2000);
 
-    let streak = 0;
-    let totalScore = 0;
-    let totalReviews = 0;
-    let goodEasyCount = 0;
+        let streak = 0;
+        let totalScore = 0;
+        let totalReviews = 0;
+        let goodEasyCount = 0;
 
-    if (logs && logs.length > 0) {
-        // --- Calculate Streak ---
-        const dates = [...new Set(logs.map(l => new Date(l.review_time).toDateString()))];
-        let checkDate = new Date();
-        while (true) {
-            const checkStr = checkDate.toDateString();
-            if (dates.includes(checkStr)) {
-                streak++;
-                checkDate.setDate(checkDate.getDate() - 1);
-            } else {
-                if (streak === 0 && checkDate.toDateString() === new Date().toDateString()) {
+        if (logs && logs.length > 0) {
+            // --- Calculate Streak ---
+            const dates = [...new Set(logs.map(l => new Date(l.review_time).toDateString()))];
+            let checkDate = new Date();
+            while (true) {
+                const checkStr = checkDate.toDateString();
+                if (dates.includes(checkStr)) {
+                    streak++;
                     checkDate.setDate(checkDate.getDate() - 1);
-                    continue;
+                } else {
+                    if (streak === 0 && checkDate.toDateString() === new Date().toDateString()) {
+                        checkDate.setDate(checkDate.getDate() - 1);
+                        continue;
+                    }
+                    break;
                 }
-                break;
             }
+
+            // --- Calculate Stats ---
+            logs.forEach(l => {
+                totalScore += (l.rating || 0);
+                totalReviews++;
+                if (l.rating >= 3) goodEasyCount++;
+            });
+        }
+        document.getElementById('streak-count').textContent = streak;
+
+        // --- Mastery Calculation ---
+        const mastery = totalReviews > 0 ? Math.round((totalScore / (totalReviews * 4)) * 100) : 0;
+        document.getElementById('mastery-percent').textContent = `${mastery}%`;
+        document.getElementById('mastery-bar').style.width = `${mastery}%`;
+
+        const masteryLabel = document.getElementById('mastery-label');
+        if (masteryLabel) {
+            if (mastery < 10) masteryLabel.textContent = 'Novice';
+            else if (mastery < 40) masteryLabel.textContent = 'Apprentice';
+            else if (mastery < 80) masteryLabel.textContent = 'Expert';
+            else masteryLabel.textContent = 'Master';
         }
 
-        // --- Calculate Stats ---
-        logs.forEach(l => {
-            totalScore += (l.rating || 0);
-            totalReviews++;
-            if (l.rating >= 3) goodEasyCount++;
-        });
+        // --- Retention Calculation ---
+        const retention = totalReviews > 0 ? Math.round((goodEasyCount / totalReviews) * 100) : 0;
+        const retentionText = document.getElementById('retention-text');
+        if (retentionText) {
+            retentionText.textContent = retention + '%';
+            retentionText.style.color = 'var(--text-primary)';
+        }
+
+        drawRetentionDonut(retention);
+
+        // 4. Fetch and display daily AI insight
+        if (state.user && !state.isGuest) {
+            fetchDailyInsight();
+        }
+
+        // 5. Load Today Sections
+        loadTodaySections();
+    } finally {
+        state.loadingToday = false;
     }
-    document.getElementById('streak-count').textContent = streak;
-
-    // --- Mastery Calculation ---
-    const mastery = totalReviews > 0 ? Math.round((totalScore / (totalReviews * 4)) * 100) : 0;
-    document.getElementById('mastery-percent').textContent = `${mastery}%`;
-    document.getElementById('mastery-bar').style.width = `${mastery}%`;
-
-    const masteryLabel = document.getElementById('mastery-label');
-    if (masteryLabel) {
-        if (mastery < 10) masteryLabel.textContent = 'Novice';
-        else if (mastery < 40) masteryLabel.textContent = 'Apprentice';
-        else if (mastery < 80) masteryLabel.textContent = 'Expert';
-        else masteryLabel.textContent = 'Master';
-    }
-
-    // --- Retention Calculation ---
-    const retention = totalReviews > 0 ? Math.round((goodEasyCount / totalReviews) * 100) : 0;
-    const retentionText = document.getElementById('retention-text');
-    if (retentionText) {
-        retentionText.textContent = retention + '%';
-        retentionText.style.color = 'var(--text-primary)';
-    }
-
-    drawRetentionDonut(retention);
-
-    // 4. Fetch and display daily AI insight
-    if (state.user && !state.isGuest) {
-        fetchDailyInsight();
-    }
-
-    // 5. Load Today Sections
-    loadTodaySections();
 }
-
 // Fetch and display daily AI insight
 async function fetchDailyInsight(force = false) {
     // Prevent multiple calls per session unless forced
@@ -2428,127 +2455,133 @@ document.getElementById('start-today-review-btn').addEventListener('click', asyn
 // --- Decks View (List Layout) ---
 
 async function loadDecksView(force = false) {
-    const list = document.getElementById('deck-list');
+    if (state.loadingDecks) return;
+    state.loadingDecks = true;
+    try {
+        const list = document.getElementById('deck-list');
 
-    // Instant toggle logic removed to ensure stats are always fresh
-    // if (!force && state.decks && state.decks.length > 0 && state.subjects && state.subjects.length > 0) {
-    //     renderDecksViewWithSubjects();
-    //     return;
-    // }
+        // Instant toggle logic removed to ensure stats are always fresh
+        // if (!force && state.decks && state.decks.length > 0 && state.subjects && state.subjects.length > 0) {
+        //     renderDecksViewWithSubjects();
+        //     return;
+        // }
 
-    if (list) list.innerHTML = getComponentLoader('Syncing your decks...');
+        if (list) list.innerHTML = getComponentLoader('Syncing your decks...');
 
-    // 1. Fetch access rights first (Shared & Groups)
-    const [gpRes, dsRes] = await Promise.all([
-        sb.from('group_members').select('group_id').eq('user_id', state.user.id),
-        sb.from('deck_shares').select('deck_id').eq('user_email', state.user.email)
-    ]);
+        // 1. Fetch access rights first (Shared & Groups)
+        const [gpRes, dsRes] = await Promise.all([
+            sb.from('group_members').select('group_id').eq('user_id', state.user.id),
+            sb.from('deck_shares').select('deck_id').eq('user_email', state.user.email)
+        ]);
 
-    state.myGroupIds = gpRes.data ? gpRes.data.map(gm => gm.group_id) : [];
-    state.sharedDeckIds = dsRes.data ? dsRes.data.map(ds => ds.deck_id) : [];
+        state.myGroupIds = gpRes.data ? gpRes.data.map(gm => gm.group_id) : [];
+        state.sharedDeckIds = dsRes.data ? dsRes.data.map(ds => ds.deck_id) : [];
 
-    // 2. Fetch ALL relevant decks (Owned + Shared + Community shared via Group)
-    let decks;
-    const conditions = [`user_id.eq.${state.user.id}`];
-    if (state.sharedDeckIds.length > 0) conditions.push(`id.in.(${state.sharedDeckIds.join(',')})`);
-    if (state.myGroupIds.length > 0) conditions.push(`group_id.in.(${state.myGroupIds.join(',')})`);
+        // 2. Fetch ALL relevant decks (Owned + Shared + Community shared via Group)
+        let decks;
+        const conditions = [`user_id.eq.${state.user.id}`];
+        if (state.sharedDeckIds.length > 0) conditions.push(`id.in.(${state.sharedDeckIds.join(',')})`);
+        if (state.myGroupIds.length > 0) conditions.push(`group_id.in.(${state.myGroupIds.join(',')})`);
 
-    const { data: deckData, error: deckErr } = await sb.from('decks')
-        .select('*, subjects(name)')
-        .or(conditions.join(','))
-        .order('created_at', { ascending: false });
+        const { data: deckData, error: deckErr } = await sb.from('decks')
+            .select('*, subjects(name)')
+            .or(conditions.join(','))
+            .order('created_at', { ascending: false });
 
-    if (deckErr) return showToast(deckErr.message, 'error');
-    state.decks = deckData || [];
+        if (deckErr) return showToast(deckErr.message, 'error');
+        state.decks = deckData || [];
 
-    if (state.decks.length === 0) {
-        // Fetch subjects even if no decks (to handle subject-only views)
+        if (state.decks.length === 0) {
+            // Fetch subjects even if no decks (to handle subject-only views)
+            const { data: subjects } = await sb.from('subjects')
+                .select('*')
+                .eq('user_id', state.user.id)
+                .order('name');
+            state.subjects = subjects || [];
+
+            if (list) list.innerHTML = `<div class="p-8 text-center text-secondary">No decks found. Create one to get started!</div>`;
+            return;
+        }
+
+        // 3. Fetch stats for all fetched decks
+        const deckIds = state.decks.map(d => d.id);
+        const stats = {};
+        const { data: cards } = await sb.from('cards')
+            .select('id, deck_id, due_at, interval_days, reviews_count')
+            .in('deck_id', deckIds)
+            .limit(50000); // Large limit to avoid 0 count on big libraries
+
+        const user_id = state.user?.id;
+        const { data: logs } = user_id ? await sb.from('study_logs')
+            .select('card_id, rating')
+            .eq('user_id', user_id)
+            .order('review_time', { ascending: false })
+            .limit(5000) : { data: [] };
+
+        const cardMastery = new Map();
+        if (logs) {
+            const seen = new Set();
+            logs.forEach(log => {
+                if (!seen.has(log.card_id)) {
+                    seen.add(log.card_id);
+                    if (log.rating >= 3) cardMastery.set(log.card_id, true);
+                }
+            });
+        }
+
+        const now = new Date();
+        // Initialize stats for ALL decks first to ensure defaults
+        state.decks.forEach(d => {
+            stats[d.id] = { total: 0, due: 0, new: 0, difficult: 0, easy: 0, mature: 0 };
+        });
+
+        if (cards) {
+            console.log(`[loadDecksView] Fetched ${cards.length} cards for ${deckIds.length} decks.`);
+            cards.forEach(card => {
+                // Safety check if card belongs to a deck we know about (though we queried by In list)
+                if (!stats[card.deck_id]) stats[card.deck_id] = { total: 0, due: 0, new: 0, difficult: 0, easy: 0, mature: 0 };
+
+                stats[card.deck_id].total++;
+                const due = card.due_at ? new Date(card.due_at) : null;
+                const interval = Number(card.interval_days || 0);
+                const reviews = Number(card.reviews_count || 0);
+
+                // Check due status
+                const isDue = (interval === 0) || (due && due <= now);
+
+                if (isDue) {
+                    if (reviews === 0) {
+                        stats[card.deck_id].new++;
+                    } else {
+                        stats[card.deck_id].due++; // This is effectively "To Review"
+                        // Sub-categorize difficulty (optional for UI, but good for stats)
+                        if (interval < 1) stats[card.deck_id].difficult++;
+                        else stats[card.deck_id].easy++;
+                    }
+                }
+                if (cardMastery.has(card.id)) stats[card.deck_id].mature++;
+            });
+        } else {
+            console.warn("[loadDecksView] No cards returned from DB stats query.");
+        }
+
+        // Debug log for specific deck stats issues
+        console.log("[loadDecksView] Final calculated stats:", stats);
+
+        // Update state
+        state.decks = state.decks.map(d => ({ ...d, stats: stats[d.id] }));
+
+        // 4. Fetch Subjects
         const { data: subjects } = await sb.from('subjects')
             .select('*')
             .eq('user_id', state.user.id)
             .order('name');
         state.subjects = subjects || [];
 
-        if (list) list.innerHTML = `<div class="p-8 text-center text-secondary">No decks found. Create one to get started!</div>`;
-        return;
+        renderDecksViewWithSubjects();
+    } finally {
+        state.loadingDecks = false;
     }
-
-    // 3. Fetch stats for all fetched decks
-    const deckIds = state.decks.map(d => d.id);
-    const stats = {};
-    const { data: cards } = await sb.from('cards')
-        .select('id, deck_id, due_at, interval_days, reviews_count')
-        .in('deck_id', deckIds)
-        .limit(50000); // Large limit to avoid 0 count on big libraries
-
-    const user_id = state.user?.id;
-    const { data: logs } = user_id ? await sb.from('study_logs')
-        .select('card_id, rating')
-        .eq('user_id', user_id)
-        .order('review_time', { ascending: false })
-        .limit(5000) : { data: [] };
-
-    const cardMastery = new Map();
-    if (logs) {
-        const seen = new Set();
-        logs.forEach(log => {
-            if (!seen.has(log.card_id)) {
-                seen.add(log.card_id);
-                if (log.rating >= 3) cardMastery.set(log.card_id, true);
-            }
-        });
-    }
-
-    const now = new Date();
-    // Initialize stats for ALL decks first to ensure defaults
-    state.decks.forEach(d => {
-        stats[d.id] = { total: 0, due: 0, new: 0, difficult: 0, easy: 0, mature: 0 };
-    });
-
-    if (cards) {
-        console.log(`[loadDecksView] Fetched ${cards.length} cards for ${deckIds.length} decks.`);
-        cards.forEach(card => {
-            // Safety check if card belongs to a deck we know about (though we queried by In list)
-            if (!stats[card.deck_id]) stats[card.deck_id] = { total: 0, due: 0, new: 0, difficult: 0, easy: 0, mature: 0 };
-
-            stats[card.deck_id].total++;
-            const due = card.due_at ? new Date(card.due_at) : null;
-            const interval = Number(card.interval_days || 0);
-            const reviews = Number(card.reviews_count || 0);
-
-            // Check due status
-            const isDue = (interval === 0) || (due && due <= now);
-
-            if (isDue) {
-                if (reviews === 0) {
-                    stats[card.deck_id].new++;
-                } else {
-                    stats[card.deck_id].due++; // This is effectively "To Review"
-                    // Sub-categorize difficulty (optional for UI, but good for stats)
-                    if (interval < 1) stats[card.deck_id].difficult++;
-                    else stats[card.deck_id].easy++;
-                }
-            }
-            if (cardMastery.has(card.id)) stats[card.deck_id].mature++;
-        });
-    } else {
-        console.warn("[loadDecksView] No cards returned from DB stats query.");
-    }
-
-    // Debug log for specific deck stats issues
-    console.log("[loadDecksView] Final calculated stats:", stats);
-
-    // Update state
-    state.decks = state.decks.map(d => ({ ...d, stats: stats[d.id] }));
-
-    // 4. Fetch Subjects
-    const { data: subjects } = await sb.from('subjects')
-        .select('*')
-        .eq('user_id', state.user.id)
-        .order('name');
-    state.subjects = subjects || [];
-
-    renderDecksViewWithSubjects();
 }
 
 function renderDecksViewWithSubjects() {
