@@ -4,14 +4,6 @@ const supabaseUrl = 'https://grgcynxsmanqfsgkiytu.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdyZ2N5bnhzbWFucWZzZ2tpeXR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NDkxMDQsImV4cCI6MjA4NjEyNTEwNH0.rlTuj58kCkZqb_nIGQhCeBkvFeY04FtFx-SLpwXp-Yg';
 const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-// Log to help debug the "No API key" issue
-console.log("Supabase Client Init - URL:", supabaseUrl);
-if (!supabaseKey) {
-    console.error("Supabase Key is MISSING!");
-} else {
-    console.log("Supabase Key detected (length):", supabaseKey.length);
-}
-
 // State Management
 const state = {
     user: null,
@@ -67,7 +59,13 @@ const state = {
     sessionRatings: [], // Track ratings in current session: { cardId: string, rating: number }
     currentNote: null,
     notes: [],
-    pendingUpdates: [] // Track DB update promises for consistency
+    pendingUpdates: [], // Track DB update promises for consistency
+    leaderboard: {
+        topPlayers: [],
+        userRank: null,
+        userXP: 0,
+        userLeague: 'Bronze'
+    }
 };
 
 const DEFAULT_TAGS = [
@@ -107,7 +105,26 @@ function closeMobileSidebar() {
     if (sidebarOverlay) sidebarOverlay.classList.remove('active');
 }
 
-function switchView(viewId) {
+function switchView(viewId, isForced = false) {
+    // 1. Study Session Guard: intercept navigation if session in progress
+    if (isForced !== true) {
+        const studyView = document.getElementById('study-view');
+        const isStudying = studyView && !studyView.classList.contains('hidden');
+        const hasProgress = state.sessionRatings && state.sessionRatings.length > 0;
+
+        // Summary view means they've already "finished" and saved progress
+        const summaryView = document.getElementById('study-summary-view');
+        const isSummaryVisible = summaryView && !summaryView.classList.contains('hidden');
+        const isFinished = (state.studyQueue && state.currentCardIndex >= state.studyQueue.length) || isSummaryVisible;
+
+        if (isStudying && hasProgress && !isFinished) {
+            // Re-route through the confirmation modal
+            exitStudyMode(false, () => switchView(viewId, true));
+            return;
+        }
+    }
+
+    // Original switchView Logic
     // Hide all views first
     document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
 
@@ -211,7 +228,6 @@ async function checkUser() {
     }
 
     sb.auth.onAuthStateChange((_event, session) => {
-        console.log("Auth state changed:", _event, session);
         state.user = session ? session.user : null;
         if (state.user) {
             showApp();
@@ -220,13 +236,11 @@ async function checkUser() {
         }
     });
 }
-console.log("Script.js: Auth logic initialized");
 
 // Auth Toggle
 let authMode = 'login';
 
 function updateAuthUI() {
-    console.log("updateAuthUI called. Mode:", authMode);
     const submitBtn = document.getElementById('auth-submit');
     const toggleText = document.getElementById('auth-toggle-text');
     const toggleLink = document.getElementById('auth-toggle-link');
@@ -819,38 +833,42 @@ function applyInterfaceSettings() {
 
 // --- Navigation ---
 
-document.getElementById('nav-today').addEventListener('click', async () => {
-    if (state.isGuest) {
-        authMode = 'login';
-        updateAuthUI();
-        authModal.classList.remove('hidden');
-        document.body.classList.add('modal-open');
-        closeMobileSidebar();
-        return;
-    }
-    updateNav('nav-today');
-    switchView('today-view');
-
-    // Ensure we show fresh data if updates are still flying
-    if (state.pendingUpdates && state.pendingUpdates.length > 0) {
-        await Promise.allSettled(state.pendingUpdates);
-        state.pendingUpdates = [];
-    }
-    loadTodayView();
+document.getElementById('nav-today').addEventListener('click', () => {
+    const action = async () => {
+        if (state.isGuest) {
+            authMode = 'login';
+            updateAuthUI();
+            authModal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
+            closeMobileSidebar();
+            return;
+        }
+        updateNav('nav-today');
+        switchView('today-view');
+        if (state.pendingUpdates && state.pendingUpdates.length > 0) {
+            await Promise.allSettled(state.pendingUpdates);
+            state.pendingUpdates = [];
+        }
+        loadTodayView();
+    };
+    exitStudyMode(false, action);
 });
 
 document.getElementById('nav-decks').addEventListener('click', () => {
-    if (state.isGuest) {
-        authMode = 'login';
-        updateAuthUI();
-        authModal.classList.remove('hidden');
-        document.body.classList.add('modal-open');
-        closeMobileSidebar();
-        return;
-    }
-    updateNav('nav-decks');
-    switchView('decks-view');
-    loadDecksView(true); // Force full fetch to ensure both tabs have data
+    const action = () => {
+        if (state.isGuest) {
+            authMode = 'login';
+            updateAuthUI();
+            authModal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
+            closeMobileSidebar();
+            return;
+        }
+        updateNav('nav-decks');
+        switchView('decks-view');
+        loadDecksView(true);
+    };
+    exitStudyMode(false, action);
 });
 const myDecksTab = document.getElementById('my-decks-tab');
 const sharedDecksTab = document.getElementById('shared-decks-tab');
@@ -883,59 +901,100 @@ if (sharedDecksTab) {
 }
 
 document.getElementById('nav-insights').addEventListener('click', () => {
-    if (state.isGuest) {
-        authMode = 'login';
-        updateAuthUI();
-        authModal.classList.remove('hidden');
-        document.body.classList.add('modal-open');
-        closeMobileSidebar();
-        return;
-    }
-    updateNav('nav-insights');
-    switchView('insights-view');
-    loadStats(); // Combined stats and insights loading
+    const action = () => {
+        if (state.isGuest) {
+            authMode = 'login';
+            updateAuthUI();
+            authModal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
+            closeMobileSidebar();
+            return;
+        }
+        updateNav('nav-insights');
+        switchView('insights-view');
+        loadStats();
+    };
+    exitStudyMode(false, action);
 });
 
 document.getElementById('nav-community').addEventListener('click', () => {
-    updateNav('nav-community');
-    switchView('community-view'); // You need to add community-view back to HTML or rename one
-    loadCommunityDecks();
+    const action = () => {
+        updateNav('nav-community');
+        switchView('community-view');
+        loadCommunityDecks();
+    };
+    exitStudyMode(false, action);
 });
 
 document.getElementById('nav-groups').addEventListener('click', () => {
-    if (state.isGuest) {
-        authMode = 'login';
-        updateAuthUI();
-        authModal.classList.remove('hidden');
-        document.body.classList.add('modal-open');
-        closeMobileSidebar();
-        return;
-    }
-    updateNav('nav-groups');
-    switchView('groups-view'); // Make sure this ID exists in HTML, or reuse decks-view logic if similar
-    loadGroups();
+    const action = () => {
+        if (state.isGuest) {
+            authMode = 'login';
+            updateAuthUI();
+            authModal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
+            closeMobileSidebar();
+            return;
+        }
+        updateNav('nav-groups');
+        switchView('groups-view');
+        loadGroups();
+    };
+    exitStudyMode(false, action);
+});
+
+document.getElementById('nav-leaderboard').addEventListener('click', () => {
+    const action = () => {
+        if (state.isGuest) {
+            authMode = 'login';
+            updateAuthUI();
+            authModal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
+            closeMobileSidebar();
+            return;
+        }
+        updateNav('nav-leaderboard');
+        switchView('leaderboard-view');
+        loadLeaderboard();
+    };
+    exitStudyMode(false, action);
 });
 
 document.getElementById('nav-notes').addEventListener('click', () => {
-    updateNav('nav-notes');
-    switchView('notes-view');
-    loadNotesView();
+    const action = () => {
+        updateNav('nav-notes');
+        switchView('notes-view');
+        loadNotesView();
+    };
+    exitStudyMode(false, action);
 });
 
 
 
 // Settings
 document.getElementById('nav-settings').addEventListener('click', () => {
-    if (state.isGuest) {
-        authMode = 'login';
-        updateAuthUI();
-        authModal.classList.remove('hidden');
-        document.body.classList.add('modal-open');
-        closeMobileSidebar();
-        return;
-    }
-    initSettingsModal();
-    openModal('settings-modal');
+    const action = () => {
+        if (state.isGuest) {
+            authMode = 'login';
+            updateAuthUI();
+            authModal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
+            closeMobileSidebar();
+            return;
+        }
+        initSettingsModal();
+        openModal('settings-modal');
+    };
+    exitStudyMode(false, action);
+});
+
+document.getElementById('nav-admin').addEventListener('click', () => {
+    const action = () => {
+        updateNav('nav-admin');
+        switchView('admin-view');
+        loadAdminDashboard();
+    };
+    exitStudyMode(false, action);
 });
 
 // Delete Account Handler
@@ -1523,6 +1582,9 @@ async function loadTodayView() {
         const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
         dateEl.textContent = new Date().toLocaleDateString('en-US', dateOptions);
     }
+
+    // 1.5. Render Leaderboard Widget
+    renderTodayLeaderboard();
 
     // 2. Fetch Accessible Decks (Owned, Shared, Group)
     const myDeckIds = await getMyDeckIds();
@@ -2395,7 +2457,7 @@ async function loadDecksView(force = false) {
     const { data: cards } = await sb.from('cards')
         .select('id, deck_id, due_at, interval_days, reviews_count')
         .in('deck_id', deckIds)
-        .limit(10000); // Bump limit to avoid 0 count on large libraries
+        .limit(50000); // Large limit to avoid 0 count on big libraries
 
     const user_id = state.user?.id;
     const { data: logs } = user_id ? await sb.from('study_logs')
@@ -4254,7 +4316,7 @@ async function startStudySession(restart = false) {
     if (state.currentDeck) {
         document.getElementById('study-deck-title').textContent = state.currentDeck.title;
         document.getElementById('study-deck-title').onclick = () => {
-            if (confirm("Exit study session?")) exitStudyMode();
+            exitStudyMode();
         };
     }
 
@@ -4592,68 +4654,96 @@ async function showNextCard(animate = true) {
 
 async function rateCard(rating) {
     const card = state.studyQueue[state.currentCardIndex];
+    if (!card) return;
+
     const isOwner = state.user && state.decks && state.decks.some(d => d.id === card.deck_id);
+    const trackProgress = state.studySettings?.trackProgress !== false;
 
-    // Track locally
-    state.sessionRatings.push({ cardId: card.id, rating: rating, card: card });
-
-    // Log study event
-    if (state.user) {
-        const logPromise = sb.from('study_logs').insert([{
-            user_id: state.user.id,
-            card_id: card.id,
-            deck_id: card.deck_id,
-            rating: rating,
-            review_time: new Date()
-        }]);
-        state.pendingUpdates.push(logPromise);
-        logPromise.then(({ error }) => { if (error) console.error("Log error:", error); });
-    }
-
-    // Calculate next state
+    // 1. Calculate next state using SRS algorithm
     const { interval, ease } = calculateNextReview(card, rating);
 
-    // Update Card Object (Local)
-    card.interval_days = interval;
-    card.ease_factor = ease;
-    card.reviews_count = (Number(card.reviews_count) || 0) + 1;
-    card.last_reviewed = new Date();
+    // 2. Prepare updates but DO NOT send to DB yet (Buffering for session completion)
+    const cardUpdate = {
+        id: card.id,
+        deck_id: card.deck_id,
+        interval_days: interval,
+        ease_factor: ease,
+        reviews_count: (Number(card.reviews_count) || 0) + 1,
+        last_reviewed: new Date(),
+        due_at: new Date(Date.now() + (interval * 24 * 60 * 60 * 1000))
+    };
 
-    // Calculate Due Date
-    const due_at = new Date();
-    due_at.setMinutes(due_at.getMinutes() + (interval * 24 * 60));
-    card.due_at = due_at; // Update local due date immediately
+    // 3. Track locally in sessionRatings
+    // Always count study activity (including community/shared decks) for XP
+    state.sessionRatings.push({
+        cardId: card.id,
+        rating: rating,
+        card: card,
+        cardUpdate: cardUpdate,
+        isOwner: trackProgress // Count all study sessions, not just owned decks
+    });
 
-    // Requeue if Learning Step (interval < 1 day) AND rating was Again/Hard
-    // Or if it's a learning step that needs to be seen again today
+    // 4. Update local card object immediately for UI/SRS feedback
+    Object.assign(card, cardUpdate);
+
+    // 5. Requeue if Learning Step (interval < 1 day)
     const inSession = interval < 1.0;
-
     if (inSession) {
-        // Re-insert into queue for same-session review
-        // Logic: specific insertion point or end of queue?
-        // Simple: End of queue
         state.studyQueue.push(card);
-        // showToast(`Card requeued in ${formatInterval(interval)}`, 'info');
     }
 
-    // Update DB (Non-blocking but tracked)
-    if (isOwner) {
-        const updatePromise = sb.from('cards').update({
-            interval_days: interval,
-            ease_factor: ease,
-            reviews_count: card.reviews_count,
-            last_reviewed: new Date(),
-            due_at: due_at
-        }).eq('id', card.id);
-        state.pendingUpdates.push(updatePromise);
-        updatePromise.then(({ error }) => { if (error) console.error("SRS Update Error:", error); });
-    }
-
+    // 6. Move to next card
     state.currentCardIndex++;
     showNextCard();
 }
 
 async function finishStudySession() {
+    const container = document.getElementById('study-summary-body');
+    if (!container) return;
+
+    // 1. Bulk Save Progress (Synchronize all buffered updates)
+    if (state.user && state.sessionRatings.length > 0) {
+        console.log("Saving session progress...");
+
+        // A. All ratings with tracking enabled (community + owned)
+        const trackableRatings = state.sessionRatings.filter(r => r.isOwner);
+
+        if (trackableRatings.length > 0) {
+            // B. Bulk Insert Study Logs for ALL tracked cards (Triggers XP gain)
+            const logsToInsert = trackableRatings.map(r => ({
+                user_id: state.user.id,
+                card_id: r.cardId,
+                deck_id: r.card.deck_id,
+                rating: r.rating,
+                review_time: new Date()
+            }));
+
+            const logsPromise = sb.from('study_logs').insert(logsToInsert);
+            state.pendingUpdates.push(logsPromise);
+        }
+
+        // C. Bulk Update Card SRS Data (only for cards user actually owns)
+        const isActualOwner = (r) => state.decks && state.decks.some(d => d.id === r.card.deck_id);
+        const ownedRatings = trackableRatings.filter(isActualOwner);
+
+        if (ownedRatings.length > 0) {
+            const cardsToUpsert = ownedRatings.map(r => ({
+                id: r.cardId,
+                deck_id: r.card.deck_id,
+                interval_days: r.cardUpdate.interval_days,
+                ease_factor: r.cardUpdate.ease_factor,
+                reviews_count: r.cardUpdate.reviews_count,
+                last_reviewed: r.cardUpdate.last_reviewed,
+                due_at: r.cardUpdate.due_at,
+                user_id: state.user.id // Ensure owner
+            }));
+
+            // Using upsert to update existing cards based on ID
+            const cardsPromise = sb.from('cards').upsert(cardsToUpsert, { onConflict: 'id' });
+            state.pendingUpdates.push(cardsPromise);
+        }
+    }
+
     switchView('study-summary-view');
 
     // Calculate Stats
@@ -4664,151 +4754,293 @@ async function finishStudySession() {
     const easy = easyCards.length;
     const accuracy = total > 0 ? Math.round((easy / total) * 100) : 0;
 
-    // Update progress elements
-    const progressBar = document.getElementById('study-progress-bar');
-    const progressText = document.getElementById('study-progress-text');
-    if (progressBar) progressBar.style.width = '100%';
-    if (progressText) progressText.textContent = `Accuracy: ${accuracy}%`;
+    // Reset container for sequence
+    container.innerHTML = `<div class="sequence-container" id="session-sequence"></div>`;
+    const seqContainer = document.getElementById('session-sequence');
 
-    // Check if user has hit daily limit and has more cards available
-    const dailyLimit = state.settings.dailyLimit || 50;
-    let hasMoreCardsAvailable = false;
-    let studyMoreMessage = '';
+    await runCompletionSequence(seqContainer, { total, accuracy, difficult, difficultCards });
+}
 
-    if (total >= dailyLimit && state.studyQueue && state.currentCardIndex >= state.studyQueue.length) {
-        // Get remaining cards from all decks (excluding those already studied today)
-        const myDeckIds = await getMyDeckIds();
-        let remainingCount = 0;
+async function runCompletionSequence(container, stats) {
+    const { total, accuracy, difficult, difficultCards } = stats;
 
-        if (myDeckIds.length > 0) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const todayISO = today.toISOString();
-            const nowISO = new Date().toISOString();
+    // 1. Initial Summary Stage (No buttons yet)
+    const summaryStage = document.createElement('div');
+    summaryStage.className = 'summary-stage';
+    summaryStage.innerHTML = `
+        <div class="summary-stats-grid">
+            <div class="stat-box">
+                <div class="value">${total}</div>
+                <div class="label">Cards</div>
+            </div>
+            <div class="stat-box" style="border-color: ${accuracy > 80 ? 'var(--success)' : accuracy > 50 ? 'var(--warning)' : 'var(--danger)'}">
+                <div class="value">${accuracy}%</div>
+                <div class="label">Accuracy</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">${difficult}</div>
+                <div class="label">Difficult</div>
+            </div>
+        </div>
+    `;
+    container.appendChild(summaryStage);
 
-            const { data: allCards } = await sb
-                .from('cards')
-                .select('id, last_reviewed')
-                .in('deck_id', myDeckIds)
-                .or(`due_at.lte.${nowISO},reviews_count.eq.0`);
+    // Auto-scroll to summary
+    summaryStage.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            if (allCards) {
-                // Count cards not reviewed today
-                const cardsNotReviewedToday = allCards.filter(c => {
-                    if (!c.last_reviewed) return true; // New cards
-                    const lastReviewDate = new Date(c.last_reviewed);
-                    lastReviewDate.setHours(0, 0, 0, 0);
-                    return lastReviewDate.getTime() !== today.getTime();
-                });
-                remainingCount = cardsNotReviewedToday.length - total; // Subtract already studied in this session
-                hasMoreCardsAvailable = remainingCount > 0;
+    // 2. Data Preparation: Rank BEFORE gain
+    const oldXP = state.leaderboard.userXP;
+    const { count: oldRankCount } = await sb.from('profiles').select('*', { count: 'exact', head: true }).gt('xp', oldXP);
+    const oldRank = (oldRankCount || 0) + 1;
+    const xpGain = total * 10;
 
-                if (hasMoreCardsAvailable) {
-                    studyMoreMessage = `You've completed your goal of ${dailyLimit} cards today! ${remainingCount} more waiting.`;
-                }
-            }
+    // 3. Wait then Slide Up Summary
+    await new Promise(r => setTimeout(r, 1200));
+    summaryStage.classList.add('slide-up');
+
+    // 4. Show Leaderboard Section (Pre-gain state)
+    const lbSection = document.createElement('div');
+    lbSection.className = 'sequence-leaderboard-section';
+    lbSection.innerHTML = `
+        <h3 class="text-center text-sm font-bold text-secondary uppercase tracking-widest mb-4">Daily Rank Progress</h3>
+        <div class="xp-roll-up" id="xp-counter">${oldXP}</div>
+        <div id="xp-gain-label" class="xp-gain-label" style="opacity: 0">+0 XP</div>
+        
+        <div class="leaderboard-main mini mt-4" style="border-radius: 1rem; overflow: hidden; border: 1px solid var(--border);">
+            <div id="sequence-lb-list">
+                 <!-- Mini list content -->
+            </div>
+        </div>
+    `;
+    container.appendChild(lbSection);
+
+    // Auto-scroll to leaderboard
+    lbSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Fill the list with users around the current user
+    const lbList = document.getElementById('sequence-lb-list');
+    await renderSequenceMiniLeaderboard(lbList, oldXP, oldRank);
+
+    // 5. XP Count-up + Row Movement Animation
+    await new Promise(r => setTimeout(r, 400));
+    const xpCounter = document.getElementById('xp-counter');
+    const xpGainLabel = document.getElementById('xp-gain-label');
+    xpGainLabel.style.opacity = '1';
+
+    // Start rolling numbers
+    let currentDisplayXP = oldXP;
+    const targetXP = oldXP + xpGain;
+    const duration = 1200; // 1.2s for the count-up
+    const startTime = performance.now();
+
+    function animateXP(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        currentDisplayXP = Math.floor(oldXP + (xpGain * progress));
+        xpCounter.textContent = currentDisplayXP.toLocaleString();
+        xpGainLabel.textContent = `+${Math.floor(xpGain * progress)} XP`;
+
+        if (progress < 1) {
+            requestAnimationFrame(animateXP);
+        }
+    }
+    requestAnimationFrame(animateXP);
+
+    // Trigger DB update in background
+    updateUserXP(xpGain);
+
+    // Wait for roll to finish
+    await new Promise(r => setTimeout(r, 1400));
+
+    // 6. Check Rank Jump
+    const { count: newRankCount } = await sb.from('profiles').select('*', { count: 'exact', head: true }).gt('xp', targetXP);
+    const newRank = (newRankCount || 0) + 1;
+
+    if (newRank < oldRank) {
+        const userRow = document.getElementById('seq-user-row');
+        if (userRow) {
+            userRow.classList.add('rank-jump-highlight');
+            await new Promise(r => setTimeout(r, 600));
+            userRow.querySelector('.seq-rank-val').innerHTML = `#${newRank}`;
+            userRow.querySelector('.seq-xp-val').textContent = targetXP;
+            createConfetti(container);
+            const lbList = document.getElementById('sequence-lb-list');
+            const rows = Array.from(lbList.children);
+            rows.sort((a, b) => {
+                const xpA = parseInt(a.querySelector('.seq-xp-val')?.textContent || 0);
+                const xpB = parseInt(b.querySelector('.seq-xp-val')?.textContent || 0);
+                return xpB - xpA;
+            });
+            rows.forEach(r => lbList.appendChild(r));
         }
     }
 
-    // Inject Summary HTML
-    const container = document.getElementById('study-summary-body');
-    if (container) {
-        const btnsHTML = `
-            <div id="summary-suggestions" style="text-align: left; margin-top: 2rem;">
-                <h4 style="font-size: 0.75rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">Recommended Next Steps</h4>
-                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    ${hasMoreCardsAvailable ? `
-                        <div style="background: rgba(34, 197, 94, 0.1); border-left: 4px solid var(--success); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem;">
-                            <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0;">${studyMoreMessage}</p>
-                        </div>
-                        <button class="btn btn-primary w-full" style="justify-content: flex-start; padding: 1rem;" onclick="continueStudyingMore()">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 1.25rem; height: 1.25rem; margin-right: 0.75rem;">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
-                            Study ${Math.min(Math.ceil(remainingCount / 5) * 5, 25)} More Cards
-                        </button>
-                    ` : ''}
-                    ${difficult > 0 ? `
-                        <button class="btn btn-secondary w-full" style="justify-content: flex-start; padding: 1rem; border-color: var(--danger)30;" id="retry-hard-btn">
-                            <span style="background: var(--danger); width: 8px; height: 8px; border-radius: 50%; margin-right: 0.75rem;"></span>
-                            Focus on Difficult Cards (${difficult})
-                        </button>
-                    ` : ''}
-                    <button class="btn btn-secondary w-full" style="justify-content: flex-start; padding: 1rem;" onclick="exitStudyMode()">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 1.25rem; height: 1.25rem; margin-right: 0.75rem;">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
-                        </svg>
-                        Back to Dashboard
-                    </button>
-                </div>
+    // 7. Finally show the CTAs (buttons)
+    const dailyLimit = state.settings.dailyLimit || 50;
+    const myDeckIds = await getMyDeckIds();
+    let hasMoreCardsAvailable = false;
+    let remainingCount = 0;
+
+    if (myDeckIds.length > 0) {
+        const nowISO = new Date().toISOString();
+        const { data: all } = await sb.from('cards').select('id').in('deck_id', myDeckIds).or(`due_at.lte.${nowISO},reviews_count.eq.0`);
+        if (all) {
+            remainingCount = all.length;
+            hasMoreCardsAvailable = remainingCount > 0;
+        }
+    }
+
+    const ctaContainer = document.createElement('div');
+    ctaContainer.className = 'cta-container mt-6';
+    ctaContainer.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
+            ${hasMoreCardsAvailable ? `
+                <button id="continue-study-btn" class="btn btn-primary w-full py-4 text-lg" onclick="continueStudyingMore(this)" style="justify-content: center;">
+                    Continue Learning
+                </button>
+            ` : ''}
+            <button class="btn btn-secondary w-full py-4" onclick="exitStudyMode()" style="justify-content: center;">
+                Finish for Today
+            </button>
+        </div>
+    `;
+    container.appendChild(ctaContainer);
+
+    // Auto-scroll to CTAs
+    setTimeout(() => {
+        ctaContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+
+    setTimeout(() => ctaContainer.classList.add('visible'), 300);
+}
+
+async function renderSequenceMiniLeaderboard(container, xp, rank) {
+    // Show top users or users around me
+    const { data: performers } = await sb.rpc('get_global_leaderboard', { limit_count: 50 });
+
+    let displayList = [];
+    if (performers && performers.length > 0) {
+        const userIndex = performers.findIndex(p => p.id === state.user.id);
+        if (userIndex !== -1) {
+            // Find users around me
+            displayList = performers.slice(Math.max(0, userIndex - 1), userIndex + 2);
+        } else {
+            // Not in top 50, show top 3 and user at bottom
+            displayList = performers.slice(0, 3);
+            displayList.push({ id: state.user.id, username: state.user.username || 'You', xp: xp, rank: rank });
+        }
+    } else {
+        // Fallback if everyone is 0 XP
+        displayList = [{ id: state.user.id, username: state.user.username || 'You', xp: xp, rank: rank }];
+    }
+
+    container.innerHTML = displayList.map(p => `
+        <div class="leaderboard-row ${p.id === state.user.id ? 'is-user' : ''}" id="${p.id === state.user.id ? 'seq-user-row' : ''}" style="grid-template-columns: 60px 1fr 80px; padding: 0.75rem 1rem;">
+            <div class="rank-col seq-rank-val" style="font-size: 0.9rem;">#${p.rank || '?'}</div>
+            <div class="user-col" style="gap: 0.75rem;">
+                <div class="user-avatar-lb" style="width: 28px; height: 28px; font-size: 0.65rem;">${(p.username || 'U').charAt(0).toUpperCase()}</div>
+                <div class="text-sm font-semibold">${escapeHtml(p.username)}</div>
             </div>
-        `;
+            <div class="xp-col seq-xp-val" style="font-size: 0.85rem;">${p.xp}</div>
+        </div>
+    `).join('');
+}
 
-        container.innerHTML = `
-            <div class="summary-stats-grid">
-                <div class="stat-box">
-                    <div class="value">${total}</div>
-                    <div class="label">Cards</div>
-                </div>
-                <div class="stat-box" style="border-color: ${accuracy > 80 ? 'var(--success)' : accuracy > 50 ? 'var(--warning)' : 'var(--danger)'}">
-                    <div class="value">${accuracy}%</div>
-                    <div class="label">Accuracy</div>
-                </div>
-                <div class="stat-box">
-                    <div class="value">${difficult}</div>
-                    <div class="label">Difficult</div>
-                </div>
-            </div>
-            ${btnsHTML}
-        `;
+function createConfetti(parent) {
+    for (let i = 0; i < 40; i++) {
+        const c = document.createElement('div');
+        c.style.position = 'absolute';
+        c.style.width = '10px';
+        c.style.height = '10px';
+        c.style.background = ['#2563eb', '#10b981', '#f59e0b', '#ef4444'][Math.floor(Math.random() * 4)];
+        c.style.left = '50%';
+        c.style.top = '50%';
+        c.style.zIndex = '100';
+        c.style.borderRadius = '2px';
+        parent.appendChild(c);
 
-        // Attach event for dynamic retry button
-        const retryHardBtn = container.querySelector('#retry-hard-btn');
-        if (retryHardBtn) {
-            retryHardBtn.onclick = () => {
-                state.studyQueue = difficultCards.map(r => r.card);
-                state.currentCardIndex = 0;
-                state.sessionRatings = [];
-                switchView('study-view');
-                showNextCard(false);
-            };
-        }
-        // Mastery / Deck Stats
-        if (state.cards) {
-            const totalCards = state.cards.length;
-            const mastered = state.cards.filter(c => c.interval_days >= 21).length; // Anki standard for mature
-            const learning = totalCards - mastered;
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 5 + Math.random() * 10;
+        const vx = Math.cos(angle) * velocity;
+        const vy = Math.sin(angle) * velocity - 10; // Initial bump up
 
-            const masteryEl = document.getElementById('summary-deck-progress');
-            if (masteryEl) masteryEl.textContent = totalCards > 0 ? Math.round((mastered / totalCards) * 100) + '%' : '0%';
+        let x = 0, y = 0, g = 0.5;
+        let opacity = 1;
 
-            // Optional detailed progress if these elements exist
-            const difficultCountEl = document.getElementById('summary-difficult-count');
-            const easyCountEl = document.getElementById('summary-easy-count');
-            if (difficultCountEl) difficultCountEl.textContent = `${learning} / ${totalCards}`;
-            if (easyCountEl) easyCountEl.textContent = `${mastered} / ${totalCards}`;
-        }
-
-        // Handle Finish Button
-        const finishBtn = document.getElementById('summary-finish-btn');
-        if (finishBtn) {
-            finishBtn.onclick = () => {
-                exitStudyMode();
-            };
-        }
+        const anim = () => {
+            x += vx;
+            y += vy;
+            y += g;
+            opacity -= 0.01;
+            c.style.transform = `translate(${x}px, ${y}px) rotate(${x * 2}deg)`;
+            c.style.opacity = opacity;
+            if (opacity > 0) requestAnimationFrame(anim);
+            else c.remove();
+        };
+        requestAnimationFrame(anim);
     }
 }
 
 // Continue studying more cards after daily limit
-async function continueStudyingMore() {
+async function continueStudyingMore(btn) {
+    const originalHTML = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+        btn.innerHTML = '<span class="loading-spinner"></span> Loading more...';
+    }
     state.studySessionConfig = {
         type: 'standard',
         isStudyMore: true
     };
-    await startStudySession();
+    try {
+        await startStudySession();
+    } finally {
+        // Re-enable button (matters when session didn't start, e.g. no cards)
+        if (btn && document.body.contains(btn)) {
+            btn.disabled = false;
+            btn.style.opacity = '';
+            btn.innerHTML = originalHTML;
+        }
+    }
 }
 
-async function exitStudyMode() {
+function showStudyExitModal() {
+    const modal = document.getElementById('study-exit-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        // Also unhide the inner .modal div (closeModal hides ALL .modal elements)
+        const inner = modal.querySelector('.modal');
+        if (inner) inner.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+    }
+}
+
+async function exitStudyMode(force = false, onConfirm = null) {
+    const studyViewElement = document.getElementById('study-view');
+    const isStudying = studyViewElement && !studyViewElement.classList.contains('hidden');
+    const hasProgress = state.sessionRatings && state.sessionRatings.length > 0;
+
+    // Check if we are in the summary screen (Finished means no modal needed)
+    const summaryView = document.getElementById('study-summary-view');
+    const isSummaryVisible = summaryView && !summaryView.classList.contains('hidden');
+    const isFinished = (state.studyQueue && state.currentCardIndex >= state.studyQueue.length) || isSummaryVisible;
+
+    if (!force && isStudying && hasProgress && !isFinished) {
+        state.studyExitPendingAction = onConfirm; // Store for when they click "Yes" in the modal
+        showStudyExitModal();
+        return;
+    }
+
+    closeAllModals();
+    state.sessionRatings = [];
+
+    // Run custom action if provided, otherwise default navigation
+    if (onConfirm) {
+        if (typeof onConfirm === 'function') onConfirm();
+        return;
+    }
+
     const target = state.studyOrigin || 'decks-view';
     const deckId = state.currentDeck ? state.currentDeck.id : null;
 
@@ -4990,13 +5222,30 @@ async function refreshDeckStatsOnly(deckId) {
 
 const backToDeckBtn = document.getElementById('back-to-deck-btn');
 if (backToDeckBtn) {
-    backToDeckBtn.addEventListener('click', exitStudyMode);
+    backToDeckBtn.addEventListener('click', () => exitStudyMode(false));
 }
 
 const quitStudyBtn = document.getElementById('quit-study-btn');
 if (quitStudyBtn) {
-    quitStudyBtn.addEventListener('click', exitStudyMode);
+    quitStudyBtn.addEventListener('click', () => exitStudyMode(false));
 }
+
+// Global beforeunload warning for active study sessions
+window.addEventListener('beforeunload', (e) => {
+    const studyView = document.getElementById('study-view');
+    const summaryView = document.getElementById('study-summary-view');
+    const isStudying = studyView && !studyView.classList.contains('hidden');
+    const isSummaryVisible = summaryView && !summaryView.classList.contains('hidden');
+
+    const hasProgress = state.sessionRatings && state.sessionRatings.length > 0;
+    const isFinished = (state.studyQueue && state.currentCardIndex >= state.studyQueue.length) || isSummaryVisible;
+
+    if (isStudying && hasProgress && !isFinished) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved study progress. If you leave now, you will lose your XP gain. Are you sure?';
+        return e.returnValue;
+    }
+});
 
 
 // --- GROUPS LOGIC ---
@@ -5951,8 +6200,11 @@ function renderHeatmap(data = {}) {
 
     if (last30Days.every(d => d.val === 0)) {
         container.innerHTML = `
-            <div style="height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 0.8rem; background: #f8fafc; border-radius: 12px; border: 1px dashed var(--border);">
-                 Start studying to see your activity rhythm here.
+            <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 0.9rem; background: var(--surface-hover); border-radius: 1.5rem; gap: 0.5rem;">
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 2rem; height: 2rem; opacity: 0.5;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                 </svg>
+                 Start studying to see your activity.
             </div>
         `;
         return;
@@ -5974,7 +6226,7 @@ function renderHeatmap(data = {}) {
 
     const colorScale = d3.scaleThreshold()
         .domain([1, 10, 25, 50])
-        .range(["#f1f5f9", "#dbeafe", "#93c5fd", "#3b82f6", "#1d4ed8"]);
+        .range(["#f1f5f9", "#e0e7ff", "#818cf8", "#4f46e5", "#3730a3"]);
 
     svg.selectAll(".day")
         .data(last30Days)
@@ -6093,16 +6345,19 @@ async function loadCommunityDecks(force = false) {
     // Fetch card counts for these decks
     const safeDecks = decks || [];
     const deckIds = safeDecks.map(d => d.id);
-    const { data: cardCounts } = await sb
-        .from('cards')
-        .select('deck_id')
-        .in('deck_id', deckIds);
-
+    // Fetch card counts per deck using individual count queries for accuracy
+    // (RLS may restrict bulk card fetches for other users' decks)
     const countsMap = {};
-    if (cardCounts) {
-        cardCounts.forEach(c => {
-            countsMap[c.deck_id] = (countsMap[c.deck_id] || 0) + 1;
-        });
+    const countPromises = deckIds.map(async (deckId) => {
+        const { count } = await sb
+            .from('cards')
+            .select('*', { count: 'exact', head: true })
+            .eq('deck_id', deckId);
+        countsMap[deckId] = count || 0;
+    });
+    // Execute in batches of 10 to avoid overwhelming the server
+    for (let i = 0; i < countPromises.length; i += 10) {
+        await Promise.all(countPromises.slice(i, i + 10));
     }
 
     state.communityDecks = safeDecks.map(d => ({
@@ -8317,9 +8572,9 @@ function renderRadarChart(subjectStats) {
         const r = rScale((j + 1) / levels);
         svg.append("circle")
             .attr("r", r)
-            .style("fill", "#f8fafc")
-            .style("stroke", "#e2e8f0")
-            .style("stroke-dasharray", "2,2");
+            .style("fill", "transparent")
+            .style("stroke", "var(--border)")
+            .style("stroke-width", "0.5px");
     }
 
     // Draw axes
@@ -8613,10 +8868,10 @@ function addSupportMessage(msg, type, date) { // type: 'user' | 'support'
     div.className = `chat-message ${type === 'user' ? 'user' : 'support'}`;
     // For user view: 'user' (me) is right blue. 'support' (admin) is left white.
     // CSS for .user is right-aligned. CSS for .support is left.
-    
+
     div.innerHTML = `
         <div>${escapeHtml(msg)}</div>
-        <span class="chat-timestamp">${new Date(date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+        <span class="chat-timestamp">${new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
     `;
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
@@ -8631,36 +8886,36 @@ function subscribeToSupport() {
         .select('*')
         .eq('conversation_id', state.user.id)
         .order('created_at', { ascending: true })
-        .then(({data, error}) => {
-             if(data) {
-                 const container = document.getElementById('support-messages');
-                 if(container) {
-                     container.innerHTML = '';
-                     data.forEach(m => {
-                         const type = m.sender_id === state.user.id ? 'user' : 'support';
-                         addSupportMessage(m.message, type, m.created_at);
-                     });
-                     // Add welcome message if empty?
-                     if (data.length === 0) {
-                         const welcome = document.createElement('div');
-                         welcome.className = 'text-center text-secondary text-sm mt-4';
-                         welcome.textContent = 'Start a conversation with us!';
-                         container.appendChild(welcome);
-                     }
-                 }
-             } else if (error) {
-                 console.error('Error fetching support messages:', error);
-             }
+        .then(({ data, error }) => {
+            if (data) {
+                const container = document.getElementById('support-messages');
+                if (container) {
+                    container.innerHTML = '';
+                    data.forEach(m => {
+                        const type = m.sender_id === state.user.id ? 'user' : 'support';
+                        addSupportMessage(m.message, type, m.created_at);
+                    });
+                    // Add welcome message if empty?
+                    if (data.length === 0) {
+                        const welcome = document.createElement('div');
+                        welcome.className = 'text-center text-secondary text-sm mt-4';
+                        welcome.textContent = 'Start a conversation with us!';
+                        container.appendChild(welcome);
+                    }
+                }
+            } else if (error) {
+                console.error('Error fetching support messages:', error);
+            }
         });
 
     // Realtime
     sb.channel('support-chat')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `conversation_id=eq.${state.user.id}` }, payload => {
-        if (payload.new.sender_id !== state.user.id) {
-            addSupportMessage(payload.new.message, 'support', payload.new.created_at);
-        }
-    })
-    .subscribe();
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `conversation_id=eq.${state.user.id}` }, payload => {
+            if (payload.new.sender_id !== state.user.id) {
+                addSupportMessage(payload.new.message, 'support', payload.new.created_at);
+            }
+        })
+        .subscribe();
 }
 
 
@@ -8695,7 +8950,7 @@ function switchAdminTab(tab) {
 async function loadAdminFeedback() {
     const container = document.getElementById('admin-feedback-list');
     if (!container) return;
-    
+
     container.innerHTML = '<p class="text-secondary text-center">Loading...</p>';
 
     // Note: This query assumes we can join auth.users via RLS or view, which might fail if user_id is foreign key to auth.users but not exposed.
@@ -8715,7 +8970,7 @@ async function loadAdminFeedback() {
     // Try to resolve user emails if possible, otherwise show ID
     // We can't easily join auth tables directly from client client usually unless public view exists.
     // We'll just show ID for now or try fetching profile.
-    
+
     // Fetch profiles for these users
     const userIds = [...new Set(data.map(d => d.user_id))];
     let userMap = {};
@@ -8740,7 +8995,7 @@ async function loadAdminFeedback() {
 async function loadAdminSupportChats() {
     const listContainer = document.getElementById('admin-chat-users');
     if (!listContainer) return;
-    
+
     listContainer.innerHTML = '<p class="text-xs text-secondary p-2">Loading...</p>';
 
     // Get unique conversations. 
@@ -8759,14 +9014,14 @@ async function loadAdminSupportChats() {
 
     const conversations = {};
     data.forEach(msg => {
-         if (!conversations[msg.conversation_id]) {
-             conversations[msg.conversation_id] = msg;
-         }
+        if (!conversations[msg.conversation_id]) {
+            conversations[msg.conversation_id] = msg;
+        }
     });
 
     // Render list
     listContainer.innerHTML = '';
-    
+
     const userIds = Object.keys(conversations);
     if (userIds.length === 0) {
         listContainer.innerHTML = '<p class="text-xs text-secondary p-2">No active chats.</p>';
@@ -8812,18 +9067,18 @@ async function openAdminChat(userId) {
     if (btn) btn.disabled = false;
 
     // Unsubscribe previous
-    sb.removeAllChannels(); 
+    sb.removeAllChannels();
 
     // Subscribe new
     sb.channel(`admin-chat:${userId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `conversation_id=eq.${userId}` }, payload => {
-          appendAdminChatMessage(payload.new);
-      })
-      .subscribe();
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `conversation_id=eq.${userId}` }, payload => {
+            appendAdminChatMessage(payload.new);
+        })
+        .subscribe();
 
     // Fetch messages
     const { data } = await sb.from('support_messages').select('*').eq('conversation_id', userId).order('created_at', { ascending: true });
-    
+
     container.innerHTML = '';
     if (data && data.length > 0) {
         data.forEach(appendAdminChatMessage);
@@ -8834,20 +9089,20 @@ async function openAdminChat(userId) {
 
 function appendAdminChatMessage(msg) {
     const container = document.getElementById('admin-chat-messages');
-    if(!container) return;
+    if (!container) return;
 
     // In Admin View:
     // If sender is ME (admin), align right (blue).
     // If sender is THEM (user), align left (white).
-    const isMe = msg.sender_id === state.user.id; 
-    
+    const isMe = msg.sender_id === state.user.id;
+
     const div = document.createElement('div');
     // We reuse .chat-message.user for "Me" and .chat-message.support for "Them"
-    div.className = `chat-message ${isMe ? 'user' : 'support'}`; 
-    
+    div.className = `chat-message ${isMe ? 'user' : 'support'}`;
+
     div.innerHTML = `
         <div>${escapeHtml(msg.message)}</div>
-        <span class="chat-timestamp">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+        <span class="chat-timestamp">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
     `;
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
@@ -8855,21 +9110,21 @@ function appendAdminChatMessage(msg) {
 
 // Admin Send
 const adminChatForm = document.getElementById('admin-chat-form');
-if(adminChatForm) {
+if (adminChatForm) {
     adminChatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if(!currentAdminChatUser) return;
+        if (!currentAdminChatUser) return;
         const input = document.getElementById('admin-chat-input');
         const msg = input.value;
-        if(!msg.trim()) return;
-        
+        if (!msg.trim()) return;
+
         // Optimistic update
         appendAdminChatMessage({
             sender_id: state.user.id,
             message: msg,
             created_at: new Date().toISOString()
         });
-        
+
         input.value = '';
 
         await sb.from('support_messages').insert({
@@ -8878,5 +9133,453 @@ if(adminChatForm) {
             message: msg,
             is_admin: true
         });
+    });
+}
+
+// --- LEADBOARD LOGIC ---
+
+async function loadLeaderboard() {
+    const list = document.getElementById('global-leaderboard-list');
+    if (list) {
+        list.innerHTML = Array(5).fill(0).map(() => `
+            <div class="skeleton-row">
+                <div class="skeleton-rank skeleton"></div>
+                <div class="skeleton-avatar skeleton"></div>
+                <div class="skeleton-text skeleton-name skeleton"></div>
+                <div class="skeleton-text skeleton-xp skeleton"></div>
+            </div>
+        `).join('');
+    }
+
+    // Determine active tab
+    const activeTab = document.querySelector('#leaderboard-view .lb-tab.active');
+    const tabType = activeTab ? activeTab.dataset.tab : 'weekly';
+
+    // 1. Fetch Leaderboard from RPC (always fetch all)
+    const { data, error } = await sb.rpc('get_global_leaderboard', { limit_count: 50 });
+
+    if (error) {
+        console.error("Leaderboard Error:", error);
+        if (list) list.innerHTML = `<div class="p-8 text-center text-danger">Failed to load leaderboard.</div>`;
+        return;
+    }
+
+    let allPlayers = data || [];
+
+    // 2. Fetch User's Own XP and Rank
+    const userInTop = allPlayers.find(p => p.id === state.user.id);
+    if (userInTop) {
+        state.leaderboard.userXP = userInTop.xp;
+    } else {
+        const { data: profile } = await sb.from('profiles').select('xp').eq('id', state.user.id).single();
+        if (profile) {
+            state.leaderboard.userXP = profile.xp;
+        }
+    }
+    state.leaderboard.userLeague = getLeagueName(state.leaderboard.userXP);
+
+    // 3. Filter by league for weekly/monthly tabs; all-time shows everyone
+    if (tabType === 'all-time') {
+        state.leaderboard.topPlayers = allPlayers;
+    } else {
+        // Filter to only show players in the same league as the user
+        const userLeague = state.leaderboard.userLeague;
+        const leaguePlayers = allPlayers.filter(p => getLeagueName(p.xp) === userLeague);
+        // Re-rank within the league
+        state.leaderboard.topPlayers = leaguePlayers.map((p, i) => ({ ...p, rank: i + 1 }));
+    }
+
+    // Calculate user rank within the displayed list
+    const userInFiltered = state.leaderboard.topPlayers.find(p => p.id === state.user.id);
+    if (userInFiltered) {
+        state.leaderboard.userRank = userInFiltered.rank;
+    } else {
+        // User not in top list, calculate rank
+        if (tabType === 'all-time') {
+            const { count } = await sb.from('profiles').select('*', { count: 'exact', head: true }).gt('xp', state.leaderboard.userXP);
+            state.leaderboard.userRank = (count || 0) + 1;
+        } else {
+            // Count players in the same league with more XP
+            state.leaderboard.userRank = state.leaderboard.topPlayers.filter(p => p.xp > state.leaderboard.userXP).length + 1;
+        }
+    }
+
+    renderLeaderboard();
+}
+
+function showRankChangeModal(oldRank, newRank, xpGain) {
+    const modal = document.getElementById('leaderboard-rank-modal');
+    const oldVal = document.getElementById('rank-old-val');
+    const newVal = document.getElementById('rank-new-val');
+    const xpVal = document.getElementById('session-xp-gain');
+    const message = document.getElementById('rank-message');
+
+    if (!modal) return;
+
+    oldVal.textContent = `#${oldRank}`;
+    newVal.textContent = `#${newRank}`;
+    xpVal.textContent = `+${xpGain}`;
+
+    if (newRank < oldRank) {
+        message.textContent = "You climbed the global leaderboard!";
+        message.classList.add('text-success');
+    } else {
+        message.textContent = "Great session! Keep it up to climb higher.";
+        message.classList.remove('text-success');
+    }
+
+    modal.classList.remove('hidden');
+}
+
+document.getElementById('close-rank-modal')?.addEventListener('click', () => {
+    document.getElementById('leaderboard-rank-modal').classList.add('hidden');
+});
+
+async function renderTodayLeaderboard() {
+    const rankEl = document.getElementById('today-user-rank');
+    const xpEl = document.getElementById('today-user-xp');
+    const leagueEl = document.getElementById('today-user-league');
+    const miniList = document.getElementById('today-mini-leaderboard');
+
+    if (!rankEl) return;
+
+    const { data: allPlayers } = await sb.rpc('get_global_leaderboard', { limit_count: 50 });
+    const { data: profile } = await sb.from('profiles').select('xp').eq('id', state.user.id).single();
+
+    if (profile) {
+        state.leaderboard.userXP = profile.xp;
+        const { count } = await sb.from('profiles').select('*', { count: 'exact', head: true }).gt('xp', profile.xp);
+        state.leaderboard.userRank = (count || 0) + 1;
+        state.leaderboard.userLeague = getLeagueName(profile.xp);
+    }
+
+    const userLeagueInfo = getLeagueInfo(state.leaderboard.userXP);
+    rankEl.textContent = state.leaderboard.userRank ? `#${state.leaderboard.userRank}` : '--';
+    xpEl.textContent = state.leaderboard.userXP.toLocaleString();
+    leagueEl.textContent = state.leaderboard.userLeague;
+    leagueEl.style.color = userLeagueInfo.color;
+
+    // Show user's position with neighbors instead of top 3
+    if (miniList && allPlayers) {
+        const userIndex = allPlayers.findIndex(p => p.id === state.user.id);
+        let displayList = [];
+
+        if (userIndex !== -1) {
+            // Get 1 above and 1 below
+            const start = Math.max(0, userIndex - 1);
+            const end = Math.min(allPlayers.length, userIndex + 2);
+            displayList = allPlayers.slice(start, end);
+        } else {
+            // User not in top 50, show their estimated position
+            displayList = [
+                ...(allPlayers.length > 0 ? [allPlayers[allPlayers.length - 1]] : []),
+                { id: state.user.id, username: state.user.username || 'You', xp: state.leaderboard.userXP, rank: state.leaderboard.userRank }
+            ];
+        }
+
+        miniList.innerHTML = displayList.map(p => {
+            const isUser = p.id === state.user.id;
+            return `
+            <div class="mini-rank-item ${isUser ? 'is-user' : 'is-others'}">
+                <div class="flex items-center" style="gap: 0.3rem; min-width: 0; flex: 1;">
+                    <span class="mini-rank-num">${p.rank}</span>
+                    <span class="mini-rank-name">${isUser ? 'You' : escapeHtml(p.username.split(' ')[0])}</span>
+                </div>
+                <span class="mini-rank-xp">${p.xp >= 1000 ? (p.xp / 1000).toFixed(1) + 'k' : p.xp} XP</span>
+            </div>
+        `;
+        }).join('');
+    }
+}
+
+function getLeagueName(xp) {
+    if (xp >= 10000) return 'Diamond League';
+    if (xp >= 5000) return 'Platinum League';
+    if (xp >= 2500) return 'Gold League';
+    if (xp >= 1000) return 'Silver League';
+    return 'Bronze League';
+}
+
+function getLeagueInfo(xp) {
+    if (xp >= 10000) return { name: 'Diamond', icon: '💎', color: '#6366f1', cssClass: 'league-diamond' };
+    if (xp >= 5000) return { name: 'Platinum', icon: '🏅', color: '#14b8a6', cssClass: 'league-platinum' };
+    if (xp >= 2500) return { name: 'Gold', icon: '🥇', color: '#eab308', cssClass: 'league-gold' };
+    if (xp >= 1000) return { name: 'Silver', icon: '🥈', color: '#94a3b8', cssClass: 'league-silver' };
+    return { name: 'Bronze', icon: '🥉', color: '#d97706', cssClass: 'league-bronze' };
+}
+
+async function updateUserXP(xpGain) {
+    if (!state.user || xpGain <= 0) return;
+
+    // Update local state
+    state.leaderboard.userXP += xpGain;
+    state.leaderboard.userLeague = getLeagueName(state.leaderboard.userXP);
+
+    console.log(`Local XP updated to ${state.leaderboard.userXP} (DB handled by trigger)`);
+}
+
+function renderLeaderboard() {
+    const list = document.getElementById('global-leaderboard-list');
+    const sticky = document.getElementById('lb-user-sticky-row');
+    const leagueDisplay = document.getElementById('lb-current-league');
+    const leagueIcon = document.getElementById('lb-league-icon');
+    const heroBanner = document.getElementById('lb-hero-banner');
+    const heroXP = document.getElementById('lb-hero-xp-val');
+    const tabDesc = document.getElementById('lb-tab-description');
+    const podiumEl = document.getElementById('lb-podium');
+
+    if (!list) return;
+    list.innerHTML = '';
+
+    // Update hero banner
+    const userLeagueInfo = getLeagueInfo(state.leaderboard.userXP);
+    if (leagueDisplay) {
+        leagueDisplay.textContent = userLeagueInfo.name;
+    }
+    if (leagueIcon) leagueIcon.textContent = userLeagueInfo.icon;
+    if (heroXP) heroXP.textContent = `${state.leaderboard.userXP.toLocaleString()} XP`;
+    if (heroBanner) {
+        heroBanner.className = 'lb-hero-banner ' + userLeagueInfo.cssClass;
+    }
+
+    // Determine active tab for display context
+    const activeTab = document.querySelector('#leaderboard-view .lb-tab.active');
+    const tabType = activeTab ? activeTab.dataset.tab : 'weekly';
+
+    // Update tab description
+    if (tabDesc) {
+        if (tabType === 'all-time') {
+            tabDesc.textContent = 'Showing all learners globally';
+        } else {
+            tabDesc.innerHTML = `Showing players in <strong style="color: ${userLeagueInfo.color}">${userLeagueInfo.icon} ${userLeagueInfo.name} League</strong>`;
+        }
+    }
+
+    const players = state.leaderboard.topPlayers;
+    const top3 = players.slice(0, 3);
+    const rest = players.slice(3);
+
+    // Render Podium (reorder: 2nd, 1st, 3rd)
+    if (podiumEl) {
+        if (top3.length >= 3) {
+            const podiumOrder = [top3[1], top3[0], top3[2]]; // Silver, Gold, Bronze
+            podiumEl.innerHTML = podiumOrder.map(player => {
+                const pLeague = getLeagueInfo(player.xp);
+                return `
+                <div class="lb-podium-player" onclick="showUserComparison('${player.id}', '${escapeHtml(player.username)}', ${player.xp}, ${player.rank})">
+                    <div class="lb-podium-avatar">${player.username.charAt(0).toUpperCase()}</div>
+                    <div class="lb-podium-pedestal">
+                        <div class="lb-podium-rank">#${player.rank}</div>
+                        <div class="lb-podium-name">${escapeHtml(player.username.split(' ')[0])}</div>
+                        <div class="lb-podium-xp">${player.xp.toLocaleString()} XP</div>
+                    </div>
+                </div>
+            `;
+            }).join('');
+            podiumEl.style.display = '';
+        } else if (top3.length > 0) {
+            // Not enough for podium, just show what we have
+            podiumEl.innerHTML = top3.map(player => `
+                <div class="lb-podium-player" onclick="showUserComparison('${player.id}', '${escapeHtml(player.username)}', ${player.xp}, ${player.rank})">
+                    <div class="lb-podium-avatar">${player.username.charAt(0).toUpperCase()}</div>
+                    <div class="lb-podium-pedestal">
+                        <div class="lb-podium-rank">#${player.rank}</div>
+                        <div class="lb-podium-name">${escapeHtml(player.username.split(' ')[0])}</div>
+                        <div class="lb-podium-xp">${player.xp.toLocaleString()} XP</div>
+                    </div>
+                </div>
+            `).join('');
+            podiumEl.style.display = '';
+        } else {
+            podiumEl.style.display = 'none';
+        }
+    }
+
+    // Render table rows (4th place onwards)
+    rest.forEach(player => {
+        const playerLeague = getLeagueInfo(player.xp);
+        const row = document.createElement('div');
+        row.className = `leaderboard-row ${player.id === state.user.id ? 'is-user' : ''}`;
+        if (player.id === state.user.id) row.id = 'lb-user-row';
+        row.onclick = () => showUserComparison(player.id, player.username, player.xp, player.rank);
+        row.innerHTML = `
+            <div class="rank-col">${player.rank}</div>
+            <div class="user-col">
+                <div class="user-avatar-lb" style="background: ${playerLeague.color};">${player.username.charAt(0).toUpperCase()}</div>
+                <div class="user-name">
+                    <span class="font-bold">${escapeHtml(player.username)}</span>
+                    <span class="lb-league-tag ${playerLeague.cssClass}">${playerLeague.icon} ${playerLeague.name}</span>
+                </div>
+            </div>
+            <div class="xp-col">${player.xp.toLocaleString()} <small>XP</small></div>
+        `;
+        list.appendChild(row);
+    });
+
+    // If no rows in rest, show a message
+    if (rest.length === 0 && top3.length > 0) {
+        list.innerHTML = `<div class="p-6 text-center text-secondary text-sm">All players shown in the podium above.</div>`;
+    }
+
+    // Handle Sticky Row (if user is not in top items shown)
+    const userInList = players.some(p => p.id === state.user.id);
+    if (!userInList && state.leaderboard.userRank && sticky) {
+        sticky.classList.remove('hidden');
+        sticky.innerHTML = `
+            <div class="rank-col">${state.leaderboard.userRank}</div>
+            <div class="user-col">
+                <div class="user-avatar-lb" style="background: ${userLeagueInfo.color}; color: white;">${(state.user.username || 'U').charAt(0).toUpperCase()}</div>
+                <div class="user-name">
+                    <span class="font-bold">${escapeHtml(state.user.username || 'You')}</span>
+                    <span class="lb-league-tag ${userLeagueInfo.cssClass}">${userLeagueInfo.icon} ${userLeagueInfo.name}</span>
+                </div>
+            </div>
+            <div class="xp-col">${state.leaderboard.userXP.toLocaleString()} <small>XP</small></div>
+        `;
+    } else if (sticky) {
+        sticky.classList.add('hidden');
+    }
+
+    // Auto-scroll to user's row
+    requestAnimationFrame(() => {
+        const userRow = document.getElementById('lb-user-row');
+        if (userRow) {
+            setTimeout(() => {
+                userRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
+        }
+    });
+}
+
+// Show User Comparison Modal
+function showUserComparison(playerId, playerName, playerXP, playerRank) {
+    if (playerId === state.user.id) return; // Don't compare with self
+
+    const modal = document.getElementById('user-comparison-modal');
+    const vsSection = document.getElementById('comparison-vs-section');
+    const statsSection = document.getElementById('comparison-stats');
+    if (!modal) return;
+
+    const userLeague = getLeagueInfo(state.leaderboard.userXP);
+    const otherLeague = getLeagueInfo(playerXP);
+    const userName = state.user.username || 'You';
+    const userXP = state.leaderboard.userXP;
+    const userRank = state.leaderboard.userRank;
+
+    // VS Section
+    vsSection.innerHTML = `
+        <div class="comparison-player">
+            <div class="comparison-avatar" style="background: ${userLeague.color};">${userName.charAt(0).toUpperCase()}</div>
+            <div class="comparison-player-name">${escapeHtml(userName)}</div>
+            <div class="comparison-player-league" style="color: ${userLeague.color};">${userLeague.icon} ${userLeague.name}</div>
+        </div>
+        <div class="comparison-vs-badge">VS</div>
+        <div class="comparison-player">
+            <div class="comparison-avatar" style="background: ${otherLeague.color};">${playerName.charAt(0).toUpperCase()}</div>
+            <div class="comparison-player-name">${escapeHtml(playerName)}</div>
+            <div class="comparison-player-league" style="color: ${otherLeague.color};">${otherLeague.icon} ${otherLeague.name}</div>
+        </div>
+    `;
+
+    // Stats Section
+    const stats = [
+        { label: 'Total XP', left: userXP, right: playerXP, format: v => v.toLocaleString() },
+        { label: 'Rank', left: userRank, right: playerRank, format: v => `#${v}`, lowerBetter: true },
+        { label: 'League', left: userLeague.name, right: otherLeague.name, format: v => v, isText: true }
+    ];
+
+    const leagueOrder = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
+
+    statsSection.innerHTML = stats.map(s => {
+        let leftClass = '', rightClass = '';
+        if (!s.isText) {
+            if (s.lowerBetter) {
+                leftClass = s.left < s.right ? 'is-winning' : s.left > s.right ? 'is-losing' : '';
+                rightClass = s.right < s.left ? 'is-winning' : s.right > s.left ? 'is-losing' : '';
+            } else {
+                leftClass = s.left > s.right ? 'is-winning' : s.left < s.right ? 'is-losing' : '';
+                rightClass = s.right > s.left ? 'is-winning' : s.right < s.left ? 'is-losing' : '';
+            }
+        } else {
+            const li = leagueOrder.indexOf(s.left);
+            const ri = leagueOrder.indexOf(s.right);
+            leftClass = li > ri ? 'is-winning' : li < ri ? 'is-losing' : '';
+            rightClass = ri > li ? 'is-winning' : ri < li ? 'is-losing' : '';
+        }
+        return `
+            <div class="comparison-stat-row">
+                <div class="comparison-stat-val left ${leftClass}">${s.format(s.left)}</div>
+                <div class="comparison-stat-label">${s.label}</div>
+                <div class="comparison-stat-val right ${rightClass}">${s.format(s.right)}</div>
+            </div>
+        `;
+    }).join('');
+
+    modal.classList.remove('hidden');
+    modal.querySelector('.modal')?.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+}
+
+// Show XP Explainer Modal
+function showXPExplainer() {
+    const modal = document.getElementById('xp-explainer-modal');
+    const leaguesList = document.getElementById('xp-leagues-list');
+    if (!modal) return;
+
+    const userLeague = getLeagueInfo(state.leaderboard.userXP);
+    const leagues = [
+        { icon: '🥉', name: 'Bronze', range: '0 – 999 XP', key: 'Bronze' },
+        { icon: '🥈', name: 'Silver', range: '1,000 – 2,499 XP', key: 'Silver' },
+        { icon: '🥇', name: 'Gold', range: '2,500 – 4,999 XP', key: 'Gold' },
+        { icon: '🏅', name: 'Platinum', range: '5,000 – 9,999 XP', key: 'Platinum' },
+        { icon: '💎', name: 'Diamond', range: '10,000+ XP', key: 'Diamond' }
+    ];
+
+    leaguesList.innerHTML = `<h4>League Tiers</h4>` + leagues.map(l => `
+        <div class="xp-league-row ${l.key === userLeague.name ? 'is-current' : ''}">
+            <span class="xp-league-icon">${l.icon}</span>
+            <span class="xp-league-name">${l.name}${l.key === userLeague.name ? ' ← You' : ''}</span>
+            <span class="xp-league-range">${l.range}</span>
+        </div>
+    `).join('');
+
+    modal.classList.remove('hidden');
+    modal.querySelector('.modal')?.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+}
+
+// Leaderboard Tabs
+document.querySelectorAll('#leaderboard-view .lb-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('#leaderboard-view .lb-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadLeaderboard();
+    });
+});
+
+// Study Exit Modal Listeners
+const confirmQuitBtn = document.getElementById('confirm-quit-btn');
+const resumeStudyBtn = document.getElementById('resume-study-btn');
+
+if (confirmQuitBtn) {
+    confirmQuitBtn.addEventListener('click', () => {
+        // Close the exit modal first
+        const exitModal = document.getElementById('study-exit-modal');
+        if (exitModal) exitModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+
+        const action = state.studyExitPendingAction;
+        state.studyExitPendingAction = null;
+        exitStudyMode(true, action); // Force exit and run action if any
+    });
+}
+
+if (resumeStudyBtn) {
+    resumeStudyBtn.addEventListener('click', () => {
+        // Just close the exit modal and resume studying
+        const exitModal = document.getElementById('study-exit-modal');
+        if (exitModal) exitModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+        state.studyExitPendingAction = null;
     });
 }

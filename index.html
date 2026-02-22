@@ -556,9 +556,18 @@
                         </svg>
                         Insights
                     </button>
+                    <button id="nav-leaderboard" class="nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            class="icon-sm">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1.001A3.75 3.75 0 0012 18z" />
+                        </svg>
+                        Leaderboard
+                    </button>
                     <!-- Admin Tab (Hidden by default) -->
-                    <button id="nav-admin" class="nav-item hidden"
-                        onclick="switchView('admin-view'); updateNav('nav-admin'); loadAdminDashboard();">
+                    <button id="nav-admin" class="nav-item hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                             class="icon-sm">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -650,7 +659,7 @@
 
                         <!-- Daily AI Insights Container -->
                         <div id="daily-ai-insights-container" class="daily-ai-insights-card hidden">
-                            <div class="flex items-start gap-3 mb-4">
+                            <div class="flex items-start gap-3">
                                 <!-- Icon removed -->
                                 <p class="ai-insights-text" id="ai-insights-text">Loading your personalized insight...
                                 </p>
@@ -682,14 +691,6 @@
                                 <p class="text-sm text-secondary">days in a row</p>
                             </div>
                             <div class="stat-panel">
-                                <h3>Retention Rate</h3>
-                                <div class="relative w-32 h-32">
-                                    <canvas id="retention-donut"></canvas>
-                                    <div class="absolute inset-0 flex items-center justify-center text-xl font-bold"
-                                        style="font-size: 1rem;" id="retention-text">--%</div>
-                                </div>
-                            </div>
-                            <div class="stat-panel">
                                 <h3>Total Mastery</h3>
                                 <div class="w-full px-4">
                                     <div class="flex justify-between text-sm mb-2" style="margin-bottom: 10px;">
@@ -702,6 +703,28 @@
                                     </div>
                                     <p class="text-lg font-bold text-secondary mt-3" style="margin-top: 10px;"
                                         id="mastery-label">Beginner</p>
+                                </div>
+                            </div>
+                            <div class="stat-panel" id="today-leaderboard-widget" style="cursor: pointer;"
+                                onclick="switchView('leaderboard-view'); updateNav('nav-leaderboard'); loadLeaderboard();">
+                                <div class="w-full px-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3>Global Rank</h3>
+                                        <span class="text-xs text-primary font-bold">VIEW ALL</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="rank-number text-3xl font-bold" id="today-user-rank">--</div>
+                                        <div class="rank-info">
+                                            <div class="text-sm font-semibold" id="today-user-league">Bronze League
+                                            </div>
+                                            <div class="text-xs text-secondary"><span id="today-user-xp">0</span> XP
+                                                total
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mini-leaderboard-list mt-3" id="today-mini-leaderboard">
+                                        <!-- Top 3 mini list injected here -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -793,6 +816,26 @@
                                 <p>Deep analytics of your learning velocity and knowledge retention.</p>
                             </div>
 
+                            <!-- Highlights Grid -->
+                            <div class="insights-highlights-grid">
+                                <div class="stat-card-premium">
+                                    <span class="stat-label">Total Reviews</span>
+                                    <div id="stats-total-reviews" class="stat-value">0</div>
+                                </div>
+                                <div class="stat-card-premium">
+                                    <span class="stat-label">Retention Rate</span>
+                                    <div id="stats-retention-rate" class="stat-value">0%</div>
+                                </div>
+                                <div class="stat-card-premium">
+                                    <span class="stat-label">Current Streak</span>
+                                    <div id="stats-streak" class="stat-value">0</div>
+                                </div>
+                                <div class="stat-card-premium">
+                                    <span class="stat-label">Cards Mastered</span>
+                                    <div id="stats-mastered" class="stat-value">0</div>
+                                </div>
+                            </div>
+
                             <!-- AI Recommendation Banner -->
                             <div class="ai-insights-banner-premium">
                                 <div class="ai-badge">
@@ -806,242 +849,216 @@
                                 <div id="ai-insight-main-text" class="ai-recommendation-text">
                                     Analyze your data to get personalized study recommendations...
                                 </div>
-                                <div class="ai-stats-pill-group">
-                                    <div class="ai-stat-pill">
-                                        <span class="ai-stat-pill-label">Daily Average</span>
-                                        <span id="ai-daily-avg" class="ai-stat-pill-value">--</span>
+                                <div class="ai-meta-grid">
+                                    <div class="ai-meta-item">
+                                        <span class="ai-meta-label">Daily Avg</span>
+                                        <span id="ai-daily-avg" class="ai-meta-value">--</span>
                                     </div>
-                                    <div class="ai-stat-pill">
-                                        <span class="ai-stat-pill-label">Study Time</span>
-                                        <span id="ai-total-hours" class="ai-stat-pill-value">-- hours</span>
+                                    <div class="ai-meta-item">
+                                        <span class="ai-meta-label">Study Time</span>
+                                        <span id="ai-total-hours" class="ai-meta-value">--</span>
                                     </div>
-                                    <div class="ai-stat-pill">
-                                        <span class="ai-stat-pill-label">Prediction</span>
-                                        <span id="ai-prediction" class="ai-stat-pill-value">Steady Growth</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Top Stats Grid -->
-                            <div class="insights-grid-top">
-                                <div class="card-insight-main">
-                                    <div class="insight-icon-bg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" class="icon-sm">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                                        </svg>
-                                    </div>
-                                    <div class="insight-val-group">
-                                        <span id="stats-total-reviews" class="insight-val">0</span>
-                                    </div>
-                                    <span class="insight-label">Total Reviews</span>
-                                    <div class="insight-trend trend-up">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                            class="icon-xs">
-                                            <path fill-rule="evenodd"
-                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                        Lifetime
-                                    </div>
-                                </div>
-
-                                <div class="card-insight-main">
-                                    <div class="insight-icon-bg" style="color: #10b981; background: #ecfdf5;">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" class="icon-sm">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                    <div class="insight-val-group">
-                                        <span id="stats-retention-rate" class="insight-val">0%</span>
-                                    </div>
-                                    <span class="insight-label">Retention Rate</span>
-                                    <div class="insight-trend trend-neutral">
-                                        30d Accuracy
-                                    </div>
-                                </div>
-
-                                <div class="card-insight-main">
-                                    <div class="insight-icon-bg" style="color: #f59e0b; background: #fffbeb;">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" class="icon-sm">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
-                                        </svg>
-                                    </div>
-                                    <div class="insight-val-group">
-                                        <span id="stats-streak" class="insight-val">0</span>
-                                        <span class="insight-unit">days</span>
-                                    </div>
-                                    <span class="insight-label">Current Streak</span>
-                                    <div class="insight-trend trend-up">
-                                        Active
-                                    </div>
-                                </div>
-
-                                <div class="card-insight-main">
-                                    <div class="insight-icon-bg" style="color: #6366f1; background: #eef2ff;">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" class="icon-sm">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75c1.133 0 2.19-.313 3.087-.855m-4.225 3.63a5.981 5.981 0 003.064-3.63c.346-1.174.526-2.41.526-3.693V8.443m6 4.357L12 12.75" />
-                                        </svg>
-                                    </div>
-                                    <div class="insight-val-group">
-                                        <span id="stats-mastered" class="insight-val">0</span>
-                                    </div>
-                                    <span class="insight-label">Mastered Cards</span>
-                                    <div class="insight-trend trend-neutral">
-                                        Mature Memory
+                                    <div class="ai-meta-item">
+                                        <span class="ai-meta-label">Next Milestone</span>
+                                        <span id="ai-prediction" class="ai-meta-value">--</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="insights-viz-grid">
-                                <!-- Main Study Rhythm -->
-                                <div class="viz-card">
-                                    <div class="viz-card-header">
-                                        <div>
-                                            <h3 class="viz-title">Study Rhythm</h3>
-                                            <span class="viz-subtitle">Activity heatmap & trend analysis</span>
-                                        </div>
-                                        <div id="activity-pulse-summary" class="text-right">
-                                            <span style="font-size: 1.125rem; font-weight: 800; color: var(--primary);"
-                                                id="best-day-val">--</span>
-                                            <div
-                                                style="font-size: 0.65rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
-                                                Best Day</div>
+                            <!-- Charts Grid -->
+                            <div class="charts-grid">
+                                <div class="stat-card">
+                                    <div class="stat-header">
+                                        <h3>Activity Heatmap</h3>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs text-secondary">Best:</span>
+                                            <span id="best-day-val" class="text-xs font-bold text-primary">--</span>
                                         </div>
                                     </div>
-
-                                    <div id="calendar-heatmap" style="width: 100%; height: 120px; margin-bottom: 1rem;">
+                                    <div id="calendar-heatmap" style="height: 200px;"></div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-header">
+                                        <h3>Learning Profile</h3>
                                     </div>
-
-                                    <!-- Heatmap Legend -->
-                                    <div
-                                        style="display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; margin-bottom: 2rem; padding-right: 0.5rem;">
-                                        <span
-                                            style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 600;">Less</span>
-                                        <div style="display: flex; gap: 2px;">
-                                            <div
-                                                style="width: 10px; height: 10px; background: #f1f5f9; border-radius: 2px;">
-                                            </div>
-                                            <div
-                                                style="width: 10px; height: 10px; background: #dbeafe; border-radius: 2px;">
-                                            </div>
-                                            <div
-                                                style="width: 10px; height: 10px; background: #93c5fd; border-radius: 2px;">
-                                            </div>
-                                            <div
-                                                style="width: 10px; height: 10px; background: #3b82f6; border-radius: 2px;">
-                                            </div>
-                                            <div
-                                                style="width: 10px; height: 10px; background: #1d4ed8; border-radius: 2px;">
-                                            </div>
+                                    <div id="subject-radar-chart" style="height: 300px;"></div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-header">
+                                        <h3>Activity Trend</h3>
+                                    </div>
+                                    <div id="activity-trend-chart" style="height: 250px;"></div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-header">
+                                        <h3>Memory Maturity</h3>
+                                        <div class="flex gap-2 text-xs">
+                                            <span style="color: #94a3b8">New: <b id="mat-new-count">0</b></span>
+                                            <span style="color: #60a5fa">Young: <b id="mat-young-count">0</b></span>
+                                            <span style="color: #34d399">Mature: <b id="mat-mature-count">0</b></span>
                                         </div>
-                                        <span
-                                            style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 600;">More</span>
                                     </div>
-
-                                    <div style="position: relative;">
-                                        <h4
-                                            style="font-size: 0.7rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 1rem;">
-                                            14-Day Activity Trend</h4>
-                                        <div id="activity-trend-chart" style="width: 100%; height: 140px;"></div>
+                                    <div id="maturity-distribution-d3" style="height: 250px;"></div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-header">
+                                        <h3>Subject Mastery</h3>
+                                    </div>
+                                    <div id="subject-breakdown-container" class="flex flex-col gap-4">
+                                        <!-- Bars injected here -->
                                     </div>
                                 </div>
-
-                                <!-- Memory Maturity -->
-                                <div class="viz-card">
-                                    <div class="viz-card-header">
+                                <div class="stat-card">
+                                    <div class="stat-header">
+                                        <h3>Deck Performance</h3>
+                                    </div>
+                                    <div class="flex flex-col gap-6">
                                         <div>
-                                            <h3 class="viz-title">Memory Maturity</h3>
-                                            <span class="viz-subtitle">Distribution of card intervals</span>
-                                        </div>
-                                    </div>
-                                    <div id="maturity-distribution-d3" style="width: 100%; flex: 1; min-height: 220px;">
-                                    </div>
-                                    <div class="grid grid-cols-3 gap-2 mt-4 text-center">
-                                        <div style="padding: 0.75rem; background: #f8fafc; border-radius: 0.75rem;">
-                                            <div id="mat-new-count"
-                                                style="font-size: 1.125rem; font-weight: 800; color: #64748b;">0</div>
-                                            <div
-                                                style="font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase;">
-                                                New</div>
-                                        </div>
-                                        <div style="padding: 0.75rem; background: #f8fafc; border-radius: 0.75rem;">
-                                            <div id="mat-young-count"
-                                                style="font-size: 1.125rem; font-weight: 800; color: var(--primary);">0
-                                            </div>
-                                            <div
-                                                style="font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase;">
-                                                Learning</div>
-                                        </div>
-                                        <div style="padding: 0.75rem; background: #f8fafc; border-radius: 0.75rem;">
-                                            <div id="mat-mature-count"
-                                                style="font-size: 1.125rem; font-weight: 800; color: var(--success);">0
-                                            </div>
-                                            <div
-                                                style="font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase;">
-                                                Mastered</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" style="display: grid; gap: 16px;">
-                                <!-- Subject Radar -->
-                                <div class="viz-card lg:col-span-1">
-                                    <div class="viz-card-header">
-                                        <h3 class="viz-title">Knowledge Map</h3>
-                                    </div>
-                                    <div id="subject-radar-chart"
-                                        style="width: 100%; height: 320px; position: relative;">
-                                        <div class="chart-empty-state"
-                                            style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 0.8rem; text-align: center; padding: 2rem;">
-                                            Study across different subjects to see your strength map.
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Subject Breakdown -->
-                                <div class="viz-card lg:col-span-1">
-                                    <div class="viz-card-header">
-                                        <h3 class="viz-title">Subject Accuracy</h3>
-                                    </div>
-                                    <div id="subject-breakdown-container">
-                                        <!-- Dynamic bars -->
-                                    </div>
-                                </div>
-
-                                <!-- Performance Edge -->
-                                <div class="viz-card lg:col-span-1">
-                                    <div class="viz-card-header">
-                                        <h3 class="viz-title">Performance Edge</h3>
-                                    </div>
-                                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                                        <div>
-                                            <h4
-                                                style="font-size: 0.7rem; font-weight: 800; color: var(--success); text-transform: uppercase; margin-bottom: 0.75rem;">
-                                                Top Decks</h4>
-                                            <div id="top-decks-container"
-                                                style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                                            <h4 class="text-xs font-bold text-success uppercase mb-2">Top Performers
+                                            </h4>
+                                            <div id="top-decks-container" class="flex flex-col gap-2"></div>
                                         </div>
                                         <div>
-                                            <h4
-                                                style="font-size: 0.7rem; font-weight: 800; color: var(--danger); text-transform: uppercase; margin-bottom: 0.75rem;">
-                                                Growth Opportunities</h4>
-                                            <div id="worst-decks-container"
-                                                style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                                            <h4 class="text-xs font-bold text-danger uppercase mb-2">Needs Review</h4>
+                                            <div id="worst-decks-container" class="flex flex-col gap-2"></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </section>
+
+                    <!-- Leaderboard View -->
+                    <section id="leaderboard-view" class="view hidden">
+                        <div class="leaderboard-container">
+                            <!-- Hero Banner -->
+                            <div class="lb-hero-banner league-bronze" id="lb-hero-banner">
+                                <div class="lb-hero-content">
+                                    <div class="lb-hero-left">
+                                        <div class="lb-hero-title-row">
+                                            <!-- Heroicon: trophy -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                fill="currentColor" class="lb-hero-title-icon">
+                                                <path fill-rule="evenodd"
+                                                    d="M5.166 2.621v.858c-1.035.148-2.059.33-3.071.543a.75.75 0 00-.584.859 6.753 6.753 0 006.138 5.6 6.73 6.73 0 002.743 1.346A6.707 6.707 0 019.279 15H8.54c-1.036 0-1.875.84-1.875 1.875V19.5h-.75a2.25 2.25 0 00-2.25 2.25c0 .414.336.75.75.75h15a.75.75 0 00.75-.75 2.25 2.25 0 00-2.25-2.25h-.75v-2.625c0-1.036-.84-1.875-1.875-1.875h-.739a6.706 6.706 0 01-1.112-3.173 6.73 6.73 0 002.743-1.347 6.753 6.753 0 006.139-5.6.75.75 0 00-.585-.858 47.077 47.077 0 00-3.07-.543V2.62a.75.75 0 00-.658-.744 49.798 49.798 0 00-6.093-.377c-2.063 0-4.096.128-6.093.377a.75.75 0 00-.657.744zm0 2.629c0 1.196.312 2.32.857 3.294A5.266 5.266 0 013.16 5.337a45.6 45.6 0 012.006-.343v.256zm13.5 0v-.256c.674.1 1.343.214 2.006.343a5.265 5.265 0 01-2.863 3.207 6.72 6.72 0 00.857-3.294z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            <h2>Leaderboard</h2>
+                                        </div>
+                                        <p>Compete with learners across Singapore.</p>
+                                        <button class="lb-hero-info-btn" onclick="showXPExplainer()">
+                                            <!-- Heroicon: question-mark-circle -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                fill="currentColor" style="width:14px;height:14px;flex-shrink:0;">
+                                                <path fill-rule="evenodd"
+                                                    d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm11.378-3.917c-.89-.777-2.366-.777-3.255 0a.75.75 0 01-.988-1.129c1.454-1.272 3.776-1.272 5.23 0 1.513 1.324 1.513 3.518 0 4.842a3.75 3.75 0 01-.837.552c-.676.328-1.028.774-1.028 1.152v.75a.75.75 0 01-1.5 0v-.75c0-1.279 1.06-2.107 1.875-2.502.182-.088.351-.199.503-.331.83-.727.83-1.857 0-2.584zM12 18a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            How XP works
+                                        </button>
+                                    </div>
+                                    <div class="lb-hero-right">
+                                        <span class="lb-hero-league-icon" id="lb-league-icon">🥉</span>
+                                        <span class="lb-hero-league-name" id="lb-current-league">Bronze</span>
+                                        <span class="lb-hero-xp" id="lb-hero-xp-val">0 XP</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabs -->
+                            <div class="lb-tabs">
+                                <button class="lb-tab active" data-tab="weekly">
+                                    <!-- Heroicon: trophy (mini) -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                        class="lb-tab-svg">
+                                        <path fill-rule="evenodd"
+                                            d="M10 1c-1.828 0-3.623.149-5.371.435a.75.75 0 00-.629.74v.387c-.827.157-1.642.345-2.445.564a.75.75 0 00-.552.698 5 5 0 004.503 5.152 6 6 0 002.946 1.822A6.451 6.451 0 017.768 13H7.5A1.5 1.5 0 006 14.5V17h-.75a2.25 2.25 0 00-2.25 2.25.75.75 0 00.75.75h12.5a.75.75 0 00.75-.75A2.25 2.25 0 0014.75 17H14v-2.5a1.5 1.5 0 00-1.5-1.5h-.268a6.453 6.453 0 01-.684-2.202 6 6 0 002.946-1.822 5 5 0 004.503-5.152.75.75 0 00-.552-.698A31.804 31.804 0 0016 1.87v-.387a.75.75 0 00-.629-.74A33.227 33.227 0 0010 1zM2.525 4.822c.12-.333.244-.664.374-.992a29.36 29.36 0 012.811-.813 5 5 0 01-3.185 1.805zm14.95 0a5 5 0 01-3.185-1.805 30.09 30.09 0 012.81.813c.13.328.255.66.375.992z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <span class="lb-tab-text">Your League</span>
+                                </button>
+                                <button class="lb-tab" data-tab="monthly">
+                                    <!-- Heroicon: calendar-days (mini) -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                        class="lb-tab-svg">
+                                        <path
+                                            d="M5.25 12a.75.75 0 01.75-.75h.01a.75.75 0 01.75.75v.01a.75.75 0 01-.75.75H6a.75.75 0 01-.75-.75V12zM6 13.25a.75.75 0 00-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 00.75-.75V14a.75.75 0 00-.75-.75H6zM7.25 12a.75.75 0 01.75-.75h.01a.75.75 0 01.75.75v.01a.75.75 0 01-.75.75H8a.75.75 0 01-.75-.75V12zM8 13.25a.75.75 0 00-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 00.75-.75V14a.75.75 0 00-.75-.75H8zM9.25 10a.75.75 0 01.75-.75h.01a.75.75 0 01.75.75v.01a.75.75 0 01-.75.75H10a.75.75 0 01-.75-.75V10zM10 11.25a.75.75 0 00-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 00.75-.75V12a.75.75 0 00-.75-.75H10zM9.25 14a.75.75 0 01.75-.75h.01a.75.75 0 01.75.75v.01a.75.75 0 01-.75.75H10a.75.75 0 01-.75-.75V14zM12 9.25a.75.75 0 00-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 00.75-.75V10a.75.75 0 00-.75-.75H12zM11.25 12a.75.75 0 01.75-.75h.01a.75.75 0 01.75.75v.01a.75.75 0 01-.75.75H12a.75.75 0 01-.75-.75V12zM12 13.25a.75.75 0 00-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 00.75-.75V14a.75.75 0 00-.75-.75H12zM13.25 10a.75.75 0 01.75-.75h.01a.75.75 0 01.75.75v.01a.75.75 0 01-.75.75H14a.75.75 0 01-.75-.75V10zM14 11.25a.75.75 0 00-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 00.75-.75V12a.75.75 0 00-.75-.75H14z" />
+                                        <path fill-rule="evenodd"
+                                            d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <span class="lb-tab-text">Monthly</span>
+                                </button>
+                                <button class="lb-tab" data-tab="all-time">
+                                    <!-- Heroicon: globe-alt (mini) -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                        class="lb-tab-svg">
+                                        <path
+                                            d="M16.555 5.412a8.028 8.028 0 00-3.503-2.81 14.899 14.899 0 011.663 4.472 8.547 8.547 0 001.84-1.662zM13.326 7.825a13.43 13.43 0 00-2.413-5.773 8.087 8.087 0 00-1.826 0 13.43 13.43 0 00-2.413 5.773A13.86 13.86 0 0010 8c1.14 0 2.254-.097 3.326-.175zM6.506 8.37a15.309 15.309 0 01-1.007-3.69 8.028 8.028 0 00-3.503 2.81 8.546 8.546 0 001.84 1.662 13.4 13.4 0 002.67-.782zm7.988 0a13.4 13.4 0 002.67.782 8.546 8.546 0 001.84-1.662 8.028 8.028 0 00-3.503-2.81 15.31 15.31 0 01-1.007 3.69zM10 9.5c-1.175 0-2.327-.105-3.445-.31a13.43 13.43 0 002.413 5.773 8.087 8.087 0 001.826 0 13.429 13.429 0 002.413-5.773A13.87 13.87 0 0110 9.5zM6.632 14.588a8.027 8.027 0 003.503 2.81 13.43 13.43 0 01-1.663-4.472 8.546 8.546 0 01-1.84 1.662zM13.368 14.588a8.546 8.546 0 01-1.84-1.662 13.43 13.43 0 01-1.663 4.472 8.027 8.027 0 003.503-2.81z" />
+                                    </svg>
+                                    <span class="lb-tab-text">All Time</span>
+                                </button>
+                            </div>
+                            <div id="lb-tab-description" class="text-xs text-secondary mt-2"
+                                style="text-align: center; margin-bottom: 0.5rem;">
+                                Showing players in your league
+                            </div>
+
+                            <!-- Podium -->
+                            <div class="lb-podium" id="lb-podium">
+                                <!-- Top 3 podium injected by JS -->
+                            </div>
+
+                            <!-- Main Table (4th place onwards) -->
+                            <div class="leaderboard-main">
+                                <div class="leaderboard-header-row">
+                                    <div class="rank-col" style="display:flex;align-items:center;gap:0.3rem;">
+                                        <!-- Heroicon: hashtag (mini) -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
+                                            style="width:12px;height:12px;opacity:0.7;">
+                                            <path fill-rule="evenodd"
+                                                d="M6.368 2.204a.75.75 0 0 1 .548.89L6.52 4.25h2.96l.46-2.046a.75.75 0 1 1 1.46.328L11.04 4.25H13a.75.75 0 0 1 0 1.5h-2.29l-.5 2.25H12a.75.75 0 0 1 0 1.5H9.96l-.46 2.046a.75.75 0 1 1-1.46-.328L8.46 9.5H5.5l-.46 2.046a.75.75 0 0 1-1.46-.328L3.96 9.5H2a.75.75 0 0 1 0-1.5h2.29l.5-2.25H3a.75.75 0 0 1 0-1.5h2.04l.46-2.046a.75.75 0 0 1 .868-.548ZM8.71 8l.5-2.25H6.25L5.75 8H8.71Z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        Rank
+                                    </div>
+                                    <div class="user-col" style="gap:0.3rem;">
+                                        <!-- Heroicon: user (mini) -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                            style="width:12px;height:12px;opacity:0.7;">
+                                            <path
+                                                d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
+                                        </svg>
+                                        Learner
+                                    </div>
+                                    <div class="xp-col"
+                                        style="display:flex;align-items:center;justify-content:flex-end;gap:0.3rem;">
+                                        <!-- Heroicon: bolt (mini) -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                            style="width:12px;height:12px;opacity:0.7;">
+                                            <path
+                                                d="M11.983 1.907a.75.75 0 00-1.292-.657l-8.5 9.5A.75.75 0 002.75 12h6.572l-1.305 6.093a.75.75 0 001.292.657l8.5-9.5A.75.75 0 0017.25 8h-6.572l1.305-6.093z" />
+                                        </svg>
+                                        XP
+                                    </div>
+                                </div>
+                                <div id="global-leaderboard-list" class="leaderboard-list">
+                                    <!-- Players injected here -->
+                                    <div class="loading-state p-8 text-center">
+                                        <div class="btn-loader"></div>
+                                        <p class="mt-2 text-secondary">Fetching top learners...</p>
+                                    </div>
+                                </div>
+
+                                <!-- User's Sticky Row if not in top list -->
+                                <div id="lb-user-sticky-row" class="leaderboard-row user-sticky hidden">
+                                    <!-- User position injected here -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+
 
                     <!-- Community View -->
                     <!-- Admin View (Hidden by default) -->
@@ -1051,9 +1068,11 @@
                                 <h2 class="text-2xl font-bold">Admin Dashboard</h2>
                                 <div class="tabs">
                                     <button class="tab-btn active" id="admin-feedback-tab"
-                                        onclick="switchAdminTab('feedback')">User Feedbacks</button>
+                                        onclick="switchAdminTab('feedback')">User
+                                        Feedbacks</button>
                                     <button class="tab-btn" id="admin-support-tab"
-                                        onclick="switchAdminTab('support')">Support Chats</button>
+                                        onclick="switchAdminTab('support')">Support
+                                        Chats</button>
                                 </div>
                             </div>
 
@@ -1911,43 +1930,7 @@
                             </div>
 
                             <div id="study-summary-body">
-                                <!-- Stats injected here -->
-                            </div>
-
-                            <div class="session-info-stats"
-                                style="margin: 2rem 0; text-align: left; background: var(--surface-hover); padding: 1.5rem; border-radius: 1.25rem; border: 1px solid var(--border);">
-                                <div
-                                    style="display: flex; justify-content: space-between; margin-bottom: 1rem; align-items: center;">
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <div
-                                            style="width: 10px; height: 10px; border-radius: 50%; background: var(--warning);">
-                                        </div>
-                                        <span class="text-sm font-semibold">Difficult Cards</span>
-                                    </div>
-                                    <span id="summary-difficult-count" class="badge"
-                                        style="background: var(--warning-light, #fef3c7); color: var(--warning); border: none; font-weight: 700;">0</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <div
-                                            style="width: 10px; height: 10px; border-radius: 50%; background: var(--success);">
-                                        </div>
-                                        <span class="text-sm font-semibold">Easy Cards</span>
-                                    </div>
-                                    <span id="summary-easy-count" class="badge"
-                                        style="background: var(--success-light, #dcfce7); color: var(--success); border: none; font-weight: 700;">0</span>
-                                </div>
-                            </div>
-
-                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                                <button id="summary-finish-btn" class="btn btn-primary btn-lg w-full"
-                                    style="height: 56px; border-radius: 1rem; font-weight: 700;">
-                                    Continue Learning
-                                </button>
-                                <button id="back-to-deck-btn" class="btn btn-text w-full"
-                                    style="height: 48px; font-weight: 600;">
-                                    Return to Deck
-                                </button>
+                                <!-- Stats and sequence injected here via JS -->
                             </div>
                         </div>
                     </section>
@@ -2195,7 +2178,8 @@
                         <button class="settings-tab-btn" data-tab="settings-support">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                                 stroke="currentColor" class="icon-xs">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
                             </svg>
                             Live Support
                         </button>
@@ -3003,6 +2987,34 @@
 
     <script src="landing-nav.js" defer></script>
     <script src="script.js" defer></script>
+    <script src="welcome.js" defer></script>
+
+    <!-- Study Exit Confirmation Modal -->
+    <div id="study-exit-modal" class="custom-overlay hidden">
+        <div class="modal" style="max-width: 400px; text-align: center; padding: 2.5rem;">
+            <div
+                style="background: #fff7ed; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: #f97316;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" style="width: 32px; height: 32px;">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+            </div>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.75rem; color: var(--text-primary);">Exit
+                Session?</h3>
+            <p style="color: var(--text-secondary); line-height: 1.5; margin-bottom: 2rem;">
+                You haven't finished this session. If you exit now, <strong>you'll lose any XP</strong> you earned from
+                the cards you just studied.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <button id="confirm-quit-btn" class="btn btn-danger btn-lg w-full" style="padding: 1rem;">Yes, Exit &
+                    Lose XP</button>
+                <button id="resume-study-btn" class="btn btn-secondary btn-lg w-full"
+                    style="padding: 1rem; background: var(--surface-hover); border-color: var(--border);">No, Keep
+                    Going</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Relocated Modals (Custom Overlay) -->
     <div id="create-group-modal" class="custom-overlay hidden">
@@ -3163,6 +3175,161 @@
                     <button type="submit" class="btn btn-primary">Add to Group</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Leaderboard Rank Change Modal -->
+    <div id="leaderboard-rank-modal" class="custom-overlay hidden" style="z-index: 3000;">
+        <div class="modal rank-modal-content text-center">
+            <div class="confetti-container" id="rank-confetti"></div>
+            <div class="rank-animation-wrapper">
+                <h2 class="text-3xl font-bold mb-2">Session Complete!</h2>
+                <div class="rank-display-box mt-6">
+                    <div class="rank-movement-container">
+                        <div class="rank-old" id="rank-old-val">#--</div>
+                        <div class="rank-arrow">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
+                                stroke="currentColor" class="icon-md">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4.5 12.75l7.5-7.5 7.5 7.5m-15 6l7.5-7.5 7.5 7.5" />
+                            </svg>
+                        </div>
+                        <div class="rank-new" id="rank-new-val">#--</div>
+                    </div>
+                </div>
+                <div class="xp-earned-banner mt-4">
+                    <span class="xp-value" id="session-xp-gain">+0</span> XP earned
+                </div>
+                <p class="mt-4 text-secondary" id="rank-message">You're climbing the leaderboard!</p>
+                <div class="modal-actions mt-8">
+                    <button class="btn btn-primary btn-lg w-full" id="close-rank-modal">Awesome!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Comparison Modal -->
+    <div id="user-comparison-modal" class="custom-overlay hidden" style="z-index: 3000;">
+        <div class="modal comparison-modal-content">
+            <div class="comparison-header">
+                <!-- Heroicon: scale (as VS indicator) -->
+                <div style="margin-bottom:0.5rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                        style="width:28px;height:28px;color:var(--primary);margin:0 auto;display:block;">
+                        <path fill-rule="evenodd"
+                            d="M12 2.25a.75.75 0 01.75.75v.756a49.106 49.106 0 019.152 1 .75.75 0 01-.152 1.485h-1.918l2.474 10.124a.75.75 0 01-.375.84A6.723 6.723 0 0118.75 18a6.723 6.723 0 01-3.181-.795.75.75 0 01-.375-.84l2.474-10.124H12.75v13.28c1.293.076 2.534.343 3.697.776a.75.75 0 01-.262 1.453h-8.37a.75.75 0 01-.262-1.453c1.162-.433 2.404-.7 3.697-.776V6.241h-4.43l2.474 10.124a.75.75 0 01-.375.84A6.723 6.723 0 015.25 18a6.723 6.723 0 01-3.181-.795.75.75 0 01-.375-.84L4.168 6.241H2.25a.75.75 0 01-.152-1.485 49.105 49.105 0 019.152-1V3a.75.75 0 01.75-.75zm4.878 13.543l1.872-7.662 1.872 7.662h-3.744zm-9.756 0L5.25 8.131l-1.872 7.662h3.744z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <h3>Head to Head</h3>
+            </div>
+            <div class="comparison-vs-section" id="comparison-vs-section">
+                <!-- Injected by JS -->
+            </div>
+            <div class="comparison-stats" id="comparison-stats">
+                <!-- Injected by JS -->
+            </div>
+            <div class="comparison-actions">
+                <button class="btn btn-primary w-full"
+                    onclick="document.getElementById('user-comparison-modal').classList.add('hidden'); document.body.classList.remove('modal-open');">Got
+                    it</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- XP System Explainer Modal -->
+    <div id="xp-explainer-modal" class="custom-overlay hidden" style="z-index: 3000;">
+        <div class="modal xp-explainer-content">
+            <div class="xp-explainer-header">
+                <!-- Heroicon: bolt -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                    style="width:32px;height:32px;color:var(--primary);margin:0 auto 0.5rem;display:block;">
+                    <path fill-rule="evenodd"
+                        d="M14.615 1.595a.75.75 0 01.359.852L12.982 9.75h7.268a.75.75 0 01.548 1.262l-10.5 11.25a.75.75 0 01-1.272-.71l1.992-7.302H3.818a.75.75 0 01-.548-1.262l10.5-11.25a.75.75 0 01.845-.143z"
+                        clip-rule="evenodd" />
+                </svg>
+                <h3>How XP Works</h3>
+                <p>Earn XP through studying to climb the leaderboard</p>
+            </div>
+            <div class="xp-explainer-body">
+                <div class="xp-earn-methods">
+                    <h4>Ways to Earn XP</h4>
+                    <div class="xp-method-item">
+                        <div class="xp-method-icon">
+                            <!-- Heroicon: rectangle-stack (cards) -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                style="width:18px;height:18px;color:var(--primary);">
+                                <path
+                                    d="M4.632 3.533A2 2 0 016.577 2h6.846a2 2 0 011.945 1.533l1.976 8.234A3.489 3.489 0 0016 11.5H4c-.476 0-.93.095-1.344.267l1.976-8.234z" />
+                                <path fill-rule="evenodd"
+                                    d="M4 13a2 2 0 100 4h12a2 2 0 100-4H4zm11.24 2a.75.75 0 01.75-.75H16a.75.75 0 01.75.75v.01a.75.75 0 01-.75.75h-.01a.75.75 0 01-.75-.75V15zm-2.25-.75a.75.75 0 00-.75.75v.01c0 .414.336.75.75.75H13a.75.75 0 00.75-.75V15a.75.75 0 00-.75-.75h-.01z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="xp-method-info">
+                            <strong>Review Cards</strong>
+                            <span>Earn XP for every card you review</span>
+                        </div>
+                        <div class="xp-method-value">+10 XP</div>
+                    </div>
+                    <div class="xp-method-item">
+                        <div class="xp-method-icon">
+                            <!-- Heroicon: check-badge -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                style="width:18px;height:18px;color:#22c55e;">
+                                <path fill-rule="evenodd"
+                                    d="M16.403 12.652a3 3 0 000-5.304 3 3 0 00-3.75-3.751 3 3 0 00-5.305 0 3 3 0 00-3.751 3.75 3 3 0 000 5.305 3 3 0 003.75 3.751 3 3 0 005.305 0 3 3 0 003.751-3.75zm-2.546-4.46a.75.75 0 00-1.214-.883l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="xp-method-info">
+                            <strong>Correct Answers</strong>
+                            <span>Bonus for answering correctly</span>
+                        </div>
+                        <div class="xp-method-value">+5 XP</div>
+                    </div>
+                    <div class="xp-method-item">
+                        <div class="xp-method-icon">
+                            <!-- Heroicon: fire -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                style="width:18px;height:18px;color:#f97316;">
+                                <path fill-rule="evenodd"
+                                    d="M13.5 4.938a7 7 0 11-7.391 11.856A4.5 4.5 0 018.5 13a4.5 4.5 0 013.5-4.394V7.5a.5.5 0 01.5-.5h1zM9 8.5a1.5 1.5 0 01-1.5 1.5H7a1.5 1.5 0 010-3h.5A1.5 1.5 0 019 8.5z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="xp-method-info">
+                            <strong>Daily Streak</strong>
+                            <span>Multiplier grows with your streak</span>
+                        </div>
+                        <div class="xp-method-value">×1.5</div>
+                    </div>
+                    <div class="xp-method-item">
+                        <div class="xp-method-icon">
+                            <!-- Heroicon: flag -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                style="width:18px;height:18px;color:#eab308;">
+                                <path
+                                    d="M3.5 2.75a.75.75 0 00-1.5 0v14.5a.75.75 0 001.5 0v-4.392l1.657-.348a6.449 6.449 0 014.271.572 7.948 7.948 0 005.965.524l2.078-.64A.75.75 0 0018 12.25v-8.5a.75.75 0 00-.904-.734l-2.38.501a7.25 7.25 0 01-4.186-.363l-.502-.2a8.75 8.75 0 00-5.053-.439l-1.476.31V2.75z" />
+                            </svg>
+                        </div>
+                        <div class="xp-method-info">
+                            <strong>Complete Sessions</strong>
+                            <span>Finish all cards in a session</span>
+                        </div>
+                        <div class="xp-method-value">+50 XP</div>
+                    </div>
+                </div>
+                <div class="xp-leagues-list" id="xp-leagues-list">
+                    <h4>League Tiers</h4>
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+            <div class="xp-explainer-actions">
+                <button class="btn btn-primary w-full"
+                    onclick="document.getElementById('xp-explainer-modal').classList.add('hidden'); document.body.classList.remove('modal-open');">Got
+                    it!</button>
+            </div>
         </div>
     </div>
 
