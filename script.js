@@ -496,7 +496,11 @@ async function showApp() {
         }
     } else {
         if (sidebar) sidebar.classList.remove('guest-mode');
-        if (userDisplay) userDisplay.textContent = state.user.email;
+        if (userDisplay) {
+            userDisplay.textContent = state.user.username || state.user.email.split('@')[0];
+            userDisplay.style.cursor = 'pointer';
+            userDisplay.onclick = () => openUserProfile(state.user.id);
+        }
         if (logoutBtn) logoutBtn.classList.remove('hidden');
         setupRealtime();
         loadTags(); // Pre-load tags
@@ -600,7 +604,15 @@ async function handleDeepLinks() {
         }
     }
 
-    // --- 3. Handle Deck Link ---
+    // --- 3. Handle User Profile Deep Link ---
+    const userId = url.searchParams.get('userid');
+    if (userId) {
+        url.searchParams.delete('userid');
+        dirty = true;
+        openUserProfile(userId);
+    }
+
+    // --- 4. Handle Deck Link ---
     const deckId = url.searchParams.get('deck');
     if (deckId) {
         url.searchParams.delete('deck');
@@ -3456,6 +3468,8 @@ async function openDeck(deck) {
     // Initial Search for Related Notes
     loadRelatedNotesSuggestion(deck);
 
+    // Load Last Studied By
+    loadLastStudied(deck.id);
 }
 
 // Global variable to store current suggested keywords
@@ -4314,15 +4328,12 @@ async function startStudySession(restart = false) {
         // 4. Limits Logic
         const dailyLimit = state.settings.dailyLimit || 50;
 
-        // If "Study More" is requested, we ignore the daily completion and grant a fresh batch of 20
-        let remainingQuota = Math.max(0, dailyLimit - completedToday);
-        if (config.isStudyMore) {
-            remainingQuota = 20; // Fresh batch for extra study
-        }
+        // If "Study More" is requested, we ignore the daily completion and grant a fresh batch of dailyLimit
+        let remainingQuota = config.isStudyMore ? dailyLimit : Math.max(0, dailyLimit - completedToday);
 
         // SMART MIX: Always try to show a mix of New cards and Due cards
         // Strategy: Dedicate up to 25% of quota to New cards if available, prioritizing Due for the rest.
-        const newTargetLimit = config.isStudyMore ? 10 : Math.max(5, Math.ceil(remainingQuota * 0.25));
+        const newTargetLimit = config.isStudyMore ? Math.ceil(dailyLimit * 0.25) : Math.max(5, Math.ceil(remainingQuota * 0.25));
 
         let selectedNew = newList.slice(0, newTargetLimit);
         let remainingForDue = Math.max(0, remainingQuota - selectedNew.length);
@@ -4464,7 +4475,14 @@ const prevBtn = document.getElementById('study-prev-btn');
 if (prevBtn) {
     prevBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        prevCard();
+        if (state.currentCardIndex > 0) {
+            const lastRating = state.sessionRatings.pop();
+            if (lastRating) {
+                Object.assign(lastRating.card, lastRating.originalCardState);
+            }
+            state.currentCardIndex--;
+            showNextCard();
+        }
     });
 }
 
@@ -4718,6 +4736,7 @@ async function rateCard(rating) {
     const { interval, ease } = calculateNextReview(card, rating);
 
     // 2. Prepare updates but DO NOT send to DB yet (Buffering for session completion)
+    const originalCardState = { ...card };
     const cardUpdate = {
         id: card.id,
         deck_id: card.deck_id,
@@ -4734,6 +4753,7 @@ async function rateCard(rating) {
         cardId: card.id,
         rating: rating,
         card: card,
+        originalCardState: originalCardState,
         cardUpdate: cardUpdate,
         isOwner: trackProgress // Count all study sessions, not just owned decks
     });
@@ -4741,13 +4761,7 @@ async function rateCard(rating) {
     // 4. Update local card object immediately for UI/SRS feedback
     Object.assign(card, cardUpdate);
 
-    // 5. Requeue if Learning Step (interval < 1 day)
-    const inSession = interval < 1.0;
-    if (inSession) {
-        state.studyQueue.push(card);
-    }
-
-    // 6. Move to next card
+    // 5. Move to next card
     state.currentCardIndex++;
     showNextCard();
 }
@@ -4847,7 +4861,15 @@ async function runCompletionSequence(container, stats) {
     const oldXP = state.leaderboard.userXP;
     const { count: oldRankCount } = await sb.from('profiles').select('*', { count: 'exact', head: true }).gt('xp', oldXP);
     const oldRank = (oldRankCount || 0) + 1;
-    const xpGain = total * 10;
+
+    const baseXP = total * 10;
+    const correctCount = state.sessionRatings.filter(r => r.rating > 1).length;
+    const correctBonus = correctCount * 5;
+    const sessionBonus = 50;
+    const streakEl = document.getElementById('streak-count');
+    const streak = streakEl ? parseInt(streakEl.textContent) || 0 : 0;
+    const streakMultiplier = Math.min(1.5, 1 + (streak * 0.1));
+    const xpGain = Math.floor((baseXP + correctBonus + sessionBonus) * streakMultiplier);
 
     // 3. Wait then Slide Up Summary
     await new Promise(r => setTimeout(r, 1200));
@@ -6084,6 +6106,16 @@ async function loadStats() {
         bestDayElement.textContent = maxVal > 0 ? maxVal : '--';
     }
 
+    // Set display name and email if available
+    const displayEl = document.getElementById('user-display');
+    const emailEl = document.getElementById('user-display-email');
+    if (displayEl) {
+        displayEl.textContent = state.user.username || state.user.email.split('@')[0];
+        displayEl.style.cursor = 'pointer';
+        displayEl.onclick = () => openUserProfile(state.user.id);
+    }
+    if (emailEl) emailEl.textContent = state.user.email;
+
     // Maturity Chart Sub-counts
     const nm = document.getElementById('mat-new-count');
     const ny = document.getElementById('mat-young-count');
@@ -6476,7 +6508,7 @@ function renderCommunityDecks() {
                 <p class="community-deck-excerpt">${escapeHtml(deck.description || 'Access these flashcards and start learning today.')}</p>
                 
                 <div class="community-card-footer">
-                    <div class="creator-mini-profile">
+                    <div class="creator-mini-profile" onclick="event.stopPropagation(); window.openUserProfile('${deck.user_id || deck.profiles?.id}')" style="cursor:pointer;" title="View Profile">
                         <div class="creator-avatar">${(deck.profiles?.username || 'U').charAt(0).toUpperCase()}</div>
                         <div class="creator-info">
                             <span class="creator-label">Shared by</span>
@@ -6568,7 +6600,6 @@ async function executeCommunitySearch() {
         .filter(d => (d.profiles?.username || '').toLowerCase().includes(val))
         .map(d => d.profiles?.username))]
         .filter(u => u);
-
     if (userMatches.length > 0) {
         const section = document.createElement('div');
         section.style.marginBottom = '3rem';
@@ -6577,12 +6608,16 @@ async function executeCommunitySearch() {
                 <span style="font-size: 0.875rem; font-weight: 800; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.15em; white-space: nowrap;">CREATORS</span>
             </div>
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                ${userMatches.map(u => `
-                    <div class="user-chip hover-card" onclick="setCommunitySearch('${escapeHtml(u)}')">
+                ${userMatches.map(u => {
+            const userDecks = state.communityDecks.filter(d => (d.profiles?.username || '') === u);
+            const uid = userDecks.length > 0 ? (userDecks[0].user_id || userDecks[0].profiles?.id) : '';
+            return `
+                    <div class="user-chip hover-card" onclick="window.openUserProfile('${uid}')" title="View Profile">
                         <div class="user-avatar-xs">${u.charAt(0).toUpperCase()}</div>
                         <span class="font-bold text-sm">${escapeHtml(u)}</span>
                     </div>
-                `).join('')}
+                `
+        }).join('')}
             </div>`;
         results.appendChild(section);
     }
@@ -6637,7 +6672,7 @@ async function executeCommunitySearch() {
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
                         <div style="display: flex; align-items: center; gap: 1.25rem; flex: 1;">
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;" onclick="event.stopPropagation(); window.openUserProfile('${deck.user_id || deck.profiles?.id}')" title="View Profile">
                                 <div class="creator-avatar" style="width:28px; height:28px; font-size:0.75rem">${(deck.profiles?.username || 'U').charAt(0).toUpperCase()}</div>
                                 <div style="display: flex; align-items: center; gap: 0.375rem; font-size: 0.8rem; color: var(--text-secondary);">
                                     <span>by</span>
@@ -6699,6 +6734,82 @@ function getSkeletonLoadingCards(count = 3) {
         `;
     }
     return skeletons;
+}
+
+function getProfileSkeleton() {
+    return `
+        <div style="max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 5rem 1rem; opacity: 0.8;">
+            <!-- Header Skeleton -->
+            <div style="display: flex; align-items: flex-end; gap: 2.5rem; margin-bottom: 2.5rem; padding-bottom: 2.5rem; border-bottom: 1px solid var(--border);">
+                <div class="skeleton-avatar" style="width: 110px; height: 110px; border-radius: 50%; background: var(--border); overflow: hidden; position: relative;">
+                    <div class="skeleton-shimmer"></div>
+                </div>
+                <div style="flex: 1;">
+                    <div class="skeleton-text" style="width: 240px; height: 2.25rem; margin-bottom: 1rem; background: var(--border); position: relative; overflow: hidden;">
+                        <div class="skeleton-shimmer"></div>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <div class="skeleton-text" style="width: 120px; height: 1.5rem; border-radius: 99px; background: var(--border); position: relative; overflow: hidden;">
+                            <div class="skeleton-shimmer"></div>
+                        </div>
+                        <div class="skeleton-text" style="width: 80px; height: 1.5rem; background: var(--border); position: relative; overflow: hidden;">
+                            <div class="skeleton-shimmer"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 320px; gap: 2.5rem;">
+                <div style="display: flex; flex-direction: column; gap: 2.5rem;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;">
+                        <div class="skeleton-card" style="height: 80px; background: var(--border); border-radius: var(--radius-lg); position: relative; overflow: hidden; min-height: auto; padding: 0;">
+                            <div class="skeleton-shimmer"></div>
+                        </div>
+                        <div class="skeleton-card" style="height: 80px; background: var(--border); border-radius: var(--radius-lg); position: relative; overflow: hidden; min-height: auto; padding: 0;">
+                            <div class="skeleton-shimmer"></div>
+                        </div>
+                        <div class="skeleton-card" style="height: 80px; background: var(--border); border-radius: var(--radius-lg); position: relative; overflow: hidden; min-height: auto; padding: 0;">
+                            <div class="skeleton-shimmer"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="skeleton-text" style="width: 150px; height: 1.25rem; margin-bottom: 1.25rem; background: var(--border); position: relative; overflow: hidden;">
+                            <div class="skeleton-shimmer"></div>
+                        </div>
+                        <div style="display: flex; gap: 0.75rem;">
+                            <div class="skeleton-text" style="width: 100px; height: 2.5rem; border-radius: var(--radius); background: var(--border); position: relative; overflow: hidden;">
+                                <div class="skeleton-shimmer"></div>
+                            </div>
+                            <div class="skeleton-text" style="width: 100px; height: 2.5rem; border-radius: var(--radius); background: var(--border); position: relative; overflow: hidden;">
+                                <div class="skeleton-shimmer"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="skeleton-text" style="width: 180px; height: 1.25rem; margin-bottom: 1.25rem; background: var(--border); position: relative; overflow: hidden;">
+                            <div class="skeleton-shimmer"></div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                            <div class="skeleton-card" style="height: 140px; background: var(--border); border-radius: var(--radius-lg); position: relative; overflow: hidden; min-height: auto; padding: 0;">
+                                <div class="skeleton-shimmer"></div>
+                            </div>
+                            <div class="skeleton-card" style="height: 140px; background: var(--border); border-radius: var(--radius-lg); position: relative; overflow: hidden; min-height: auto; padding: 0;">
+                                <div class="skeleton-shimmer"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 2rem;">
+                    <div class="skeleton-card" style="height: 280px; background: var(--border); border-radius: var(--radius-lg); position: relative; overflow: hidden; min-height: auto; padding: 0;">
+                        <div class="skeleton-shimmer"></div>
+                    </div>
+                    <div class="skeleton-card" style="height: 48px; background: var(--border); border-radius: var(--radius-lg); position: relative; overflow: hidden; min-height: auto; padding: 0;">
+                        <div class="skeleton-shimmer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function getComponentLoader(message = 'Loading...') {
@@ -9429,6 +9540,9 @@ async function renderTodayLeaderboard() {
 }
 
 function getLeagueName(xp) {
+    if (xp >= 100000) return 'Legend League';
+    if (xp >= 50000) return 'Grandmaster League';
+    if (xp >= 25000) return 'Master League';
     if (xp >= 10000) return 'Diamond League';
     if (xp >= 5000) return 'Platinum League';
     if (xp >= 2500) return 'Gold League';
@@ -9437,6 +9551,9 @@ function getLeagueName(xp) {
 }
 
 function getLeagueInfo(xp) {
+    if (xp >= 100000) return { name: 'Legend', icon: '👑', color: '#dc2626', cssClass: 'league-legend' };
+    if (xp >= 50000) return { name: 'Grandmaster', icon: '🌠', color: '#7c3aed', cssClass: 'league-grandmaster' };
+    if (xp >= 25000) return { name: 'Master', icon: '⚡', color: '#db2777', cssClass: 'league-master' };
     if (xp >= 10000) return { name: 'Diamond', icon: '💎', color: '#6366f1', cssClass: 'league-diamond' };
     if (xp >= 5000) return { name: 'Platinum', icon: '🏅', color: '#14b8a6', cssClass: 'league-platinum' };
     if (xp >= 2500) return { name: 'Gold', icon: '🥇', color: '#eab308', cssClass: 'league-gold' };
@@ -9503,7 +9620,7 @@ function renderLeaderboard() {
                 const pLeague = getLeagueInfo(player.xp);
                 return `
                 <div class="lb-podium-player" onclick="showUserComparison('${player.id}', '${escapeHtml(player.username)}', ${player.xp}, ${player.rank})">
-                    <div class="lb-podium-avatar">${player.username.charAt(0).toUpperCase()}</div>
+                    <div class="lb-podium-avatar" style="background: ${pLeague.color};">${player.username.charAt(0).toUpperCase()}</div>
                     <div class="lb-podium-pedestal">
                         <div class="lb-podium-rank">#${player.rank}</div>
                         <div class="lb-podium-name">${escapeHtml(player.username.split(' ')[0])}</div>
@@ -9515,16 +9632,19 @@ function renderLeaderboard() {
             podiumEl.style.display = '';
         } else if (top3.length > 0) {
             // Not enough for podium, just show what we have
-            podiumEl.innerHTML = top3.map(player => `
+            podiumEl.innerHTML = top3.map(player => {
+                const pLeague = getLeagueInfo(player.xp);
+                return `
                 <div class="lb-podium-player" onclick="showUserComparison('${player.id}', '${escapeHtml(player.username)}', ${player.xp}, ${player.rank})">
-                    <div class="lb-podium-avatar">${player.username.charAt(0).toUpperCase()}</div>
+                    <div class="lb-podium-avatar" style="background: ${pLeague.color};">${player.username.charAt(0).toUpperCase()}</div>
                     <div class="lb-podium-pedestal">
                         <div class="lb-podium-rank">#${player.rank}</div>
                         <div class="lb-podium-name">${escapeHtml(player.username.split(' ')[0])}</div>
                         <div class="lb-podium-xp">${player.xp.toLocaleString()} XP</div>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
             podiumEl.style.display = '';
         } else {
             podiumEl.style.display = 'none';
@@ -9611,9 +9731,14 @@ function showUserComparison(playerId, playerName, playerXP, playerRank) {
         </div>
         <div class="comparison-vs-badge">VS</div>
         <div class="comparison-player">
-            <div class="comparison-avatar" style="background: ${otherLeague.color};">${playerName.charAt(0).toUpperCase()}</div>
+            <div class="comparison-avatar" style="background: ${otherLeague.color}; position: relative;">
+                ${playerName.charAt(0).toUpperCase()}
+                <button onclick="event.stopPropagation(); window.openUserProfile('${playerId}')" style="position: absolute; bottom: -5px; right: -5px; width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; border: 2px solid var(--surface); cursor: pointer;" title="View Profile">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                </button>
+            </div>
             <div class="comparison-player-name">${escapeHtml(playerName)}</div>
-            <div class="comparison-player-league" style="color: ${otherLeague.color};">${otherLeague.icon} ${otherLeague.name}</div>
+            <div class="comparison-player-league" style="color: ${otherLeague.color};">${otherLeague.icon} ${otherLeague.name} League</div>
         </div>
     `;
 
@@ -9624,7 +9749,7 @@ function showUserComparison(playerId, playerName, playerXP, playerRank) {
         { label: 'League', left: userLeague.name, right: otherLeague.name, format: v => v, isText: true }
     ];
 
-    const leagueOrder = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'];
+    const leagueOrder = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master', 'Grandmaster', 'Legend'];
 
     statsSection.innerHTML = stats.map(s => {
         let leftClass = '', rightClass = '';
@@ -9668,7 +9793,10 @@ function showXPExplainer() {
         { icon: '🥈', name: 'Silver', range: '1,000 – 2,499 XP', key: 'Silver' },
         { icon: '🥇', name: 'Gold', range: '2,500 – 4,999 XP', key: 'Gold' },
         { icon: '🏅', name: 'Platinum', range: '5,000 – 9,999 XP', key: 'Platinum' },
-        { icon: '💎', name: 'Diamond', range: '10,000+ XP', key: 'Diamond' }
+        { icon: '💎', name: 'Diamond', range: '10,000 - 24,999 XP', key: 'Diamond' },
+        { icon: '⚡', name: 'Master', range: '25,000 - 49,999 XP', key: 'Master' },
+        { icon: '🌠', name: 'Grandmaster', range: '50,000 - 99,999 XP', key: 'Grandmaster' },
+        { icon: '👑', name: 'Legend', range: '100,000+ XP', key: 'Legend' }
     ];
 
     leaguesList.innerHTML = `<h4>League Tiers</h4>` + leagues.map(l => `
@@ -9719,3 +9847,368 @@ if (resumeStudyBtn) {
         state.studyExitPendingAction = null;
     });
 }
+// --- Global helper functions for profile and studied by ---
+async function loadLastStudied(deckId) {
+    const container = document.getElementById('deck-last-studied');
+    if (!container) return;
+
+    // Get the most recent logs to find top distinct users
+    const { data: logs, error } = await sb.from('study_logs')
+        .select('user_id')
+        .eq('deck_id', deckId)
+        .order('review_time', { ascending: false })
+        .limit(20);
+
+    if (error) {
+        console.error("Error loading last studied:", error);
+        container.style.display = 'none';
+        return;
+    }
+
+    if (!logs || logs.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    const uniqueUids = [...new Set(logs.map(l => l.user_id))];
+    const { data: profiles } = await sb.from('profiles').select('id, username, xp').in('id', uniqueUids);
+
+    if (!profiles || profiles.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    const profileMap = {};
+    profiles.forEach(p => profileMap[p.id] = p);
+
+    const distinctUsers = [];
+    const seenUids = new Set();
+    for (const log of logs) {
+        const prof = profileMap[log.user_id];
+        if (prof && !seenUids.has(log.user_id)) {
+            seenUids.add(log.user_id);
+            distinctUsers.push({
+                id: log.user_id,
+                username: prof.username,
+                xp: prof.xp || 0
+            });
+            if (distinctUsers.length >= 3) break;
+        }
+    }
+
+    if (distinctUsers.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    let avatarsHtml = '';
+    distinctUsers.forEach((u, index) => {
+        const info = getLeagueInfo(u.xp);
+        const letter = u.username ? u.username.charAt(0).toUpperCase() : '?';
+        avatarsHtml += `
+            <div onclick="window.openUserProfile('${u.id}')" style="width: 28px; height: 28px; border-radius: 50%; background: ${info.color}; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; border: 2px solid var(--surface); margin-left: ${index > 0 ? '-10px' : '0'}; cursor: pointer; z-index: ${3 - index}; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" title="${u.username}">
+                ${letter}
+            </div>
+        `;
+    });
+
+    const nameLinks = distinctUsers.map(u => `<span onclick="window.openUserProfile('${u.id}')" style="cursor: pointer; font-weight: 600; color: var(--text-primary); text-decoration: underline;">${escapeHtml(u.username)}</span>`).join(', ');
+
+    let extraText = '';
+    if (uniqueUids.length > 3) {
+        extraText = ` and ${uniqueUids.length - 3} others...`;
+    } else {
+        extraText = '...';
+    }
+
+    container.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div style="display: flex;">
+                ${avatarsHtml}
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                Last viewed by ${nameLinks}${extraText}
+            </div>
+        </div>
+    `;
+    container.style.display = 'block';
+}
+
+async function openUserProfile(userId) {
+    if (!userId) return;
+
+    // Save previous view to go back correctly
+    if (state.lastView !== 'user-profile-view') {
+        state.previousViewBeforeProfile = state.lastView;
+    }
+
+    // Hide comparison modal if open
+    const comparisonModal = document.getElementById('user-comparison-modal');
+    if (comparisonModal) {
+        comparisonModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+    }
+
+    switchView('user-profile-view');
+
+    const contentEl = document.getElementById('user-profile-view-content');
+    contentEl.innerHTML = getProfileSkeleton();
+
+    // Update URL
+    const url = new URL(window.location.href);
+    url.searchParams.set('userid', userId);
+    window.history.pushState({ view: 'user-profile-view', userId }, '', url.toString());
+
+    // Fetch user profile data
+    const { data: profile } = await sb.from('profiles').select('username, xp, created_at').eq('id', userId).maybeSingle();
+
+    if (!profile) {
+        contentEl.innerHTML = `
+            <div style="text-align: center; padding: 4rem;">
+                <div style="font-size: 4rem; margin-bottom: 2rem;">👤</div>
+                <h2 style="color: var(--text-primary); margin-bottom: 1rem;">User Not Found</h2>
+                <p style="color: var(--text-tertiary); margin-bottom: 2rem;">The profile you're looking for doesn't exist or has been made private.</p>
+                <button class="btn btn-primary" onclick="closeUserProfile()">Go Back</button>
+            </div>
+        `;
+        return;
+    }
+
+    // Fetch user's public decks with subject info
+    const { data: userDecks } = await sb.from('decks')
+        .select('*, profiles:user_id(username), subjects(name)')
+        .eq('user_id', userId)
+        .eq('is_public', true)
+        .order('created_at', { ascending: false });
+
+    // Calculate Top Subjects
+    const subjectCounts = {};
+    if (userDecks) {
+        userDecks.forEach(d => {
+            if (d.subjects) {
+                subjectCounts[d.subjects.name] = (subjectCounts[d.subjects.name] || 0) + 1;
+            }
+        });
+    }
+    const topSubjects = Object.entries(subjectCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(s => s[0]);
+
+    // Fetch recent logs for streak calculation (limited to last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const { data: logs, error: logsError } = await sb.from('study_logs')
+        .select('review_time')
+        .eq('user_id', userId)
+        .gte('review_time', thirtyDaysAgo.toISOString())
+        .order('review_time', { ascending: false });
+
+    if (logsError) {
+        console.error("Error loading user streak logs:", logsError);
+    }
+
+    // Calculate Streak
+    let streak = 0;
+    if (logs && logs.length > 0) {
+        const uniqueDates = new Set(logs.map(log => new Date(log.review_time).toDateString()));
+        const sortedDates = Array.from(uniqueDates).map(d => new Date(d)).sort((a, b) => b - a);
+
+        const today = new Date().toDateString();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toDateString();
+
+        const latestDate = sortedDates[0].toDateString();
+        if (latestDate === today || latestDate === yesterdayStr) {
+            streak = 1;
+            let current = sortedDates[0];
+            for (let i = 1; i < sortedDates.length; i++) {
+                const prev = new Date(current);
+                prev.setDate(prev.getDate() - 1);
+                if (sortedDates[i].toDateString() === prev.toDateString()) {
+                    streak++;
+                    current = sortedDates[i];
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+
+    const info = getLeagueInfo(profile.xp || 0);
+    const letter = profile.username ? profile.username.charAt(0).toUpperCase() : '?';
+    const joinDate = new Date(profile.created_at).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+
+    // XP Progress
+    const nextLeague = getNextLeagueInfo(profile.xp || 0);
+    let progressHtml = '';
+    if (nextLeague) {
+        const currentLeagueXP = getLeagueThreshold(info.name);
+        const range = nextLeague.threshold - currentLeagueXP;
+        const progress = Math.min(100, Math.max(0, ((profile.xp - currentLeagueXP) / range) * 100));
+        progressHtml = `
+            <div style="width: 100%; max-width: 600px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.75rem;">
+                    <span style="color: var(--text-secondary);">League Progress</span>
+                    <span style="color: var(--primary); font-family: monospace;">Next: ${nextLeague.name} (${Math.floor(progress)}%)</span>
+                </div>
+                <div style="height: 12px; background: var(--surface); border-radius: 6px; overflow: hidden; border: 1px solid var(--border); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="height: 100%; width: ${progress}%; background: linear-gradient(90deg, var(--primary), ${info.color}); border-radius: 6px; transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Decks Grid HTML
+    let decksHtml = '';
+    if (userDecks && userDecks.length > 0) {
+        decksHtml = userDecks.map(deck => `
+            <div class="dashboard-card" onclick="closeUserProfile(); openDeckView('${deck.id}');" style="min-height: 160px;">
+                <div style="margin-bottom: 1rem;">
+                    <span class="badge ${deck.is_public ? 'badge-new' : 'badge-due'}">${escapeHtml(deck.subjects?.name || 'General')}</span>
+                </div>
+                <h4 style="font-weight: 800; color: var(--text-primary); margin-bottom: 0.25rem; font-size: 1.05rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${escapeHtml(deck.title)}</h4>
+                <p style="color: var(--text-tertiary); font-size: 0.7rem; font-weight: 500; margin-bottom: 1.5rem;">Shared ${new Date(deck.created_at).toLocaleDateString()}</p>
+            </div>
+        `).join('');
+    } else {
+        decksHtml = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; background: var(--surface); border-radius: var(--radius-lg); border: 1px dashed var(--border); color: var(--text-tertiary); font-weight: 500;">No public decks shared yet.</div>`;
+    }
+
+    contentEl.innerHTML = `
+        <div style="max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem 5rem 1rem;">
+            <!-- Header Section -->
+            <div style="display: flex; align-items: flex-end; gap: 2.5rem; margin-bottom: 2.5rem; padding-bottom: 2.5rem; border-bottom: 1px solid var(--border);">
+                <div style="width: 110px; height: 110px; border-radius: 50%; background: ${info.color}; color: white; display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 900; box-shadow: 0 15px 30px -8px ${info.color}40; border: 5px solid var(--surface); position: relative; flex-shrink: 0;">
+                    ${letter}
+                    <div style="position: absolute; bottom: 0; right: 0; background: var(--surface); width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; border: 3px solid var(--border); box-shadow: var(--shadow-sm);">
+                        ${info.icon}
+                    </div>
+                </div>
+                
+                <div style="flex: 1;">
+                    <h2 style="margin: 0; font-size: 2.25rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; line-height: 1.1;">${profile.username}</h2>
+                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1rem;">
+                        <span class="lb-league-tag ${info.cssClass}" style="padding: 4px 14px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border-radius: 99px;">${info.name} League</span>
+                        <span style="font-size: 1.1rem; font-weight: 700; color: var(--primary);">${(profile.xp || 0).toLocaleString()} <span style="font-size: 0.85rem; font-weight: 600; opacity: 0.7; color: var(--text-tertiary);">XP</span></span>
+                    </div>
+                    
+                    <div style="margin-top: 1.25rem; display: flex; align-items: center; gap: 1rem; color: var(--text-tertiary); font-size: 0.85rem; font-weight: 500;">
+                        <span style="display: flex; align-items: center; gap: 0.4rem;">
+                            Joined ${joinDate}
+                        </span>
+                        <span style="width: 4px; height: 4px; border-radius: 50%; background: var(--border);"></span>
+                        <span style="color: #f97316; font-weight: 600; display: flex; align-items: center; gap: 0.3rem;">
+                            ${streak} Day Streak
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 320px; gap: 2.5rem;">
+                <div style="display: flex; flex-direction: column; gap: 2.5rem;">
+                    <!-- Quick Stats Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;">
+                        <div style="background: var(--surface); padding: 1.25rem; border-radius: var(--radius-lg); border: 1px solid var(--border); text-align: center; box-shadow: var(--shadow-sm);">
+                            <div style="font-size: 1.75rem; margin-bottom: 0.25rem; color: var(--text-primary); font-weight: 800;">${userDecks ? userDecks.length : 0}</div>
+                            <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.1em;">Shared Decks</div>
+                        </div>
+                        <div style="background: var(--surface); padding: 1.25rem; border-radius: var(--radius-lg); border: 1px solid var(--border); text-align: center; box-shadow: var(--shadow-sm);">
+                            <div style="font-size: 1.75rem; margin-bottom: 0.25rem; color: var(--text-primary); font-weight: 800;">${Math.floor((profile.xp || 0) / 10).toLocaleString()}</div>
+                            <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.1em;">Total Reviews</div>
+                        </div>
+                        <div style="background: var(--surface); padding: 1.25rem; border-radius: var(--radius-lg); border: 1px solid var(--border); text-align: center; box-shadow: var(--shadow-sm);">
+                            <div style="font-size: 1.75rem; margin-bottom: 0.25rem; color: var(--text-primary); font-weight: 800;">${streak}</div>
+                            <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.1em;">Current Streak</div>
+                        </div>
+                    </div>
+
+                    <!-- Learning Focus -->
+                    <section>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                            Learning Focus
+                        </h3>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                            ${topSubjects.length > 0 ? topSubjects.map(s => `
+                                <div style="background: ${info.color}15; color: ${info.color}; padding: 8px 16px; border-radius: var(--radius); font-weight: 700; border: 1px solid ${info.color}25; font-size: 0.9rem;">
+                                    ${escapeHtml(s)}
+                                </div>
+                            `).join('') : '<span style="color: var(--text-tertiary); font-size: 0.9rem;">No specific focus data available.</span>'}
+                        </div>
+                    </section>
+
+                    <!-- Public Decks -->
+                    <section>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                            Shared Resources
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem;">
+                            ${decksHtml}
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Sidebar Content -->
+                <div style="display: flex; flex-direction: column; gap: 2rem;">
+                    <section style="background: var(--surface); padding: 1.75rem; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+                        <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.5rem;">League Ranking</h4>
+                        <div style="display: flex; flex-direction: column; gap: 1.5rem; align-items: center;">
+                            <div style="font-size: 3.5rem;">${info.icon}</div>
+                            ${progressHtml}
+                            <p style="font-size: 0.85rem; color: var(--text-tertiary); text-align: center; line-height: 1.5;">
+                                ${profile.username} is currently in the <strong>${info.name} League</strong>.
+                            </p>
+                        </div>
+                    </section>
+
+                    <button class="btn btn-outline" onclick="closeUserProfile()" style="width: 100%; padding: 12px; border-radius: var(--radius); font-weight: 700; font-size: 0.9rem;">Return to App</button>
+                    
+                    <p style="text-align: center; font-size: 0.8rem; color: var(--text-tertiary); margin-top: 1rem;">
+                        This is a public profile view for ${profile.username}.
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function closeUserProfile() {
+    // Navigate back to the previous view
+    const targetView = state.previousViewBeforeProfile || 'today-view';
+    switchView(targetView);
+
+    // Clear URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete('userid');
+    window.history.pushState({}, '', url.toString());
+}
+
+function getNextLeagueInfo(xp) {
+    if (xp < 1000) return { name: 'Silver', threshold: 1000 };
+    if (xp < 2500) return { name: 'Gold', threshold: 2500 };
+    if (xp < 5000) return { name: 'Platinum', threshold: 5000 };
+    if (xp < 10000) return { name: 'Diamond', threshold: 10000 };
+    if (xp < 25000) return { name: 'Master', threshold: 25000 };
+    if (xp < 50000) return { name: 'Grandmaster', threshold: 50000 };
+    if (xp < 100000) return { name: 'Legend', threshold: 100000 };
+    return null;
+}
+
+function getLeagueThreshold(name) {
+    const thresh = {
+        'Bronze': 0,
+        'Silver': 1000,
+        'Gold': 2500,
+        'Platinum': 5000,
+        'Diamond': 10000,
+        'Master': 25000,
+        'Grandmaster': 50000,
+        'Legend': 100000
+    };
+    return thresh[name] || 0;
+}
+
+window.openUserProfile = openUserProfile;
+window.closeUserProfile = closeUserProfile;
+window.loadLastStudied = loadLastStudied;

@@ -8301,6 +8301,18 @@ html {
     background: linear-gradient(135deg, #312e81 0%, #3730a3 40%, #4338ca 100%);
 }
 
+.lb-hero-banner.league-master {
+    background: linear-gradient(135deg, #831843 0%, #be185d 40%, #db2777 100%);
+}
+
+.lb-hero-banner.league-grandmaster {
+    background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 40%, #7c3aed 100%);
+}
+
+.lb-hero-banner.league-legend {
+    background: linear-gradient(135deg, #7f1d1d 0%, #b91c1c 40%, #dc2626 100%);
+}
+
 .lb-hero-content {
     position: relative;
     z-index: 1;
@@ -8769,6 +8781,18 @@ html {
     color: #6366f1;
 }
 
+.user-name .lb-league-tag.league-master {
+    color: #db2777;
+}
+
+.user-name .lb-league-tag.league-grandmaster {
+    color: #7c3aed;
+}
+
+.user-name .lb-league-tag.league-legend {
+    color: #dc2626;
+}
+
 .xp-col {
     font-weight: 800;
     text-align: right;
@@ -8877,6 +8901,24 @@ html {
     background: #e0e7ff;
     color: #4338ca;
     border: 1px solid #a5b4fc;
+}
+
+.league-badge-pill.league-master {
+    background: #fce7f3;
+    color: #9d174d;
+    border: 1px solid #f472b6;
+}
+
+.league-badge-pill.league-grandmaster {
+    background: #ede9fe;
+    color: #5b21b6;
+    border: 1px solid #a78bfa;
+}
+
+.league-badge-pill.league-legend {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #f87171;
 }
 
 .league-badge-container {

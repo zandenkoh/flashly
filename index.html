@@ -1051,8 +1051,26 @@
                             </div>
                         </div>
                     </section>
-
-
+                    <!-- User Profile View -->
+                    <section id="user-profile-view" class="view hidden">
+                        <div class="section-header" style="margin-bottom: 2rem;">
+                            <div class="header-left">
+                                <button onclick="closeUserProfile()" class="btn btn-text btn-sm"
+                                    style="display: flex; align-items: center; gap: 0.5rem; padding-left: 0;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="2" stroke="currentColor" style="width: 18px; height: 18px;">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                                    </svg>
+                                    Back
+                                </button>
+                                <h2 style="font-size: 1.5rem; font-weight: 800;">User Profile</h2>
+                            </div>
+                        </div>
+                        <div id="user-profile-view-content">
+                            <!-- Injected by JS -->
+                        </div>
+                    </section>
 
                     <!-- Community View -->
                     <!-- Admin View (Hidden by default) -->
@@ -1670,6 +1688,12 @@
                                             Custom Study
                                         </button>
                                     </div>
+                                </div>
+
+                                <!-- Last Studied By -->
+                                <div id="deck-last-studied" class="mt-4"
+                                    style="display: none; padding: 0.75rem 1rem; background: var(--surface-hover); border-radius: 12px; border: 1px solid var(--border);">
+                                    <!-- Injected by JS -->
                                 </div>
                             </div>
 
