@@ -1,0 +1,246 @@
+-- a/index.html
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+            <!-- Landing Navigation -->
+            <nav class="landing-nav">
+                <div class="nav-container">
+                    <div class="landing-logo" onclick="window.location.reload()" style="cursor: pointer;">Flashly</div>
+                    <div class="nav-actions">
+                        <a href="./about/index.html" class="btn btn-text" style="text-decoration: none;">About</a>
+                        <a href="./support/index.html" class="btn btn-text" style="text-decoration: none;">Support</a>
+                        <button class="btn btn-text btn-login-toggle">Sign In</button>
+                        <button class="btn btn-primary btn-signup-toggle">Get Started</button>
+                    <button id="landing-mobile-menu-toggle" class="mobile-menu-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="icon-md">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+
+                    <a href="./about/index.html" class="mobile-nav-item">
+                        About
+                    <a href="./support/index.html" class="mobile-nav-item">
+                        Support
+                    <a href="./privacy/index.html" class="mobile-nav-item">
+                        Privacy
+                    <a href="mailto:team.flashly@gmail.com" class="mobile-nav-item">
+                        Contact
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                            <path
+                                d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.161V6a2 2 0 00-2-2H3z" />
+                            <path
+                                d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
+                        </svg>
+                    </a>
+            <!-- Hero Section -->
+            <section class="landing-page-section landing-hero-revamp">
+                <div class="section-content-wrapper">
+                    <div class="landing-text-block">
+                        <h1>Exams are coming. <span>Your flashcards and notes are here.</span></h1>
+                        <p>Over 15,000 free flashcards and notes, supercharged by <strong>personal AI coaching</strong>.
+                            Master your subjects with the ultimate Spaced Repetition System tailored for Singapore
+                            students.</p>
+                        <div class="hero-btns" style="display:flex; gap:1rem; align-items: center; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-lg btn-signup-toggle">Start Learning</button>
+                            <button class="btn btn-secondary btn-lg" onclick="state.isGuest = true; showApp();">
+                                Community Decks and Curated Notes</button>
+                    <div class="landing-visual-block">
+                        <div class="hero-mockup">
+                            <img src="./Assets/deck-graphic-light.svg" alt="Flashly App Interface"
+                                style="width: 100%; height: auto; border-radius: 8px;">
+                </div>
+            </section>
+            <!-- Trusted By Section -->
+            <section class="landing-trust-section">
+                        <p class="trust-footer">Join the community of students acing their exams</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Science Section (SRS) -->
+            <section class="landing-page-section" style="background: var(--surface);">
+                <div class="section-content-wrapper" style="grid-template-columns: 1fr 1fr;">
+                    <div class="landing-visual-block" style="order: 2;">
+                        <div class="srs-mockup" style="transform: perspective(1000px) rotateY(10deg) rotateX(5deg);">
+                            <div class="flex flex-col gap-4">
+                                <div class="card" style="border-left: 4px solid var(--primary);">
+                                    <div class="text-sm font-bold text-primary mb-1">REVIEW DUE</div>
+                                    <div class="text-lg font-semibold">"Photosynthesis Process"</div>
+                                    <div class="text-xs text-secondary mt-2">Last seen 3 days ago</div>
+                                </div>
+                                <div class="card" style="opacity: 0.6;">
+                                    <div class="text-sm font-bold text-secondary mb-1">STABLE</div>
+                                    <div class="text-lg font-semibold">"Mitochondria Function"</div>
+                                    <div class="text-xs text-secondary mt-2">Review in 14 days</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="landing-text-block" style="order: 1;">
+                        <span class="feature-pill">The Algorithm</span>
+                        <h2>Beat the forgetting curve.</h2>
+                        <p>Our optimized Spaced Repetition System (SRS) predicts exactly when you're about to forget a
+                            concept and surfaces it for review at the perfect moment.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- New AI Section -->
+            <section class="landing-page-section">
+                <div class="section-content-wrapper" style="grid-template-columns: 1fr 1fr;">
+                    <div class="landing-text-block">
+                        <span class="feature-pill" style="background: #f5f3ff; color: #8b5cf6;">AI COACH</span>
+                        <h2>Your personal tutor.</h2>
+                        <p>Flashly AI analyzes your study habits and provides daily, actionable insights. Get custom
+                            game plans, motivational coaching, and smart recommendations tailored just for you.</p>
+                        <button class="btn btn-primary btn-lg btn-signup-toggle">Meet Your AI Coach</button>
+                    </div>
+                    <div class="landing-visual-block">
+                        <div class="ai-mockup" style="padding: 2rem;">
+                            <div class="card" style="margin-bottom: 1rem; border-left: 4px solid #8b5cf6;">
+                                <div class="ai-insight-badge mb-2">
+                                    <div class="ai-insight-dot"></div>
+                                    <span>AI INSIGHT</span>
+                                </div>
+                                <p class="text-sm font-medium">"You've mastered 85% of Pure Chemistry. Focus on 'Organic
+                                    Compounds' today to hit your 90% goal!"</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="ai-stat-card">
+                                    <div class="font-bold mb-1 text-xs">Study Chemistry</div>
+                                    <div class="text-secondary text-xs">Weakest deck</div>
+                                </div>
+                                <div class="ai-stat-card">
+                                    <div class="font-bold mb-1 text-xs">View Stats</div>
+                                    <div class="text-secondary text-xs">Track progress</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Community Section -->
+            <section class="landing-page-section">
+                <div class="section-content-wrapper">
+                    <div class="landing-text-block">
+                        <span class="feature-pill">Community</span>
+                        <h2>Learn from the best.</h2>
+                        <p>Access thousands of student-made decks and premium notes. GCE 'O' Levels, IB, or
+                            University—whatever you're studying, someone has already mastered it here.</p>
+                        <button class="btn btn-secondary btn-lg"
+                            onclick="state.isGuest = true; showApp(); loadCommunityDecks();">Explore Decks</button>
+                    </div>
+                    <div class="landing-visual-block">
+                        <div class="community-mockup">
+                            <div class="grid grid-cols-2 gap-2" style="gap: 5px;">
+                                <div class="card p-4 text-center"
+                                    style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
+                                    <div class="text-2xl mb-1">🧪</div>
+                                    <div class="text-sm font-bold">Pure Chemistry</div>
+                                    <div class="text-xs text-secondary">1.2k Cards</div>
+                                </div>
+                                <div class="card p-4 text-center"
+                                    style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
+                                    <div class="text-2xl mb-1">📐</div>
+                                    <div class="text-sm font-bold">A-Maths</div>
+                                    <div class="text-xs text-secondary">850 Cards</div>
+                                </div>
+                                <div class="card p-4 text-center"
+                                    style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
+                                    <div class="text-2xl mb-1">🌍</div>
+                                    <div class="text-sm font-bold">Geography</div>
+                                    <div class="text-xs text-secondary">430 Cards</div>
+                                </div>
+                            </div>
+                        </div>
+            <!-- Analytics Section -->
+            <section class="landing-page-section" style="background: var(--surface);">
+                <div class="section-content-wrapper" style="grid-template-columns: 1fr 1fr;">
+                    <div class="landing-visual-block" style="order: 2;">
+                        <div class="analytics-mockup"
+                            style="transform: perspective(1000px) rotateY(10deg) rotateX(5deg);">
+                            <div class="card" style="padding: 1.5rem;">
+                                <div class="text-sm font-bold mb-4">RETENTION RATE</div>
+                                <div
+                                    style="height: 120px; width: 100%; background: linear-gradient(0deg, var(--primary-light) 0%, transparent 100%); border-radius: 4px; display: flex; align-items: flex-end; gap: 4px; padding: 10px;">
+                                    <div style="height: 40%; flex: 1; background: var(--primary); border-radius: 2px;">
+                                    </div>
+                                    <div style="height: 60%; flex: 1; background: var(--primary); border-radius: 2px;">
+                                    </div>
+                                    <div style="height: 55%; flex: 1; background: var(--primary); border-radius: 2px;">
+                                    </div>
+                                    <div style="height: 80%; flex: 1; background: var(--primary); border-radius: 2px;">
+                                    </div>
+                                    <div style="height: 95%; flex: 1; background: var(--primary); border-radius: 2px;">
+                                    </div>
+                                </div>
+                                <div class="text-xl font-bold mt-4">94.2%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="landing-text-block" style="order: 1;">
+                        <span class="feature-pill">Performance</span>
+                        <h2>Visualize your growth.</h2>
+                        <p>Track your daily streaks, retention rates, and card maturity levels. Turn your learning into
+                            an interactive journey with beautiful, data-driven insights.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Groups Section -->
+            <section class="landing-page-section">
+                <div class="section-content-wrapper">
+                    <div class="landing-text-block">
+                        <span class="feature-pill">Collaboration</span>
+                        <h2>Study better, together.</h2>
+                        <p>Create shared groups to collaborate on decks with classmates. Compete on leaderboards and
+                            track group-wide mastery in real-time.</p>
+                        <button class="btn btn-primary btn-lg btn-signup-toggle">Form a Group</button>
+                    </div>
+                    <div class="landing-visual-block">
+                        <div class="groups-mockup">
+                            <div class="card p-4">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs">
+                                        J</div>
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white text-xs">
+                                        A</div>
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-warning flex items-center justify-center text-white text-xs">
+                                        K</div>
+                                    <div class="text-xs text-secondary">+12 active</div>
+                                </div>
+                                <div class="text-sm font-bold mb-2 text-primary">Class of 2026 - Bio</div>
+                                <div class="progress-bar-container"
+                                    style="height: 6px; background: var(--background); border-radius: 3px;">
+                                    <div
+                                        style="width: 75%; height: 100%; background: var(--primary); border-radius: 3px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <footer class="landing-footer" style="padding: 4rem 2rem; border-top: 1px solid var(--border);">
+                <div class="footer-container"
+                    style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+                    <p>&copy; 2026 Flashly. Built for focused learners.</p>
+                    <div class="footer-links" style="display: flex; gap: 2rem;">
+                        <a href="about/index.html"
+                            style="color: var(--text-secondary); text-decoration: none;">About</a>
+                        <a href="privacy/index.html"
+                            style="color: var(--text-secondary); text-decoration: none;">Privacy</a>
+                        <a href="support/index.html"
+                            style="color: var(--text-secondary); text-decoration: none;">Support</a>
+                    </div>
+                </div>
+            </footer>
+                                    user@example.com</p>
+                    it!</button>
+-- a/landing-nav.js
+-- a/style.css

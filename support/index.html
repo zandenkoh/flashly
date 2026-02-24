@@ -12,62 +12,54 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://flashly-edu.github.io/flashly/support/">
 
-    <!-- Open Graph -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://flashly-edu.github.io/flashly/support/">
-    <meta property="og:title" content="Help Center - Flashly">
-    <meta property="og:description" content="Get comprehensive help and support for Flashly.">
-    <meta property="og:image" content="https://flashly-edu.github.io/flashly/Assets/og-image.png">
-
-    <!-- JSON-LD FAQPage -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [{
-        "@type": "Question",
-        "name": "Does Flashly cost money?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Flashly is currently 100% free for all users. We believe access to effective learning tools should be universal."
-        }
-      }, {
-        "@type": "Question",
-        "name": "Can I study offline?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Currently, Flashly requires an internet connection to sync your progress to the cloud. An offline mode is in our roadmap."
-        }
-      }, {
-        "@type": "Question",
-        "name": "How do I reset my account progress?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "You can go to the Settings tab and find the 'Danger Zone'. There you have options to reset decks or delete your account entirely."
-        }
-      }]
-    }
-    </script>
-
     <link rel="stylesheet" href="../style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="icon" type="image/png" href="../Assets/logo.png">
+
     <style>
-        /* Override global body style to allow scrolling */
+        :root {
+            --transition-snappy: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            text-decoration: none;
+        }
+
         body {
             background-color: var(--background);
             font-family: 'Inter', sans-serif;
             color: var(--text-primary);
             overflow-y: auto !important;
             height: auto !important;
+            line-height: 1.6;
+            background-image:
+                radial-gradient(circle at top right, var(--primary-light) 0%, transparent 40%),
+                radial-gradient(circle at bottom left, var(--primary-light) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        .sora {
+            font-family: 'Sora', sans-serif;
+            letter-spacing: -0.02em;
         }
 
         .support-container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 4rem 2rem;
+            padding: 10rem 2rem 4rem;
         }
 
         /* Hero / Header */
@@ -77,11 +69,11 @@
         }
 
         .support-header h1 {
-            font-size: 3rem;
-            font-weight: 700;
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 800;
             margin-bottom: 1rem;
-            letter-spacing: -0.03em;
-            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            letter-spacing: -0.04em;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -98,86 +90,109 @@
         .quick-nav {
             display: flex;
             justify-content: center;
-            gap: 1rem;
-            margin-bottom: 4rem;
+            gap: 0.75rem;
+            margin-bottom: 5rem;
             flex-wrap: wrap;
         }
 
         .nav-chip {
             background: var(--surface);
             border: 1px solid var(--border);
-            padding: 0.5rem 1rem;
-            border-radius: 99px;
+            padding: 0.6rem 1.25rem;
+            border-radius: 100px;
             color: var(--text-secondary);
             text-decoration: none;
             font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s;
+            font-weight: 600;
+            transition: all 0.3s var(--transition-snappy);
+            font-family: 'Sora', sans-serif;
         }
 
         .nav-chip:hover {
             border-color: var(--primary);
             color: var(--primary);
             background: var(--primary-light);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.1);
         }
 
         /* Content Sections */
         .section-block {
-            margin-bottom: 5rem;
-            scroll-margin-top: 2rem;
+            margin-bottom: 6rem;
+            scroll-margin-top: 100px;
         }
 
         .section-title {
             font-size: 1.75rem;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
+            font-weight: 800;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.25rem;
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.25rem;
         }
 
         .section-icon {
             color: var(--primary);
+            background: var(--primary-light);
+            padding: 0.65rem;
+            border-radius: 14px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
         .help-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 2rem;
         }
 
         .help-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 2rem;
-            transition: all 0.2s;
+            border-radius: 2rem;
+            padding: 2.5rem;
+            transition: all 0.3s var(--transition-snappy);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .help-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
         }
 
         .help-card h3 {
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             margin-bottom: 1rem;
             color: var(--text-primary);
+            font-weight: 700;
         }
 
         .help-card p {
             color: var(--text-secondary);
-            font-size: 0.95rem;
+            font-size: 1rem;
             margin-bottom: 1.5rem;
             line-height: 1.6;
         }
 
         .tip-box {
             background: var(--primary-light);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            font-size: 0.875rem;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            font-size: 0.9rem;
             color: var(--text-primary);
             display: flex;
             gap: 0.75rem;
             align-items: flex-start;
+            margin-top: auto;
         }
 
         .tip-box svg {
@@ -189,14 +204,15 @@
         /* FAQ Section */
         .faq-section {
             background: var(--surface);
-            padding: 3rem;
-            border-radius: var(--radius);
+            padding: 1.5rem 2.5rem;
+            border-radius: 2rem;
             border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
         }
 
         .faq-item {
             border-bottom: 1px solid var(--border);
-            padding: 1.5rem 0;
+            padding: 1.75rem 0;
         }
 
         .faq-item:last-child {
@@ -204,12 +220,14 @@
         }
 
         .faq-question {
-            font-weight: 600;
-            font-size: 1.125rem;
+            font-weight: 700;
+            font-size: 1.15rem;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-family: 'Sora', sans-serif;
+            transition: color 0.2s;
         }
 
         .faq-question:hover {
@@ -218,9 +236,10 @@
 
         .faq-answer {
             color: var(--text-secondary);
-            line-height: 1.6;
-            margin-top: 1rem;
+            line-height: 1.7;
+            margin-top: 1.25rem;
             display: none;
+            font-size: 1rem;
         }
 
         .faq-item.active .faq-answer {
@@ -228,435 +247,506 @@
         }
 
         .faq-icon {
-            transition: transform 0.2s;
+            transition: transform 0.3s var(--transition-snappy);
+            color: var(--text-tertiary);
         }
 
         .faq-item.active .faq-icon {
             transform: rotate(180deg);
+            color: var(--primary);
         }
 
         /* Footer / Contact */
         .contact-footer {
             margin-top: 6rem;
             text-align: center;
-            padding: 4rem;
-            background: linear-gradient(180deg, var(--surface) 0%, var(--background) 100%);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
+            padding: 6rem 2rem;
+            background: #0f0f0f;
+            color: white;
+            border-radius: 2.5rem;
+            position: relative;
+            overflow: hidden;
         }
 
-        .back-link {
-            position: fixed;
-            top: 2rem;
-            left: 2rem;
-            background: var(--surface);
-            padding: 0.75rem 1.25rem;
-            border-radius: 99px;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border);
+        .contact-footer::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .contact-footer h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .contact-footer p {
+            margin-bottom: 3rem;
+            color: rgba(255, 255, 255, 0.6);
+            position: relative;
+        }
+
+        .contact-btn {
+            background: var(--primary);
+            color: white;
+            padding: 1.1rem 2.25rem;
+            border-radius: 16px;
             text-decoration: none;
-            color: var(--text-primary);
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            z-index: 100;
-            transition: all 0.2s;
+            font-weight: 700;
+            display: inline-block;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+            position: relative;
+            font-family: 'Sora', sans-serif;
         }
 
-        .back-link:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-            color: var(--primary);
+        .contact-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(37, 99, 235, 0.5);
         }
 
         @media (max-width: 768px) {
-            .back-link {
-                position: static;
-                margin-bottom: 2rem;
-                display: inline-flex;
+            .support-container {
+                padding-top: 8rem;
+            }
+
+            .support-header h1 {
+                font-size: 2.5rem;
+            }
+
+            .quick-nav {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 1rem;
+                scrollbar-width: none;
+            }
+
+            .quick-nav::-webkit-scrollbar {
+                display: none;
+            }
+
+            .nav-chip {
+                white-space: nowrap;
+            }
+
+            .help-card {
+                padding: 2rem;
+            }
+
+            .faq-section {
+                padding: 1.5rem;
             }
         }
     </style>
 </head>
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-PSQD1QL17E"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
+<body>
 
-    gtag('config', 'G-PSQD1QL17E');
-</script>
-
-<nav class="landing-nav">
-    <div class="nav-container">
-        <a href="../index.html" class="landing-logo" style="text-decoration: none; display: flex; align-items: center;">
-            Flashly
-        </a>
-        <div class="nav-actions">
-            <a href="../about/index.html" class="btn btn-text" style="text-decoration: none;">About</a>
-            <a href="./index.html" class="btn btn-text" style="text-decoration: none;">Support</a>
-            <button class="btn btn-text btn-login-toggle">Sign In</button>
-            <button class="btn btn-primary btn-signup-toggle">Get Started</button>
+    <nav class="lp-nav" id="lp-nav">
+        <div class="lp-nav-inner">
+            <a href="../index.html" class="lp-logo">
+                <img src="../Assets/logo.png" alt="Flashly Logo" style="width: 32px; height: 32px; border-radius: 50%;">
+                <span>Flashly</span>
+            </a>
+            <div class="lp-nav-links">
+                <a href="../about/index.html">About</a>
+                <a href="./index.html">Support</a>
+            </div>
+            <div class="lp-nav-actions">
+                <button class="lp-btn-ghost btn-login-toggle">Sign In</button>
+                <button class="lp-btn-solid btn-signup-toggle">Get Started</button>
+            </div>
+            <button class="lp-hamburger" id="landing-mobile-menu-toggle" aria-label="Open menu">
+                <span></span><span></span><span></span>
+            </button>
         </div>
-        <button id="landing-mobile-menu-toggle" class="mobile-menu-toggle">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                stroke="currentColor" class="icon-md">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-        </button>
+    </nav>
+
+    <!-- Mobile Menu Modal -->
+    <div id="mobile-nav-modal" class="mobile-nav-modal">
+        <div class="mobile-nav-links">
+            <a href="../about/index.html" class="mobile-nav-item">About
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                    <path fill-rule="evenodd"
+                        d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                        clip-rule="evenodd" />
+                </svg>
+            </a>
+            <a href="./index.html" class="mobile-nav-item">Support
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                    <path fill-rule="evenodd"
+                        d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                        clip-rule="evenodd" />
+                </svg>
+            </a>
+            <a href="../privacy/index.html" class="mobile-nav-item">Privacy
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                    <path fill-rule="evenodd"
+                        d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                        clip-rule="evenodd" />
+                </svg>
+            </a>
+        </div>
+        <div class="mobile-nav-footer">
+            <button class="lp-btn-ghost mobile-login-btn btn-login-toggle">Sign In</button>
+            <button class="lp-btn-solid mobile-signup-btn btn-signup-toggle">Sign Up</button>
+        </div>
     </div>
 
-</nav>
+    <div class="support-container">
 
-<!-- Mobile Menu Modal -->
-<div id="mobile-nav-modal" class="mobile-nav-modal">
-    <div class="mobile-nav-links">
-        <a href="../about/index.html" class="mobile-nav-item">
-            About
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
-                <path fill-rule="evenodd"
-                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                    clip-rule="evenodd" />
-            </svg>
-        </a>
-        <a href="./index.html" class="mobile-nav-item">
-            Support
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
-                <path fill-rule="evenodd"
-                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                    clip-rule="evenodd" />
-            </svg>
-        </a>
-        <a href="../privacy/index.html" class="mobile-nav-item">
-            Privacy
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
-                <path fill-rule="evenodd"
-                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                    clip-rule="evenodd" />
-            </svg>
-        </a>
-        <a href="mailto:team.flashly@gmail.com" class="mobile-nav-item">
-            Contact
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
-                <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.161V6a2 2 0 00-2-2H3z" />
-                <path d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
-            </svg>
-        </a>
-    </div>
-    <div class="mobile-nav-footer">
-        <button class="btn btn-outline mobile-login-btn btn-login-toggle">Sign In</button>
-        <button class="btn btn-primary mobile-signup-btn btn-signup-toggle">Sign Up</button>
-    </div>
-</div>
+        <div class="support-header">
+            <h1>How can we help?</h1>
+            <p>Master Flashly with our comprehensive guides for every feature.</p>
+        </div>
 
-<div class="support-container">
+        <div class="quick-nav sora">
+            <a href="#today" class="nav-chip">Today View</a>
+            <a href="#decks" class="nav-chip">Decks & Cards</a>
+            <a href="#study" class="nav-chip">Study Mode</a>
+            <a href="#insights" class="nav-chip">Insights</a>
+            <a href="#community" class="nav-chip">Community</a>
+            <a href="#groups" class="nav-chip">Groups</a>
+            <a href="#game" class="nav-chip">Games</a>
+            <a href="#settings" class="nav-chip">Settings</a>
+        </div>
 
-    <div class="support-header">
-        <h1>How can we help?</h1>
-        <p>Master Flashly with our comprehensive guides for every feature.</p>
-    </div>
+        <!-- Section: Today View -->
+        <div id="today" class="section-block">
+            <h2 class="section-title">
+                <div class="section-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </div>
+                Today View
+            </h2>
+            <div class="help-grid">
+                <div class="help-card">
+                    <h3>Daily Review</h3>
+                    <p>The "Today" view is your home base. It automatically calculates which cards you need to review
+                        based on our Spaced Repetition (SRS) algorithm to ensure efficient learning.</p>
+                    <div class="tip-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="3">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <span><strong>Tip:</strong> Try to clear your "Due Count" to 0 every day to maintain your
+                            streak!</span>
+                    </div>
+                </div>
+                <div class="help-card">
+                    <h3>Stats at a Glance</h3>
+                    <p>Track your <strong>Current Streak</strong>, comprehensive <strong>Retention Rate</strong>, and
+                        overall <strong>Mastery Level</strong> directly from this dashboard.</p>
+                </div>
+            </div>
+        </div>
 
-    <div class="quick-nav">
-        <a href="#today" class="nav-chip">Today View</a>
-        <a href="#decks" class="nav-chip">Decks & Cards</a>
-        <a href="#study" class="nav-chip">Study Mode</a>
-        <a href="#insights" class="nav-chip">Insights</a>
-        <a href="#community" class="nav-chip">Community</a>
-        <a href="#groups" class="nav-chip">Groups</a>
-        <a href="#game" class="nav-chip">Games</a>
-        <a href="#settings" class="nav-chip">Settings</a>
-    </div>
+        <!-- Section: Decks & Cards -->
+        <div id="decks" class="section-block">
+            <h2 class="section-title">
+                <div class="section-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6" />
+                    </svg>
+                </div>
+                Decks & Cards
+            </h2>
+            <div class="help-grid">
+                <div class="help-card">
+                    <h3>Creating Decks</h3>
+                    <p>Create unlimited decks to organize different topics. You can group related decks into
+                        <strong>Subjects</strong> (e.g., "Spanish" subject containing "Verbs" and "Nouns" decks).
+                    </p>
+                </div>
+                <div class="help-card">
+                    <h3>Adding Cards</h3>
+                    <p>Add cards manually or use the <strong>Bulk Add</strong> feature to paste multiple lines of text.
+                        We also support <strong>CSV Import</strong> for bringing in large external lists.</p>
+                </div>
+                <div class="help-card">
+                    <h3>Card Selection</h3>
+                    <p>Use the "Select" mode to manage multiple cards at once. You can bulk delete or move cards between
+                        decks easily.</p>
+                </div>
+            </div>
+        </div>
 
-    <!-- Section: Today View -->
-    <div id="today" class="section-block">
-        <h2 class="section-title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                class="section-icon" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-            Today View
-        </h2>
-        <div class="help-grid">
-            <div class="help-card">
-                <h3>Daily Review</h3>
-                <p>The "Today" view is your home base. It automatically calculates which cards you need to review
-                    based on our Spaced Repetition (SRS) algorithm to ensure efficient learning.</p>
-                <div class="tip-box">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
+        <!-- Section: Study Mode -->
+        <div id="study" class="section-block">
+            <h2 class="section-title">
+                <div class="section-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                </div>
+                Study Mode
+            </h2>
+            <div class="help-grid">
+                <div class="help-card">
+                    <h3>Spaced Repetition</h3>
+                    <p>When you study, rate each card as <strong>Again</strong>, <strong>Hard</strong>,
+                        <strong>Good</strong>, or <strong>Easy</strong>. The app will schedule the next review based on
+                        your rating, maximizing retention efficiency.
+                    </p>
+                </div>
+                <div class="help-card">
+                    <h3>Custom Study</h3>
+                    <p>Want to cram? Use the <strong>Custom Study</strong> feature to review cards outside of the
+                        regular schedule without affecting their long-term intervals.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Insights -->
+        <div id="insights" class="section-block">
+            <h2 class="section-title">
+                <div class="section-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 20V10"></path>
+                        <path d="M12 20V4"></path>
+                        <path d="M6 20v-6"></path>
+                    </svg>
+                </div>
+                Insights
+            </h2>
+            <div class="help-grid">
+                <div class="help-card">
+                    <h3>Activity Heatmap</h3>
+                    <p>Visualize your daily consistency. Darker squares indicate more reviews completed on that day.</p>
+                </div>
+                <div class="help-card">
+                    <h3>Retention & Maturity</h3>
+                    <p><strong>Retention</strong> shows how much you remember. <strong>Maturity</strong> tracks how many
+                        cards you have moved from "Learning" to "Mastered" status.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Community -->
+        <div id="community" class="section-block">
+            <h2 class="section-title">
+                <div class="section-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                    </svg>
-                    <span>Tip: Try to clear your "Due Count" to 0 every day to maintain your streak!</span>
-                </div>
-            </div>
-            <div class="help-card">
-                <h3>Stats at a Glance</h3>
-                <p>Track your <strong>Current Streak</strong>, comprehensive <strong>Retention Rate</strong>, and
-                    overall <strong>Mastery Level</strong> directly from this dashboard.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Section: Decks & Cards -->
-    <div id="decks" class="section-block">
-        <h2 class="section-title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                class="section-icon" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path
-                    d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6" />
-            </svg>
-            Decks & Cards
-        </h2>
-        <div class="help-grid">
-            <div class="help-card">
-                <h3>Creating Decks</h3>
-                <p>Create unlimited decks to organize different topics. You can group related decks into
-                    <strong>Subjects</strong> (e.g., "Spanish" subject containing "Verbs" and "Nouns" decks).
-                </p>
-            </div>
-            <div class="help-card">
-                <h3>Adding Cards</h3>
-                <p>Add cards manually or use the <strong>Bulk Add</strong> feature to paste multiple lines of text.
-                    We also support <strong>CSV Import</strong> for bringing in large external lists.</p>
-            </div>
-            <div class="help-card">
-                <h3>Card Selection</h3>
-                <p>Use the "Select" mode to manage multiple cards at once. You can bulk delete or move cards between
-                    decks easily.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Section: Study Mode -->
-    <div id="study" class="section-block">
-        <h2 class="section-title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                class="section-icon" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-            </svg>
-            Study Mode
-        </h2>
-        <div class="help-grid">
-            <div class="help-card">
-                <h3>Spaced Repetition</h3>
-                <p>When you study, rate each card as <strong>Again</strong>, <strong>Hard</strong>,
-                    <strong>Good</strong>, or <strong>Easy</strong>. The app will schedule the next review based on
-                    your rating, maximizing retention efficiency.
-                </p>
-            </div>
-            <div class="help-card">
-                <h3>Custom Study</h3>
-                <p>Want to cram? Use the <strong>Custom Study</strong> feature to review cards outside of the
-                    regular schedule without affecting their long-term intervals.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Section: Insights -->
-    <div id="insights" class="section-block">
-        <h2 class="section-title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                class="section-icon" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M18 20V10"></path>
-                <path d="M12 20V4"></path>
-                <path d="M6 20v-6"></path>
-            </svg>
-            Insights
-        </h2>
-        <div class="help-grid">
-            <div class="help-card">
-                <h3>Activity Heatmap</h3>
-                <p>Visualize your daily consistency. Darker squares indicate more reviews completed on that day.</p>
-            </div>
-            <div class="help-card">
-                <h3>Retention & Maturity</h3>
-                <p><strong>Retention</strong> shows how much you remember. <strong>Maturity</strong> tracks how many
-                    cards you have moved from "Learning" to "Mastered" status.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Section: Community -->
-    <div id="community" class="section-block">
-        <h2 class="section-title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                class="section-icon" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="2" y1="12" x2="22" y2="12"></line>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
-                </path>
-            </svg>
-            Community
-        </h2>
-        <div class="help-grid">
-            <div class="help-card">
-                <h3>Discover Decks</h3>
-                <p>Browse decks created by other users. You can sort by "Newest", "Popularity", or subject matter to
-                    find what you need.</p>
-            </div>
-            <div class="help-card">
-                <h3>Import to Library</h3>
-                <p>Found a useful deck? Click the <strong>Import</strong> button to make a copy in your personal
-                    library. You can then edit and study it as if it were your own.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Section: Groups -->
-    <div id="groups" class="section-block">
-        <h2 class="section-title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                class="section-icon" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-            Groups
-        </h2>
-        <div class="help-grid">
-            <div class="help-card">
-                <h3>Collaborate</h3>
-                <p>Create a study group with friends or classmates. Share decks instantly with everyone in the group
-                    without sending individual links.</p>
-            </div>
-            <div class="help-card">
-                <h3>Competition</h3>
-                <p>Track your group's progress with member leaderboards. See who has the highest mastery and review
-                    counts.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Section: Games -->
-    <div id="game" class="section-block">
-        <h2 class="section-title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                class="section-icon" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
-            Game Modes
-        </h2>
-        <div class="help-grid">
-            <div class="help-card">
-                <h3>Match Mode</h3>
-                <p>Race against the clock to match terms with their definitions. Great for quick vocabulary checks.
-                </p>
-            </div>
-            <div class="help-card">
-                <h3>Gravity Mode</h3>
-                <p>Type the answer before the asteroid hits the planet. A high-pressure mode to test your instant
-                    recall speed.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Section: Settings -->
-    <div id="settings" class="section-block">
-        <h2 class="section-title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                class="section-icon" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path
-                    d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
-                </path>
-                <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-            Settings
-        </h2>
-        <div class="help-grid">
-            <div class="help-card">
-                <h3>Account Management</h3>
-                <p>Update your display name, change your password, or manage your notification preferences.</p>
-            </div>
-            <div class="help-card">
-                <h3>Theme & Appearance</h3>
-                <p>Toggle between Light and Dark mode to suit your study environment.</p>
-            </div>
-            <div class="help-card">
-                <h3>Data Management</h3>
-                <p>Export your data, reset deck progress, or delete your account fro the Danger Zone.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- FAQ -->
-    <div class="section-block">
-        <h2 class="section-title">Common Questions</h2>
-        <div class="faq-section">
-            <div class="faq-item">
-                <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
-                    Does Flashly cost money?
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="faq-icon">
-                        <path d="m6 9 6 6 6-6" />
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path
+                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                        </path>
                     </svg>
                 </div>
-                <div class="faq-answer">
-                    <p>Flashly is currently 100% free for all users. We believe access to effective learning tools
-                        should be universal.</p>
+                Community
+            </h2>
+            <div class="help-grid">
+                <div class="help-card">
+                    <h3>Discover Decks</h3>
+                    <p>Browse decks created by other users. You can sort by "Newest", "Popularity", or subject matter to
+                        find what you need.</p>
                 </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
-                    Can I study offline?
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="faq-icon">
-                        <path d="m6 9 6 6 6-6" />
-                    </svg>
-                </div>
-                <div class="faq-answer">
-                    <p>Currently, Flashly requires an internet connection to sync your progress to the cloud. An
-                        offline mode is in our roadmap for later this year.</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
-                    How do I reset my account progress?
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="faq-icon">
-                        <path d="m6 9 6 6 6-6" />
-                    </svg>
-                </div>
-                <div class="faq-answer">
-                    <p>You can go to the Settings tab and find the "Danger Zone". There you have options to reset
-                        decks or delete your account entirely.</p>
+                <div class="help-card">
+                    <h3>Import to Library</h3>
+                    <p>Found a useful deck? Click the <strong>Import</strong> button to make a copy in your personal
+                        library. You can then edit and study it as if it were your own.</p>
                 </div>
             </div>
         </div>
+
+        <!-- Section: Groups -->
+        <div id="groups" class="section-block">
+            <h2 class="section-title">
+                <div class="section-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                Groups
+            </h2>
+            <div class="help-grid">
+                <div class="help-card">
+                    <h3>Collaborate</h3>
+                    <p>Create a study group with friends or classmates. Share decks instantly with everyone in the group
+                        without sending individual links.</p>
+                </div>
+                <div class="help-card">
+                    <h3>Competition</h3>
+                    <p>Track your group's progress with member leaderboards. See who has the highest mastery and review
+                        counts.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Game Modes -->
+        <div id="game" class="section-block">
+            <h2 class="section-title">
+                <div class="section-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                </div>
+                Game Modes
+            </h2>
+            <div class="help-grid">
+                <div class="help-card">
+                    <h3>Match Mode</h3>
+                    <p>Race against the clock to match terms with their definitions. Great for quick vocabulary checks.
+                    </p>
+                </div>
+                <div class="help-card">
+                    <h3>Gravity Mode</h3>
+                    <p>Type the answer before the asteroid hits the planet. A high-pressure mode to test your instant
+                        recall speed.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Settings -->
+        <div id="settings" class="section-block">
+            <h2 class="section-title">
+                <div class="section-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
+                        </path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </div>
+                Settings
+            </h2>
+            <div class="help-grid">
+                <div class="help-card">
+                    <h3>Account Management</h3>
+                    <p>Update your display name, change your password, or manage your notification preferences.</p>
+                </div>
+                <div class="help-card">
+                    <h3>Theme & Appearance</h3>
+                    <p>Toggle between Light and Dark mode to suit your study environment.</p>
+                </div>
+                <div class="help-card">
+                    <h3>Data Management</h3>
+                    <p>Export your data, reset deck progress, or delete your account from the Danger Zone.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: FAQ -->
+        <div class="section-block">
+            <h2 class="section-title sora">Common Questions</h2>
+            <div class="faq-section">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+                        What is Spaced Repetition?
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+                            class="faq-icon">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Spaced Repetition is a learning technique that uses increasing intervals of time between
+                            subsequent reviews of previously learned material. Flashly's algorithm tracks your
+                            performance on each card and schedules reviews exactly when you're most likely to forget,
+                            ensuring long-term mastery.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+                        Does Flashly cost money?
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+                            class="faq-icon">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Flashly is currently 100% free for all students. We believe access to effective learning
+                            tools
+                            should be universal, especially for major national exams.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+                        Can I study offline?
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+                            class="faq-icon">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Currently, Flashly requires an internet connection to sync your progress to the cloud. An
+                            offline mode is in our roadmap for later this year.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+                        How do I reset my account progress?
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+                            class="faq-icon">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+                    </div>
+                    <div class="faq-answer">
+                        <p>You can go to the Settings tab and find the "Danger Zone". There you have options to reset
+                            decks or delete your account entirely.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="contact-footer">
+            <h2>Still need help?</h2>
+            <p>Our team is ready to answer your specific questions.</p>
+            <a href="mailto:team.flashly@gmail.com" class="contact-btn">Email Support Team</a>
+        </div>
     </div>
 
-    <!-- Footer -->
-    <div class="contact-footer">
-        <h2>Still need help?</h2>
-        <p style="margin-bottom: 2rem;">Our team is ready to answer your specific questions.</p>
-        <a href="mailto:support@flashly.app"
-            style="background: var(--primary); color: white; padding: 1rem 2rem; border-radius: 0.75rem; text-decoration: none; font-weight: 500; display: inline-block;">Contact
-            Support Email</a>
-    </div>
-</div>
-<script src="../landing-nav.js" defer></script>
+    <footer class="lp-footer">
+        <div class="lp-footer-inner">
+            <div class="lp-footer-logo">
+                <span class="lp-footer-logo-text">Flashly</span>
+            </div>
+            <p class="lp-footer-copy">© 2026 Flashly. Built for focused learners.</p>
+            <div class="lp-footer-links">
+                <a href="../about/index.html">About</a>
+                <a href="../privacy/index.html">Privacy</a>
+                <a href="./index.html">Support</a>
+                <a href="../terms/index.html">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../landing-nav.js" defer></script>
 </body>
 
 </html>

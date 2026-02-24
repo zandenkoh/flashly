@@ -44,9 +44,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@400;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
@@ -146,466 +144,95 @@
     <div id="app">
         <!-- Landing & Auth View -->
         <section id="auth-view" class="view hidden">
-
-            <!-- NEW LANDING NAV -->
-            <nav class="lp-nav" id="lp-nav">
-                <div class="lp-nav-inner">
-                    <a href="./index.html" class="lp-logo" style="cursor: pointer;">
-                        <img src="./Assets/logo.png" alt="Flashly Logo"
-                            style="width: 32px; height: 32px; border-radius: 50%;">
-                        <span>Flashly</span>
-                    </a>
-                    <div class="lp-nav-links">
-                        <a href="./about/index.html">About</a>
-                        <a href="./support/index.html">Support</a>
+            <!-- Landing Navigation -->
+            <nav class="landing-nav">
+                <div class="nav-container">
+                    <div class="landing-logo" onclick="window.location.reload()" style="cursor: pointer;">Flashly</div>
+                    <div class="nav-actions">
+                        <a href="./about/index.html" class="btn btn-text" style="text-decoration: none;">About</a>
+                        <a href="./support/index.html" class="btn btn-text" style="text-decoration: none;">Support</a>
+                        <button class="btn btn-text btn-login-toggle">Sign In</button>
+                        <button class="btn btn-primary btn-signup-toggle">Get Started</button>
                     </div>
-                    <div class="lp-nav-actions">
-                        <button class="lp-btn-ghost btn-login-toggle">Sign In</button>
-                        <button class="lp-btn-solid btn-signup-toggle">Get Started</button>
-                    </div>
-                    <button class="lp-hamburger" id="landing-mobile-menu-toggle" aria-label="Open menu">
-                        <span></span><span></span><span></span>
+                    <button id="landing-mobile-menu-toggle" class="mobile-menu-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="icon-md">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
                     </button>
                 </div>
+
             </nav>
 
             <!-- Mobile Menu Modal -->
             <div id="mobile-nav-modal" class="mobile-nav-modal">
                 <div class="mobile-nav-links">
-                    <a href="./about/index.html" class="mobile-nav-item">About
+                    <a href="./about/index.html" class="mobile-nav-item">
+                        About
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
                             <path fill-rule="evenodd"
                                 d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
                                 clip-rule="evenodd" />
                         </svg>
                     </a>
-                    <a href="./support/index.html" class="mobile-nav-item">Support
+                    <a href="./support/index.html" class="mobile-nav-item">
+                        Support
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
                             <path fill-rule="evenodd"
                                 d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
                                 clip-rule="evenodd" />
                         </svg>
                     </a>
-                    <a href="./privacy/index.html" class="mobile-nav-item">Privacy
+                    <a href="./privacy/index.html" class="mobile-nav-item">
+                        Privacy
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
                             <path fill-rule="evenodd"
                                 d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
                                 clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    <a href="mailto:team.flashly@gmail.com" class="mobile-nav-item">
+                        Contact
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                            <path
+                                d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.161V6a2 2 0 00-2-2H3z" />
+                            <path
+                                d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
                         </svg>
                     </a>
                 </div>
                 <div class="mobile-nav-footer">
-                    <button class="lp-btn-ghost mobile-login-btn btn-login-toggle">Sign In</button>
-                    <button class="lp-btn-solid mobile-signup-btn btn-signup-toggle">Sign Up</button>
+                    <button class="btn btn-outline mobile-login-btn btn-login-toggle">Sign In</button>
+                    <button class="btn btn-primary mobile-signup-btn btn-signup-toggle">Sign Up</button>
                 </div>
             </div>
 
-            <!-- ========= REDESIGNED LANDING ========= -->
-            <div class="lp-root">
-
-                <!-- HERO -->
-                <section class="lp-hero">
-                    <div class="lp-hero-bg">
-                        <div class="lp-orb lp-orb-1"></div>
-                        <div class="lp-orb lp-orb-2"></div>
-                        <div class="lp-orb lp-orb-3"></div>
-                        <div class="lp-grid-lines"></div>
-                    </div>
-                    <div class="lp-hero-inner">
-                        <div class="lp-hero-content">
-                            <h1 class="lp-hero-title">
-                                Study smarter.<br>
-                                <span class="lp-hero-accent">Score higher.</span>
-                            </h1>
-                            <p class="lp-hero-sub">
-                                15,000+ free flashcards and notes, powered by spaced repetition and your personal AI
-                                coach. Built for Singapore's toughest exams.
-                            </p>
-                            <div class="lp-hero-actions">
-                                <button class="lp-btn-cta btn-signup-toggle">
-                                    Start for free
-                                </button>
-                                <button class="lp-btn-ghost-cta" onclick="state.isGuest = true; showApp();">
-                                    Browse decks
-                                </button>
-                            </div>
-                            <div class="lp-hero-social">
-                                <div class="lp-avatars">
-                                    <div class="lp-av" style="background:#fee2e2;color:#991b1b">JW</div>
-                                    <div class="lp-av" style="background:#e0f2fe;color:#0369a1">SH</div>
-                                    <div class="lp-av" style="background:#f0fdf4;color:#15803d">AK</div>
-                                    <div class="lp-av" style="background:#fef9c3;color:#a16207">RT</div>
-                                    <div class="lp-av lp-av-more">+10k</div>
-                                </div>
-                                <span>Trusted by 10,000+ students</span>
-                            </div>
+            <!-- Hero Section -->
+            <section class="landing-page-section landing-hero-revamp">
+                <div class="section-content-wrapper">
+                    <div class="landing-text-block">
+                        <h1>Exams are coming. <span>Your flashcards and notes are here.</span></h1>
+                        <p>Over 15,000 free flashcards and notes, supercharged by <strong>personal AI coaching</strong>.
+                            Master your subjects with the ultimate Spaced Repetition System tailored for Singapore
+                            students.</p>
+                        <div class="hero-btns" style="display:flex; gap:1rem; align-items: center; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-lg btn-signup-toggle">Start Learning</button>
+                            <button class="btn btn-secondary btn-lg" onclick="state.isGuest = true; showApp();">
+                                Community Decks and Curated Notes</button>
                         </div>
                     </div>
-                    <!-- Hero Visual / Mockup Stack -->
-                    <div class="lp-hero-visual">
-                        <div class="lp-visual-stack">
-                            <div class="lp-card-main-wrapper">
-                                <div class="lp-card-float lp-card-main">
-                                    <img src="./Assets/deck-graphic-light.svg" alt="Flashly App"
-                                        style="width:100%;border-radius:12px;display:block;">
-                                </div>
-                            </div>
-                            <!-- Floating decorative UI elements -->
-                            <div class="lp-floating-ui lp-ui-1">
-                                <div class="lp-ui-icon" style="background: #2563eb;">⚡</div>
-                                <div class="lp-ui-text">
-                                    <strong>94%</strong>
-                                    <span>Retention</span>
-                                </div>
-                            </div>
-                            <div class="lp-floating-ui lp-ui-2">
-                                <div class="lp-ui-icon" style="background: #f59e0b;">🔥</div>
-                                <div class="lp-ui-text">
-                                    <strong>14 Day</strong>
-                                    <span>Streak</span>
-                                </div>
-                            </div>
-                            <div class="lp-floating-ui lp-ui-3">
-                                <div class="lp-ui-icon" style="background: #8b5cf6;">✨</div>
-                                <div class="lp-ui-text">
-                                    <strong>AI Insight</strong>
-                                    <span>Study Bio now</span>
-                                </div>
-                            </div>
+                    <div class="landing-visual-block">
+                        <div class="hero-mockup">
+                            <img src="./Assets/deck-graphic-light.svg" alt="Flashly App Interface"
+                                style="width: 100%; height: auto; border-radius: 8px;">
                         </div>
                     </div>
-                </section>
+                </div>
+            </section>
 
-                <!-- STATS BAR (Integrated as a Trusted By section) -->
-                <section class="lp-trust-bar">
-                    <div class="lp-trust-inner">
-                        <span class="lp-trust-label">THE STUDY COMPANION FOR</span>
-                        <div class="lp-trust-logos">
-                            <div class="lp-trust-logo">O-LEVEL</div>
-                            <div class="lp-trust-logo">A-LEVEL</div>
-                            <div class="lp-trust-logo">IB DIPLOMA</div>
-                            <div class="lp-trust-logo">IP PROGRAMME</div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- FEATURES SECTION -->
-                <section class="lp-features" id="features">
-                    <div class="lp-features-header">
-                        <div class="lp-section-label">Features</div>
-                        <h2 class="lp-section-title">Engineered for your performance</h2>
-                    </div>
-
-                    <div class="lp-features-grid">
-                        <!-- Column 1: Main Feature -->
-                        <div class="lp-feature-col lp-col-main">
-                            <div class="lp-feature-card lp-card-large">
-                                <div class="lp-card-header">
-                                    <span class="lp-tag blue">Algorithm</span>
-                                    <h3>Spaced Repetition System</h3>
-                                    <p>Our SRS algorithm predicts exactly when you're about to forget something and
-                                        surfaces it at the perfect moment for maximum memory retention.</p>
-                                </div>
-                                <div class="lp-card-visual">
-                                    <div class="lp-srs-graphic">
-                                        <div class="lp-srs-bar" style="--h: 40%; --d: 0s;"></div>
-                                        <div class="lp-srs-bar" style="--h: 65%; --d: 0.1s;"></div>
-                                        <div class="lp-srs-bar" style="--h: 45%; --d: 0.2s;"></div>
-                                        <div class="lp-srs-bar active" style="--h: 90%; --d: 0.3s;"></div>
-                                        <div class="lp-srs-bar" style="--h: 55%; --d: 0.4s;"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Column 2: Stacked Features -->
-                        <div class="lp-feature-col lp-col-side">
-                            <div class="lp-feature-card lp-card-accent">
-                                <div class="lp-card-header">
-                                    <span class="lp-tag purple">AI COACH</span>
-                                    <h3>Personalized Learning</h3>
-                                    <p>Daily game plans and insights tailored to your study habits.</p>
-                                </div>
-                                <div class="lp-ai-micro">
-                                    <div class="lp-ai-wave"></div>
-                                    <span class="lp-ai-text">"You're 20% faster at Biology today!"</span>
-                                </div>
-                            </div>
-                            <div class="lp-feature-card">
-                                <div class="lp-card-header">
-                                    <span class="lp-tag green">COMMUNITY</span>
-                                    <h3>15k+ Free Decks</h3>
-                                    <p>Access high-quality cards made by top students in Singapore.</p>
-                                </div>
-                                <div class="lp-deck-stack">
-                                    <div class="lp-mini-deck"></div>
-                                    <div class="lp-mini-deck"></div>
-                                    <div class="lp-mini-deck"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Column 3: Full Height Features -->
-                        <div class="lp-feature-col">
-                            <div class="lp-feature-card lp-card-dark">
-                                <div class="lp-card-header">
-                                    <span class="lp-tag white">GROUPS</span>
-                                    <h3>Collaborative Study</h3>
-                                    <p>Build shared decks and compete on private leaderboards with your classmates.</p>
-                                </div>
-                                <div class="lp-group-mini">
-                                    <div class="lp-group-avatars">
-                                        <span>J</span><span>A</span><span>K</span>
-                                    </div>
-                                    <div class="lp-group-progress">
-                                        <div class="lp-progress-track"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="lp-feature-card">
-                                <div class="lp-card-header">
-                                    <span class="lp-tag blue">ANALYTICS</span>
-                                    <h3>Track Mastery</h3>
-                                    <p>Visualize your progress with beautiful heatmaps and charts.</p>
-                                </div>
-                                <div class="lp-heatmap-mini">
-                                    <div class="lp-heat-dot" style="opacity:0.3"></div>
-                                    <div class="lp-heat-dot" style="opacity:0.6"></div>
-                                    <div class="lp-heat-dot" style="opacity:0.9"></div>
-                                    <div class="lp-heat-dot" style="opacity:0.4"></div>
-                                    <div class="lp-heat-dot" style="opacity:0.8"></div>
-                                    <div class="lp-heat-dot" style="opacity:1"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- DETAILED FEATURE DEEP-DIVES -->
-                <section class="lp-detail-section" id="srs">
-                    <div class="lp-detail-inner">
-                        <div class="lp-detail-content">
-                            <h2 class="lp-detail-title">Beat the forgetting curve.</h2>
-                            <p class="lp-detail-text">Our optimized Spaced Repetition System (SRS) predicts exactly when
-                                you're about to forget a concept and surfaces it for review at the perfect moment. Turn
-                                weeks of cramming into minutes of focused study.</p>
-                            <div class="hero-btns" style="display:flex; gap:1rem;">
-                                <button class="lp-btn-solid btn-signup-toggle">Start studying free</button>
-                            </div>
-                        </div>
-                        <div class="lp-detail-visual">
-                            <div class="lp-card-float">
-                                <img src="./Assets/deck-graphic-light.svg" alt="SRS Science" class="lp-detail-mockup">
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="lp-detail-section reverse" id="ai">
-                    <div class="lp-detail-inner">
-                        <div class="lp-detail-content">
-                            <span class="lp-tag purple" style="margin-bottom: 1rem; display:inline-block;">AI
-                                INSIGHT</span>
-                            <h2 class="lp-detail-title">Your personal tutor.</h2>
-                            <p class="lp-detail-text">Flashly AI analyzes your study habits and provides daily,
-                                actionable insights. Get custom game plans, motivational coaching, and smart
-                                recommendations tailored just for you. No more feeling overwhelmed.</p>
-                            <button class="lp-btn-solid btn-signup-toggle">Meet your AI coach</button>
-                        </div>
-                        <div class="lp-detail-visual">
-                            <div class="lp-card-float"
-                                style="padding: 1.5rem; background: var(--background); border: 1px solid var(--border); border-radius: 1rem;">
-                                <div style="display:flex; align-items:center; gap: 0.75rem; margin-bottom: 1rem;">
-                                    <div
-                                        style="width: 32px; height: 32px; background: #8b5cf6; border-radius: 50%; display:flex; align-items:center; justify-content:center; color:white;">
-                                        ✨</div>
-                                    <span style="font-weight:700; font-size: 0.9rem;">Flashly AI</span>
-                                </div>
-                                <p style="font-size: 0.95rem; line-height:1.5; color: var(--text-primary);">"You've
-                                    mastered 85% of Pure Chemistry. Focus on 'Organic Compounds' today to hit your 90%
-                                    goal!"</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="lp-detail-section" id="community">
-                    <div class="lp-detail-inner">
-                        <div class="lp-detail-content">
-                            <h2 class="lp-detail-title">Learn from the best.</h2>
-                            <p class="lp-detail-text">Access thousands of student-made decks and premium notes. GCE 'O'
-                                Levels, IB, or University—whatever you're studying, someone has already mastered it
-                                here. Share your own knowledge and earn a reputation.</p>
-                            <button class="lp-btn-solid"
-                                onclick="state.isGuest = true; showApp(); loadCommunityDecks();">Explore 15k+ Decks
-                                </button>
-                        </div>
-                        <div class="lp-detail-visual">
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                <div
-                                    style="padding: 1.5rem; background: var(--background); border: 1px solid var(--border); border-radius: 1rem;">
-                                    <span style="font-size: 1.5rem;">🧪</span>
-                                    <h4 style="margin: 0.5rem 0 0.25rem 0; font-size: 0.9rem;">Pure Chem</h4>
-                                    <span style="font-size: 0.75rem; color: var(--text-secondary);">1.2k Cards</span>
-                                </div>
-                                <div
-                                    style="padding: 1.5rem; background: var(--background); border: 1px solid var(--border); border-radius: 1rem;">
-                                    <span style="font-size: 1.5rem;">📐</span>
-                                    <h4 style="margin: 0.5rem 0 0.25rem 0; font-size: 0.9rem;">A-Maths</h4>
-                                    <span style="font-size: 0.75rem; color: var(--text-secondary);">850 Cards</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- PRICING SECTION -->
-                <section class="lp-pricing" id="pricing" style="padding: 8rem 2rem;">
-                    <div class="lp-features-header" style="margin-bottom: 4rem;">
-                        <div class="lp-section-label">Pricing</div>
-                        <h2 class="lp-section-title">Free for all students</h2>
-                        <p style="color:var(--text-secondary); max-width:600px; margin: 1rem auto;">Flashly is built to
-                            be accessible. Unlock your potential without any financial barriers.</p>
-                    </div>
-
-                    <div class="pricing-grid">
-                        <div class="pricing-card">
-                            <div class="pricing-header">
-                                <h3 class="plan-name">Learner</h3>
-                                <div class="plan-price">$0<span>/mo</span></div>
-                                <p class="plan-desc">For those just starting</p>
-                            </div>
-                            <ul class="plan-features">
-                                <li><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg> Unlimited Decks</li>
-                                <li><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg> SRS Algorithm</li>
-                                <li><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg> Community Access</li>
-                            </ul>
-                            <button class="lp-btn-ghost btn-signup-toggle" style="margin-top:auto;">Get Started</button>
-                        </div>
-                        <div class="pricing-card featured">
-                            <div class="pricing-badge">BEST FOR EXAMS</div>
-                            <div class="pricing-header">
-                                <h3 class="plan-name">Mastery</h3>
-                                <div class="plan-price">$0<span>/mo</span></div>
-                                <p class="plan-desc">The full AI experience</p>
-                            </div>
-                            <ul class="plan-features">
-                                <li><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg> Everything in Learner</li>
-                                <li><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg> AI Personal Coach</li>
-                                <li><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg> Advanced Analytics</li>
-                            </ul>
-                            <button class="lp-btn-solid btn-signup-toggle" style="margin-top:auto;">Register Free
-                                </button>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- TESTIMONIALS -->
-                <section class="lp-testimonials">
-                    <div class="lp-testimonials-header">
-                        <div class="lp-section-label" style="color:rgba(255,255,255,0.4)">Success Stories</div>
-                        <h2 class="lp-section-title" style="color:white">Loved by students across Singapore</h2>
-                    </div>
-
-                    <div class="lp-testimonials-masonry">
-                        <div class="lp-testimonial-item">
-                            <div class="lp-t-stars">★★★★★</div>
-                            <p>"Flashly helped me organize my O-Level Bio notes. The SRS algorithm really works — I
-                                spent less time studying but remembered more."</p>
-                            <div class="lp-t-author">
-                                <div class="lp-t-avatar" style="background:#fee2e2;color:#991b1b">JW</div>
-                                <div class="lp-t-info">
-                                    <span class="lp-t-name">Jeryl W.</span>
-                                    <span class="lp-t-school">RI Student</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="lp-testimonial-item lp-t-featured">
-                            <div class="lp-t-stars">★★★★★</div>
-                            <p>"The community decks are a lifesaver. I found a full set of E-Maths cards that were
-                                better than my own notes. The layout is so clean."</p>
-                            <div class="lp-t-author">
-                                <div class="lp-t-avatar" style="background:#e0f2fe;color:#0369a1">SH</div>
-                                <div class="lp-t-info">
-                                    <span class="lp-t-name">Sarah H.</span>
-                                    <span class="lp-t-school">VJC Student</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="lp-testimonial-item">
-                            <div class="lp-t-stars">★★★★★</div>
-                            <p>"Finally an app that understands Singapore exams. The AI coaching gives me a game plan
-                                every morning so I don't feel overwhelmed."</p>
-                            <div class="lp-t-author">
-                                <div class="lp-t-avatar" style="background:#f0fdf4;color:#15803d">AK</div>
-                                <div class="lp-t-info">
-                                    <span class="lp-t-name">Arjun K.</span>
-                                    <span class="lp-t-school">NYP Student</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- FINAL CTA -->
-                <section class="lp-cta">
-                    <div class="lp-cta-content">
-                        <div class="lp-cta-orb-v2"></div>
-                        <div class="lp-section-label" style="color:rgba(255,255,255,0.6)">GET STARTED TODAY</div>
-                        <h2 class="lp-cta-title">Ready to reach your potential?</h2>
-                        <p class="lp-cta-sub">Join 10,000+ students on the path to mastery. Free forever.</p>
-                        <div class="lp-cta-actions">
-                            <button class="lp-btn-primary-large btn-signup-toggle">Create your free account </button>
-                            <p class="lp-cta-note">No credit card required · Free for all students</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- FOOTER -->
-                <footer class="lp-footer">
-                    <div class="lp-footer-inner">
-                        <div class="lp-footer-logo">
-                            <span class="lp-footer-logo-text">Flashly</span>
-                        </div>
-                        <p class="lp-footer-copy">© 2026 Flashly. Built for focused learners.</p>
-                        <div class="lp-footer-links">
-                            <a href="about/index.html">About</a>
-                            <a href="privacy/index.html">Privacy</a>
-                            <a href="support/index.html">Support</a>
-                        </div>
-                    </div>
-                </footer>
-
-            </div>
-            <!-- ========= END REDESIGNED LANDING ========= -->
-
-            <!-- ============ KEEP OLD AUTH SECTIONS (hidden from landing, used by modal) ============ -->
-            <!-- Trusted By Section (legacy, hidden, kept for any JS references) -->
-            <section class="landing-trust-section" style="display:none;">
+            <!-- Trusted By Section -->
+            <section class="landing-trust-section">
                 <div class="section-content-wrapper">
                     <div class="trust-container card">
                         <span class="trust-badge">TRUSTED BY STUDENTS ACROSS SINGAPORE</span>
@@ -644,10 +271,199 @@
                                 <div class="stat-label">Accounts Created</div>
                             </div>
                         </div>
+                        <p class="trust-footer">Join the community of students acing their exams</p>
                     </div>
                 </div>
             </section>
 
+            <!-- Science Section (SRS) -->
+            <section class="landing-page-section" style="background: var(--surface);">
+                <div class="section-content-wrapper" style="grid-template-columns: 1fr 1fr;">
+                    <div class="landing-visual-block" style="order: 2;">
+                        <div class="srs-mockup" style="transform: perspective(1000px) rotateY(10deg) rotateX(5deg);">
+                            <div class="flex flex-col gap-4">
+                                <div class="card" style="border-left: 4px solid var(--primary);">
+                                    <div class="text-sm font-bold text-primary mb-1">REVIEW DUE</div>
+                                    <div class="text-lg font-semibold">"Photosynthesis Process"</div>
+                                    <div class="text-xs text-secondary mt-2">Last seen 3 days ago</div>
+                                </div>
+                                <div class="card" style="opacity: 0.6;">
+                                    <div class="text-sm font-bold text-secondary mb-1">STABLE</div>
+                                    <div class="text-lg font-semibold">"Mitochondria Function"</div>
+                                    <div class="text-xs text-secondary mt-2">Review in 14 days</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="landing-text-block" style="order: 1;">
+                        <span class="feature-pill">The Algorithm</span>
+                        <h2>Beat the forgetting curve.</h2>
+                        <p>Our optimized Spaced Repetition System (SRS) predicts exactly when you're about to forget a
+                            concept and surfaces it for review at the perfect moment.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- New AI Section -->
+            <section class="landing-page-section">
+                <div class="section-content-wrapper" style="grid-template-columns: 1fr 1fr;">
+                    <div class="landing-text-block">
+                        <span class="feature-pill" style="background: #f5f3ff; color: #8b5cf6;">AI COACH</span>
+                        <h2>Your personal tutor.</h2>
+                        <p>Flashly AI analyzes your study habits and provides daily, actionable insights. Get custom
+                            game plans, motivational coaching, and smart recommendations tailored just for you.</p>
+                        <button class="btn btn-primary btn-lg btn-signup-toggle">Meet Your AI Coach</button>
+                    </div>
+                    <div class="landing-visual-block">
+                        <div class="ai-mockup" style="padding: 2rem;">
+                            <div class="card" style="margin-bottom: 1rem; border-left: 4px solid #8b5cf6;">
+                                <div class="ai-insight-badge mb-2">
+                                    <div class="ai-insight-dot"></div>
+                                    <span>AI INSIGHT</span>
+                                </div>
+                                <p class="text-sm font-medium">"You've mastered 85% of Pure Chemistry. Focus on 'Organic
+                                    Compounds' today to hit your 90% goal!"</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="ai-stat-card">
+                                    <div class="font-bold mb-1 text-xs">Study Chemistry</div>
+                                    <div class="text-secondary text-xs">Weakest deck</div>
+                                </div>
+                                <div class="ai-stat-card">
+                                    <div class="font-bold mb-1 text-xs">View Stats</div>
+                                    <div class="text-secondary text-xs">Track progress</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Community Section -->
+            <section class="landing-page-section">
+                <div class="section-content-wrapper">
+                    <div class="landing-text-block">
+                        <span class="feature-pill">Community</span>
+                        <h2>Learn from the best.</h2>
+                        <p>Access thousands of student-made decks and premium notes. GCE 'O' Levels, IB, or
+                            University—whatever you're studying, someone has already mastered it here.</p>
+                        <button class="btn btn-secondary btn-lg"
+                            onclick="state.isGuest = true; showApp(); loadCommunityDecks();">Explore Decks</button>
+                    </div>
+                    <div class="landing-visual-block">
+                        <div class="community-mockup">
+                            <div class="grid grid-cols-2 gap-2" style="gap: 5px;">
+                                <div class="card p-4 text-center"
+                                    style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
+                                    <div class="text-2xl mb-1">🧪</div>
+                                    <div class="text-sm font-bold">Pure Chemistry</div>
+                                    <div class="text-xs text-secondary">1.2k Cards</div>
+                                </div>
+                                <div class="card p-4 text-center"
+                                    style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
+                                    <div class="text-2xl mb-1">📐</div>
+                                    <div class="text-sm font-bold">A-Maths</div>
+                                    <div class="text-xs text-secondary">850 Cards</div>
+                                </div>
+                                <div class="card p-4 text-center"
+                                    style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
+                                    <div class="text-2xl mb-1">🌍</div>
+                                    <div class="text-sm font-bold">Geography</div>
+                                    <div class="text-xs text-secondary">430 Cards</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section class="landing-page-section" style="background: var(--surface);">
+                <div class="section-content-wrapper" style="grid-template-columns: 1fr 1fr;">
+                    <div class="landing-visual-block" style="order: 2;">
+                        <div class="analytics-mockup"
+                            style="transform: perspective(1000px) rotateY(10deg) rotateX(5deg);">
+                            <div class="card" style="padding: 1.5rem;">
+                                <div class="text-sm font-bold mb-4">RETENTION RATE</div>
+                                <div
+                                    style="height: 120px; width: 100%; background: linear-gradient(0deg, var(--primary-light) 0%, transparent 100%); border-radius: 4px; display: flex; align-items: flex-end; gap: 4px; padding: 10px;">
+                                    <div style="height: 40%; flex: 1; background: var(--primary); border-radius: 2px;">
+                                    </div>
+                                    <div style="height: 60%; flex: 1; background: var(--primary); border-radius: 2px;">
+                                    </div>
+                                    <div style="height: 55%; flex: 1; background: var(--primary); border-radius: 2px;">
+                                    </div>
+                                    <div style="height: 80%; flex: 1; background: var(--primary); border-radius: 2px;">
+                                    </div>
+                                    <div style="height: 95%; flex: 1; background: var(--primary); border-radius: 2px;">
+                                    </div>
+                                </div>
+                                <div class="text-xl font-bold mt-4">94.2%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="landing-text-block" style="order: 1;">
+                        <span class="feature-pill">Performance</span>
+                        <h2>Visualize your growth.</h2>
+                        <p>Track your daily streaks, retention rates, and card maturity levels. Turn your learning into
+                            an interactive journey with beautiful, data-driven insights.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Groups Section -->
+            <section class="landing-page-section">
+                <div class="section-content-wrapper">
+                    <div class="landing-text-block">
+                        <span class="feature-pill">Collaboration</span>
+                        <h2>Study better, together.</h2>
+                        <p>Create shared groups to collaborate on decks with classmates. Compete on leaderboards and
+                            track group-wide mastery in real-time.</p>
+                        <button class="btn btn-primary btn-lg btn-signup-toggle">Form a Group</button>
+                    </div>
+                    <div class="landing-visual-block">
+                        <div class="groups-mockup">
+                            <div class="card p-4">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs">
+                                        J</div>
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white text-xs">
+                                        A</div>
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-warning flex items-center justify-center text-white text-xs">
+                                        K</div>
+                                    <div class="text-xs text-secondary">+12 active</div>
+                                </div>
+                                <div class="text-sm font-bold mb-2 text-primary">Class of 2026 - Bio</div>
+                                <div class="progress-bar-container"
+                                    style="height: 6px; background: var(--background); border-radius: 3px;">
+                                    <div
+                                        style="width: 75%; height: 100%; background: var(--primary); border-radius: 3px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <footer class="landing-footer" style="padding: 4rem 2rem; border-top: 1px solid var(--border);">
+                <div class="footer-container"
+                    style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+                    <p>&copy; 2026 Flashly. Built for focused learners.</p>
+                    <div class="footer-links" style="display: flex; gap: 2rem;">
+                        <a href="about/index.html"
+                            style="color: var(--text-secondary); text-decoration: none;">About</a>
+                        <a href="privacy/index.html"
+                            style="color: var(--text-secondary); text-decoration: none;">Privacy</a>
+                        <a href="support/index.html"
+                            style="color: var(--text-secondary); text-decoration: none;">Support</a>
+                    </div>
+                </div>
+            </footer>
         </section>
 
         <!-- Main App Layout -->
@@ -2440,9 +2256,7 @@
                                 <h3 id="settings-display-name" class="text-lg font-semibold" style="margin: 0;">Username
                                 </h3>
                                 <p id="settings-display-email" class="text-secondary text-sm" style="margin: 0;">
-                                    <a href="/cdn-cgi/l/email-protection" class="__cf_email__"
-                                        data-cfemail="d4a1a7b1a694b1acb5b9a4b8b1fab7bbb9">[email&#160;protected]</a>
-                                </p>
+                                    user@example.com</p>
                             </div>
                         </div>
 
@@ -3211,7 +3025,6 @@
         </div>
     </div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
     <script src="landing-nav.js" defer></script>
     <script src="script.js" defer></script>
     <script src="welcome.js" defer></script>
@@ -3555,23 +3368,10 @@
             <div class="xp-explainer-actions">
                 <button class="btn btn-primary w-full"
                     onclick="document.getElementById('xp-explainer-modal').classList.add('hidden'); document.body.classList.remove('modal-open');">Got
-                    it</button>
+                    it!</button>
             </div>
         </div>
     </div>
-
-    <!-- Landing page scroll effects -->
-    <script>
-        (function () {
-            const authView = document.getElementById("auth-view");
-            const nav = document.getElementById("lp-nav");
-            if (authView && nav) {
-                authView.addEventListener("scroll", function () {
-                    nav.classList.toggle("scrolled", authView.scrollTop > 30);
-                });
-            }
-        })();
-    </script>
 
 </body>
 

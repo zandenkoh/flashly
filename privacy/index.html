@@ -12,246 +12,238 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://flashly-edu.github.io/flashly/privacy/">
 
-    <!-- Open Graph -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://flashly-edu.github.io/flashly/privacy/">
-    <meta property="og:title" content="Privacy Policy - Flashly">
-    <meta property="og:description" content="Learn about Flashly's commitment to your privacy and data security.">
-    <meta property="og:image" content="https://flashly-edu.github.io/flashly/Assets/og-image.png">
-
     <link rel="stylesheet" href="../style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="icon" type="image/png" href="../Assets/logo.png">
 
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebPage",
-      "name": "Privacy Policy",
-      "url": "https://flashly-edu.github.io/flashly/privacy/",
-      "description": "Privacy Policy for Flashly application."
-    }
-    </script>
     <style>
-        /* Override global body style from style.css which sets overflow: hidden */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            text-decoration: none;
+        }
+
         body {
             background-color: var(--background);
             font-family: 'Inter', sans-serif;
             color: var(--text-primary);
             overflow-y: auto !important;
             height: auto !important;
+            line-height: 1.6;
+            background-image:
+                radial-gradient(circle at top right, var(--primary-light) 0%, transparent 40%),
+                radial-gradient(circle at bottom left, var(--primary-light) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        .sora {
+            font-family: 'Sora', sans-serif;
+            letter-spacing: -0.02em;
         }
 
         .legal-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 4rem 1.5rem;
-        }
-
-        .header-section {
-            margin-bottom: 3rem;
+            padding: 10rem 1.5rem 6rem;
         }
 
         .legal-content {
             background: var(--surface);
-            padding: 3rem;
-            border-radius: var(--radius);
+            padding: 4rem;
+            border-radius: 2rem;
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
         }
 
         .legal-content h1 {
-            font-size: 2.25rem;
+            font-size: 3rem;
             margin-bottom: 0.5rem;
-            letter-spacing: -0.025em;
+            letter-spacing: -0.04em;
+            font-weight: 800;
         }
 
         .legal-content h2 {
-            margin-top: 2.5rem;
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
+            margin-top: 3rem;
+            margin-bottom: 1.25rem;
+            font-size: 1.75rem;
             color: var(--text-primary);
-            font-weight: 600;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.75rem;
         }
 
         .legal-content h3 {
-            margin-top: 1.5rem;
-            margin-bottom: 0.75rem;
-            font-size: 1.125rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
             color: var(--text-primary);
-            font-weight: 500;
+            font-weight: 700;
         }
 
         .legal-content p {
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
             color: var(--text-secondary);
-            line-height: 1.7;
-            font-size: 1rem;
+            line-height: 1.8;
+            font-size: 1.05rem;
         }
 
         .legal-content ul {
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             padding-left: 1.5rem;
             color: var(--text-secondary);
-            line-height: 1.7;
+            line-height: 1.8;
         }
 
         .legal-content li {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
 
         .last-updated {
-            color: var(--text-tertiary);
-            font-size: 0.875rem;
-            margin-bottom: 2rem;
-            display: block;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.9375rem;
-            transition: color 0.2s;
-            margin-bottom: 1rem;
-        }
-
-        .back-link:hover {
             color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        @media (max-width: 768px) {
+            .legal-content {
+                padding: 2.5rem 1.5rem;
+            }
+
+            .legal-content h1 {
+                font-size: 2.25rem;
+            }
         }
     </style>
 </head>
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-PSQD1QL17E"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
+<body>
 
-    gtag('config', 'G-PSQD1QL17E');
-</script>
-
-<nav class="landing-nav">
-    <div class="nav-container">
-        <a href="../index.html" class="landing-logo" style="text-decoration: none; display: flex; align-items: center;">
-            Flashly
-        </a>
-        <div class="nav-actions">
-            <a href="../about/index.html" class="btn btn-text" style="text-decoration: none;">About</a>
-            <a href="../support/index.html" class="btn btn-text" style="text-decoration: none;">Support</a>
-            <button class="btn btn-text btn-login-toggle">Sign In</button>
-            <button class="btn btn-primary btn-signup-toggle">Get Started</button>
+    <nav class="lp-nav" id="lp-nav">
+        <div class="lp-nav-inner">
+            <a href="../index.html" class="lp-logo">
+                <img src="../Assets/logo.png" alt="Flashly Logo" style="width: 32px; height: 32px; border-radius: 50%;">
+                <span>Flashly</span>
+            </a>
+            <div class="lp-nav-links">
+                <a href="../about/index.html">About</a>
+                <a href="../support/index.html">Support</a>
+            </div>
+            <div class="lp-nav-actions">
+                <button class="lp-btn-ghost btn-login-toggle">Sign In</button>
+                <button class="lp-btn-solid btn-signup-toggle">Get Started</button>
+            </div>
+            <button class="lp-hamburger" id="landing-mobile-menu-toggle" aria-label="Open menu">
+                <span></span><span></span><span></span>
+            </button>
         </div>
-        <button id="landing-mobile-menu-toggle" class="mobile-menu-toggle">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                stroke="currentColor" class="icon-md">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-        </button>
+    </nav>
+
+    <!-- Mobile Menu Modal -->
+    <div id="mobile-nav-modal" class="mobile-nav-modal">
+        <div class="mobile-nav-links">
+            <a href="../about/index.html" class="mobile-nav-item">About
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                    <path fill-rule="evenodd"
+                        d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                        clip-rule="evenodd" />
+                </svg>
+            </a>
+            <a href="../support/index.html" class="mobile-nav-item">Support
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                    <path fill-rule="evenodd"
+                        d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                        clip-rule="evenodd" />
+                </svg>
+            </a>
+        </div>
+        <div class="mobile-nav-footer">
+            <button class="lp-btn-ghost mobile-login-btn btn-login-toggle">Sign In</button>
+            <button class="lp-btn-solid mobile-signup-btn btn-signup-toggle">Sign Up</button>
+        </div>
     </div>
 
-</nav>
+    <div class="legal-container">
+        <div class="legal-content">
+            <h1>Privacy Policy</h1>
+            <span class="last-updated">Last updated: February 11, 2026</span>
 
-<!-- Mobile Menu Modal -->
-<div id="mobile-nav-modal" class="mobile-nav-modal">
-    <div class="mobile-nav-links">
-        <a href="../about/index.html" class="mobile-nav-item">
-            About
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
-                <path fill-rule="evenodd"
-                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                    clip-rule="evenodd" />
-            </svg>
-        </a>
-        <a href="../support/index.html" class="mobile-nav-item">
-            Support
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
-                <path fill-rule="evenodd"
-                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                    clip-rule="evenodd" />
-            </svg>
-        </a>
-        <a href="./index.html" class="mobile-nav-item">
-            Privacy
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
-                <path fill-rule="evenodd"
-                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                    clip-rule="evenodd" />
-            </svg>
-        </a>
-        <a href="mailto:team.flashly@gmail.com" class="mobile-nav-item">
-            Contact
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
-                <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.161V6a2 2 0 00-2-2H3z" />
-                <path d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
-            </svg>
-        </a>
+            <p>At Flashly, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclosure,
+                and safeguard your information when you visit our website and use our application.</p>
+
+            <h2>1. Information We Collect</h2>
+            <p>We collect information that helps us provide you with the best learning experience possible.</p>
+
+            <h3>Personal Data</h3>
+            <p>When you register for Flashly, we may collect personally identifiable information, such as your:</p>
+            <ul>
+                <li>Name</li>
+                <li>Email address</li>
+                <li>Profile preferences</li>
+            </ul>
+
+            <h3>Usage Data</h3>
+            <p>We automatically collect certain information when you visit, use, or navigate the application. This
+                information does not reveal your specific identity but may include:</p>
+            <ul>
+                <li>Learning statistics (cards reviewed, mastery levels)</li>
+                <li>Device information (browser type, operating system)</li>
+                <li>Log data (access times, pages viewed)</li>
+            </ul>
+
+            <h2>2. How We Use Your Information</h2>
+            <p>We use the information we collect or receive to:</p>
+            <ul>
+                <li><strong>Provide services:</strong> To create and manage your account and deliver flashcard
+                    functionality.</li>
+                <li><strong>Improve experience:</strong> To understand how you use Flashly and optimize our spaced
+                    repetition algorithm.</li>
+                <li><strong>Cloud Sync:</strong> To ensure your decks and progress are available across all your
+                    devices.</li>
+            </ul>
+
+            <h2>3. Data Storage and Security</h2>
+            <p>We use industry-standard security measures. Your data is stored securely using Supabase. However, no
+                internet transmission is 100% secure.</p>
+
+            <h2>4. Sharing Your Information</h2>
+            <p>We do not sell, trade, or rent your personal identification information. We may share anonymized
+                aggregated data for research or analysis.</p>
+
+            <h2>5. Contact Us</h2>
+            <p>If you have questions about this Privacy Policy, please contact us at <span
+                    style="color:var(--primary); font-weight:600;">team.flashly@gmail.com</span></p>
+        </div>
     </div>
-    <div class="mobile-nav-footer">
-        <button class="btn btn-outline mobile-login-btn btn-login-toggle">Sign In</button>
-        <button class="btn btn-primary mobile-signup-btn btn-signup-toggle">Sign Up</button>
-    </div>
-</div>
 
-<div class="legal-container">
+    <footer class="lp-footer">
+        <div class="lp-footer-inner">
+            <div class="lp-footer-logo">
+                <span class="lp-footer-logo-text">Flashly</span>
+            </div>
+            <p class="lp-footer-copy">© 2026 Flashly. Built for focused learners.</p>
+            <div class="lp-footer-links">
+                <a href="../about/index.html">About</a>
+                <a href="./index.html">Privacy</a>
+                <a href="../support/index.html">Support</a>
+                <a href="../terms/index.html">Terms</a>
+            </div>
+        </div>
+    </footer>
 
-    <div class="legal-content">
-        <h1>Privacy Policy</h1>
-        <span class="last-updated">Last updated: February 11, 2026</span>
-
-        <p>At Flashly, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclosure,
-            and safeguard your information when you visit our website and use our application.</p>
-
-        <h2>1. Information We Collect</h2>
-        <p>We collect information that helps us provide you with the best learning experience possible.</p>
-
-        <h3>Personal Data</h3>
-        <p>When you register for Flashly, we may collect personally identifiable information, such as your:</p>
-        <ul>
-            <li>Name</li>
-            <li>Email address</li>
-            <li>Profile preferences</li>
-        </ul>
-
-        <h3>Usage Data</h3>
-        <p>We automatically collect certain information when you visit, use, or navigate the application. This
-            information does not reveal your specific identity but may include:</p>
-        <ul>
-            <li>Learning statistics (cards reviewed, mastery levels)</li>
-            <li>Device information (browser type, operating system)</li>
-            <li>Log data (access times, pages viewed)</li>
-        </ul>
-
-        <h2>2. How We Use Your Information</h2>
-        <p>We use the information we collect or receive to:</p>
-        <ul>
-            <li><strong>Provide services:</strong> To create and manage your account and deliver flashcard
-                functionality.</li>
-            <li><strong>Improve experience:</strong> To understand how you use Flashly and optimize our spaced
-                repetition algorithm.</li>
-            <li><strong>Cloud Sync:</strong> To ensure your decks and progress are available across all your
-                devices.</li>
-        </ul>
-
-        <h2>3. Data Storage and Security</h2>
-        <p>We use industry-standard security measures. Your data is stored securely using Supabase. However, no
-            internet transmission is 100% secure.</p>
-
-        <h2>4. Sharing Your Information</h2>
-        <p>We do not sell, trade, or rent your personal identification information. We may share anonymized
-            aggregated data for research or analysis.</p>
-
-        <h2>5. Contact Us</h2>
-        <p>If you have questions about this Privacy Policy, please contact us at privacy@flashly.app</p>
-    </div>
-</div>
-<script src="../landing-nav.js" defer></script>
+    <script src="../landing-nav.js" defer></script>
 </body>
 
 </html>

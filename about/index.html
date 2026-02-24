@@ -15,10 +15,16 @@
     <link rel="stylesheet" href="../style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="icon" type="image/png" href="../Assets/logo.png">
 
     <style>
+        :root {
+            --transition-snappy: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -33,18 +39,18 @@
             overflow-y: auto !important;
             height: auto !important;
             line-height: 1.6;
+            background-image:
+                radial-gradient(circle at top right, var(--primary-light) 0%, transparent 40%),
+                radial-gradient(circle at bottom left, var(--primary-light) 0%, transparent 40%);
+            background-attachment: fixed;
         }
 
-        .about-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            z-index: 1000;
-            padding: 1rem 0;
+        h1,
+        h2,
+        h3,
+        h4,
+        .sora {
+            font-family: 'Sora', sans-serif;
         }
 
         .container {
@@ -53,32 +59,15 @@
             padding: 0 2rem;
         }
 
-        .nav-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
         /* Hero */
         .hero {
             padding: 10rem 0 6rem;
             text-align: center;
-            background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.05), transparent 40%),
-                radial-gradient(circle at bottom left, rgba(37, 99, 235, 0.05), transparent 40%);
+            position: relative;
         }
 
         .hero h1 {
-            font-size: 4rem;
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
             font-weight: 800;
             letter-spacing: -0.04em;
             margin-bottom: 1.5rem;
@@ -86,14 +75,14 @@
         }
 
         .hero h1 span {
-            background: linear-gradient(135deg, var(--primary) 0%, #60a5fa 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .hero p {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             color: var(--text-secondary);
             max-width: 700px;
             margin: 0 auto 3rem;
@@ -114,75 +103,96 @@
             border: 1px solid var(--border);
             text-align: center;
             box-shadow: var(--shadow-sm);
-            justify-content: center;
-            align-items: center;
+            transition: transform 0.3s var(--transition-snappy), box-shadow 0.3s var(--transition-snappy);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
         }
 
         .stat-value {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: 800;
             color: var(--primary);
             margin-bottom: 0.5rem;
             display: block;
+            font-family: 'Sora', sans-serif;
+            letter-spacing: -0.02em;
         }
 
         .stat-label {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-size: 0.875rem;
+            letter-spacing: 0.1em;
+            font-size: 0.75rem;
         }
 
         /* Mission Section */
         .section {
-            padding: 6rem 0;
+            padding: 8rem 0;
         }
 
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 4rem;
+            gap: 5rem;
             align-items: center;
         }
 
         .section-tag {
             color: var(--primary);
-            font-weight: 700;
-            font-size: 0.875rem;
+            font-weight: 800;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.15em;
             margin-bottom: 1rem;
             display: block;
+            font-family: 'Sora', sans-serif;
         }
 
         .section h2 {
-            font-size: 2.5rem;
+            font-size: 2.75rem;
             font-weight: 800;
             margin-bottom: 1.5rem;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
         }
 
         .feature-list {
-            margin-top: 2rem;
+            margin-top: 2.5rem;
         }
 
         .feature-item {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
         }
 
         .feature-icon {
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
             background: var(--primary-light);
             color: var(--primary);
-            border-radius: 6px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            font-weight: 800;
+        }
+
+        .feature-item strong {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-family: 'Sora', sans-serif;
+            font-size: 1.1rem;
+        }
+
+        .feature-item p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
         }
 
         /* Why Flashly Grid */
@@ -195,135 +205,168 @@
 
         .why-card {
             background: var(--surface);
-            padding: 2rem;
-            border-radius: 1.5rem;
+            padding: 3rem 2.5rem;
+            border-radius: 2rem;
             border: 1px solid var(--border);
-            transition: transform 0.3s ease;
+            transition: all 0.3s var(--transition-snappy);
+            box-shadow: var(--shadow-sm);
         }
 
         .why-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
             border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        }
+
+        .why-card .feature-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            display: block;
         }
 
         .why-card h3 {
             font-size: 1.5rem;
-            margin: 1.5rem 0 1rem;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .why-card p {
+            color: var(--text-secondary);
+            font-size: 1rem;
         }
 
         /* CTA */
         .cta-section {
-            background: var(--text-primary);
+            background: #0f0f0f;
             color: white;
-            padding: 6rem 0;
+            padding: 6rem 2rem;
             text-align: center;
-            border-radius: 3rem;
-            margin-top: 4rem;
-            margin-bottom: 4rem;
+            border-radius: 2.5rem;
+            margin: 6rem auto;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+            pointer-events: none;
         }
 
         .cta-section h2 {
-            font-size: 3rem;
+            font-size: clamp(2rem, 5vw, 3.5rem);
             margin-bottom: 1.5rem;
+            letter-spacing: -0.04em;
+            position: relative;
         }
 
-        .footer {
-            padding: 4rem 0;
-            border-top: 1px solid var(--border);
-            text-align: center;
-            color: var(--text-secondary);
+        .cta-section p {
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        @media (max-width: 968px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+                text-align: center;
+            }
+
+            .grid-2>div:last-child {
+                order: -1;
+            }
+
+            .feature-item {
+                text-align: left;
+            }
+
+            .hero h1 {
+                font-size: 3rem;
+            }
         }
 
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-
             .stats-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0 1.5rem;
             }
         }
     </style>
 </head>
 
 <body>
-    <nav class="landing-nav">
-        <div class="nav-container">
-            <a href="../index.html" class="landing-logo"
-                style="text-decoration: none; display: flex; align-items: center;">
-                Flashly
+    <nav class="lp-nav" id="lp-nav">
+        <div class="lp-nav-inner">
+            <a href="../index.html" class="lp-logo">
+                <img src="../Assets/logo.png" alt="Flashly Logo" style="width: 32px; height: 32px; border-radius: 50%;">
+                <span>Flashly</span>
             </a>
-            <div class="nav-actions">
-                <a href="./index.html" class="btn btn-text" style="text-decoration: none;">About</a>
-                <a href="../support/index.html" class="btn btn-text" style="text-decoration: none;">Support</a>
-                <button class="btn btn-text btn-login-toggle">Sign In</button>
-                <button class="btn btn-primary btn-signup-toggle">Get Started</button>
+            <div class="lp-nav-links">
+                <a href="./index.html">About</a>
+                <a href="../support/index.html">Support</a>
             </div>
-            <button id="landing-mobile-menu-toggle" class="mobile-menu-toggle">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor" class="icon-md">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                </svg>
+            <div class="lp-nav-actions">
+                <button class="lp-btn-ghost btn-login-toggle">Sign In</button>
+                <button class="lp-btn-solid btn-signup-toggle">Get Started</button>
+            </div>
+            <button class="lp-hamburger" id="landing-mobile-menu-toggle" aria-label="Open menu">
+                <span></span><span></span><span></span>
             </button>
         </div>
-
     </nav>
 
     <!-- Mobile Menu Modal -->
     <div id="mobile-nav-modal" class="mobile-nav-modal">
         <div class="mobile-nav-links">
-            <a href="./index.html" class="mobile-nav-item">
-                About
+            <a href="./index.html" class="mobile-nav-item">About
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
                     <path fill-rule="evenodd"
                         d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
                         clip-rule="evenodd" />
                 </svg>
             </a>
-            <a href="../support/index.html" class="mobile-nav-item">
-                Support
+            <a href="../support/index.html" class="mobile-nav-item">Support
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
                     <path fill-rule="evenodd"
                         d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
                         clip-rule="evenodd" />
                 </svg>
             </a>
-            <a href="../privacy/index.html" class="mobile-nav-item">
-                Privacy
+            <a href="../privacy/index.html" class="mobile-nav-item">Privacy
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
                     <path fill-rule="evenodd"
                         d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
                         clip-rule="evenodd" />
-                </svg>
-            </a>
-            <a href="mailto:team.flashly@gmail.com" class="mobile-nav-item">
-                Contact
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
-                    <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.161V6a2 2 0 00-2-2H3z" />
-                    <path
-                        d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
                 </svg>
             </a>
         </div>
         <div class="mobile-nav-footer">
-            <button class="btn btn-outline mobile-login-btn btn-login-toggle">Sign In</button>
-            <button class="btn btn-primary mobile-signup-btn btn-signup-toggle">Sign Up</button>
+            <button class="lp-btn-ghost mobile-login-btn btn-login-toggle">Sign In</button>
+            <button class="lp-btn-solid mobile-signup-btn btn-signup-toggle">Sign Up</button>
         </div>
     </div>
 
     <header class="hero">
         <div class="container">
-            <h1>Study Smarter, <span>Not Harder.</span></h1>
+            <h1>Mastery for <span>Every Student.</span></h1>
             <p>Flashly is the AI-powered learning platform built specifically for students in Singapore. Ace your
                 O-Levels, A-Levels, and IB with ease.</p>
-            <div class="hero-btns" style="display:flex; gap:1rem; justify-content: center;">
-                <a href="../index.html" class="btn btn-primary btn-lg">Join 10k+ Students</a>
-                <a href="#mission" class="btn btn-secondary btn-lg">Our Story</a>
+            <div class="hero-btns" style="display:flex; gap:1.25rem; justify-content: center; flex-wrap: wrap;">
+                <button class="lp-btn-cta btn-signup-toggle">Join 10k+ Students</button>
+                <a href="#mission" class="lp-btn-ghost-cta"
+                    style="text-decoration: none; display: flex; align-items: center;">Our Story</a>
             </div>
         </div>
     </header>
@@ -352,7 +395,13 @@
                     concise summary notes shouldn't be hidden behind paywalls or expensive tuition centers.</p>
                 <div class="feature-list">
                     <div class="feature-item">
-                        <div class="feature-icon">✓</div>
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
                         <div>
                             <strong>Student-First Design</strong>
                             <p>Built by local students who understand the specific demands of the SEAB and IB curricula.
@@ -360,7 +409,13 @@
                         </div>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">✓</div>
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
                         <div>
                             <strong>Always Free</strong>
                             <p>Education is a right, not a privilege. Flashly will always offer a free tier for
@@ -370,9 +425,9 @@
                 </div>
             </div>
             <div
-                style="background: var(--surface); border-radius: 2rem; padding: 1rem; border: 1px solid var(--border); box-shadow: var(--shadow-md);">
+                style="background: var(--surface); border-radius: 2.5rem; padding: 1.5rem; border: 1px solid var(--border); box-shadow: 0 40px 80px -20px rgba(0,0,0,0.1); transform: rotate(1deg);">
                 <img src="../Assets/deck-graphic-light.svg" alt="App interface"
-                    style="width: 100%; height: auto; border-radius: 1.5rem;">
+                    style="width: 100%; height: auto; border-radius: 1.5rem; display: block;">
             </div>
         </section>
 
@@ -383,18 +438,18 @@
             </div>
             <div class="why-grid">
                 <div class="why-card">
-                    <div class="feature-icon" style="width: 48px; height: 48px; font-size: 1.5rem;">🧠</div>
+                    <span class="feature-emoji">🧠</span>
                     <h3>Spaced Repetition</h3>
                     <p>Our algorithm shows you cards right before you're about to forget them, ensuring long-term memory
                         mastery.</p>
                 </div>
                 <div class="why-card">
-                    <div class="feature-icon" style="width: 48px; height: 48px; font-size: 1.5rem;">🤝</div>
+                    <span class="feature-emoji">🤝</span>
                     <h3>Collaborative Learning</h3>
                     <p>Join study groups with your classmates. Share decks and notes instantly to grow together.</p>
                 </div>
                 <div class="why-card">
-                    <div class="feature-icon" style="width: 48px; height: 48px; font-size: 1.5rem;">📊</div>
+                    <span class="feature-emoji">📊</span>
                     <h3>Progress Analytics</h3>
                     <p>Track your learning journey with detailed heatmaps and retention statistics. Visualize your
                         success.</p>
@@ -403,26 +458,28 @@
         </section>
 
         <section class="cta-section">
-            <div class="container">
-                <h2>Ready to ace your exams?</h2>
-                <p style="color: rgba(255,255,255,0.8); font-size: 1.25rem; margin-bottom: 3rem;">Join thousands of
-                    students who are already using Flashly to study smarter.</p>
-                <a href="../index.html" class="btn btn-primary btn-lg"
-                    style="background: white; color: var(--primary); border: none;">Get Started for Free</a>
-            </div>
+            <h2>Ready to reach your potential?</h2>
+            <p style="color: rgba(255,255,255,0.6); font-size: 1.25rem; max-width: 600px;">Join 10,000+ students who are
+                already using Flashly to study smarter. Completely free forever.</p>
+            <button class="lp-btn-primary-large btn-signup-toggle">Create your free account</button>
         </section>
     </div>
 
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2026 Flashly Education. Built with ❤️ for Singaporean students.</p>
-            <div style="margin-top: 1.5rem; display: flex; gap: 2rem; justify-content: center;">
-                <a href="../privacy/index.html" style="color: var(--text-secondary); text-decoration: none;">Privacy
-                    Policy</a>
-                <a href="../support/index.html" style="color: var(--text-secondary); text-decoration: none;">Support</a>
+    <footer class="lp-footer">
+        <div class="lp-footer-inner">
+            <div class="lp-footer-logo">
+                <span class="lp-footer-logo-text">Flashly</span>
+            </div>
+            <p class="lp-footer-copy">© 2026 Flashly. Built for focused learners.</p>
+            <div class="lp-footer-links">
+                <a href="./index.html">About</a>
+                <a href="../privacy/index.html">Privacy</a>
+                <a href="../support/index.html">Support</a>
+                <a href="../terms/index.html">Terms</a>
             </div>
         </div>
     </footer>
+
     <script src="../landing-nav.js" defer></script>
 </body>
 

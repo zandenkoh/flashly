@@ -1,0 +1,1895 @@
+diff --git a/index.html b/index.html
+index c1aa228..fac2924 100644
+--- a/index.html
++++ b/index.html
+@@ -44,7 +44,9 @@
+ 
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
++    <link
++        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@400;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap"
++        rel="stylesheet">
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+@@ -144,63 +146,52 @@
+     <div id="app">
+         <!-- Landing & Auth View -->
+         <section id="auth-view" class="view hidden">
+-            <!-- Landing Navigation -->
+-            <nav class="landing-nav">
+-                <div class="nav-container">
+-                    <div class="landing-logo" onclick="window.location.reload()" style="cursor: pointer;">Flashly</div>
+-                    <div class="nav-actions">
+-                        <a href="./about/index.html" class="btn btn-text" style="text-decoration: none;">About</a>
+-                        <a href="./support/index.html" class="btn btn-text" style="text-decoration: none;">Support</a>
+-                        <button class="btn btn-text btn-login-toggle">Sign In</button>
+-                        <button class="btn btn-primary btn-signup-toggle">Get Started</button>
++
++            <!-- NEW LANDING NAV -->
++            <nav class="lp-nav" id="lp-nav">
++                <div class="lp-nav-inner">
++                    <div class="lp-logo" onclick="window.location.reload()" style="cursor: pointer;">
++                        <span class="lp-logo-mark">F</span>
++                        <span>Flashly</span>
+                     </div>
+-                    <button id="landing-mobile-menu-toggle" class="mobile-menu-toggle">
+-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+-                            stroke="currentColor" class="icon-md">
+-                            <path stroke-linecap="round" stroke-linejoin="round"
+-                                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+-                        </svg>
++                    <div class="lp-nav-links">
++                        <a href="./about/index.html">About</a>
++                        <a href="./support/index.html">Support</a>
++                    </div>
++                    <div class="lp-nav-actions">
++                        <button class="lp-btn-ghost btn-login-toggle">Sign In</button>
++                        <button class="lp-btn-solid btn-signup-toggle">Get Started →</button>
++                    </div>
++                    <button class="lp-hamburger" id="landing-mobile-menu-toggle" aria-label="Open menu">
++                        <span></span><span></span><span></span>
+                     </button>
+                 </div>
+-
+             </nav>
+ 
+             <!-- Mobile Menu Modal -->
+             <div id="mobile-nav-modal" class="mobile-nav-modal">
+                 <div class="mobile-nav-links">
+-                    <a href="./about/index.html" class="mobile-nav-item">
+-                        About
++                    <a href="./about/index.html" class="mobile-nav-item">About
+                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                             <path fill-rule="evenodd"
+                                 d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                 clip-rule="evenodd" />
+                         </svg>
+                     </a>
+-                    <a href="./support/index.html" class="mobile-nav-item">
+-                        Support
++                    <a href="./support/index.html" class="mobile-nav-item">Support
+                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                             <path fill-rule="evenodd"
+                                 d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                 clip-rule="evenodd" />
+                         </svg>
+                     </a>
+-                    <a href="./privacy/index.html" class="mobile-nav-item">
+-                        Privacy
++                    <a href="./privacy/index.html" class="mobile-nav-item">Privacy
+                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+                             <path fill-rule="evenodd"
+                                 d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                 clip-rule="evenodd" />
+                         </svg>
+                     </a>
+-                    <a href="mailto:team.flashly@gmail.com" class="mobile-nav-item">
+-                        Contact
+-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm">
+-                            <path
+-                                d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.161V6a2 2 0 00-2-2H3z" />
+-                            <path
+-                                d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
+-                        </svg>
+-                    </a>
+                 </div>
+                 <div class="mobile-nav-footer">
+                     <button class="btn btn-outline mobile-login-btn btn-login-toggle">Sign In</button>
+@@ -208,31 +199,278 @@
+                 </div>
+             </div>
+ 
+-            <!-- Hero Section -->
+-            <section class="landing-page-section landing-hero-revamp">
+-                <div class="section-content-wrapper">
+-                    <div class="landing-text-block">
+-                        <h1>Exams are coming. <span>Your flashcards and notes are here.</span></h1>
+-                        <p>Over 15,000 free flashcards and notes, supercharged by <strong>personal AI coaching</strong>.
+-                            Master your subjects with the ultimate Spaced Repetition System tailored for Singapore
+-                            students.</p>
+-                        <div class="hero-btns" style="display:flex; gap:1rem; align-items: center; flex-wrap: wrap;">
+-                            <button class="btn btn-primary btn-lg btn-signup-toggle">Start Learning</button>
+-                            <button class="btn btn-secondary btn-lg" onclick="state.isGuest = true; showApp();">
+-                                Community Decks and Curated Notes</button>
++            <!-- ========= REDESIGNED LANDING ========= -->
++            <div class="lp-root">
++
++                <!-- HERO -->
++                <section class="lp-hero">
++                    <div class="lp-hero-bg">
++                        <div class="lp-orb lp-orb-1"></div>
++                        <div class="lp-orb lp-orb-2"></div>
++                        <div class="lp-orb lp-orb-3"></div>
++                        <div class="lp-grid-lines"></div>
++                    </div>
++                    <div class="lp-hero-inner">
++                        <div class="lp-hero-content">
++                            <div class="lp-hero-badge">
++                                <span class="lp-badge-dot"></span>
++                                Free for Singapore students · O-Level, A-Level &amp; IB
++                            </div>
++                            <h1 class="lp-hero-title">
++                                Study smarter.<br>
++                                <span class="lp-hero-accent">Score higher.</span>
++                            </h1>
++                            <p class="lp-hero-sub">
++                                15,000+ free flashcards and notes, powered by spaced repetition and your personal AI
++                                coach. Built for Singapore's toughest exams.
++                            </p>
++                            <div class="lp-hero-actions">
++                                <button class="lp-btn-cta btn-signup-toggle">
++                                    Start for free
++                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
++                                        <path d="M3 8h10m0 0-4-4m4 4-4 4" stroke="currentColor" stroke-width="1.5"
++                                            stroke-linecap="round" stroke-linejoin="round" />
++                                    </svg>
++                                </button>
++                                <button class="lp-btn-ghost-cta" onclick="state.isGuest = true; showApp();">
++                                    Browse decks
++                                </button>
++                            </div>
++                            <div class="lp-hero-social">
++                                <div class="lp-avatars">
++                                    <div class="lp-av" style="background:#fee2e2;color:#991b1b">JW</div>
++                                    <div class="lp-av" style="background:#e0f2fe;color:#0369a1">SH</div>
++                                    <div class="lp-av" style="background:#f0fdf4;color:#15803d">AK</div>
++                                    <div class="lp-av" style="background:#fef9c3;color:#a16207">RT</div>
++                                    <div class="lp-av lp-av-more">+10k</div>
++                                </div>
++                                <span>Trusted by 10,000+ students</span>
++                            </div>
+                         </div>
+                     </div>
+-                    <div class="landing-visual-block">
+-                        <div class="hero-mockup">
+-                            <img src="./Assets/deck-graphic-light.svg" alt="Flashly App Interface"
+-                                style="width: 100%; height: auto; border-radius: 8px;">
++                    <!-- Hero Visual / Mockup Stack -->
++                    <div class="lp-hero-visual">
++                        <div class="lp-visual-stack">
++                            <div class="lp-card-main-wrapper">
++                                <div class="lp-card-float lp-card-main">
++                                    <img src="./Assets/deck-graphic-light.svg" alt="Flashly App"
++                                        style="width:100%;border-radius:12px;display:block;">
++                                </div>
++                            </div>
++                            <!-- Floating decorative UI elements -->
++                            <div class="lp-floating-ui lp-ui-1">
++                                <div class="lp-ui-icon" style="background: #2563eb;">⚡</div>
++                                <div class="lp-ui-text">
++                                    <strong>94%</strong>
++                                    <span>Retention</span>
++                                </div>
++                            </div>
++                            <div class="lp-floating-ui lp-ui-2">
++                                <div class="lp-ui-icon" style="background: #f59e0b;">🔥</div>
++                                <div class="lp-ui-text">
++                                    <strong>14 Day</strong>
++                                    <span>Streak</span>
++                                </div>
++                            </div>
++                            <div class="lp-floating-ui lp-ui-3">
++                                <div class="lp-ui-icon" style="background: #8b5cf6;">✨</div>
++                                <div class="lp-ui-text">
++                                    <strong>AI Insight</strong>
++                                    <span>Study Bio now</span>
++                                </div>
++                            </div>
+                         </div>
+                     </div>
+-                </div>
+-            </section>
++                </section>
++
++                <!-- STATS BAR (Integrated as a Trusted By section) -->
++                <section class="lp-trust-bar">
++                    <div class="lp-trust-inner">
++                        <span class="lp-trust-label">THE STUDY COMPANION FOR</span>
++                        <div class="lp-trust-logos">
++                            <div class="lp-trust-logo">O-LEVEL</div>
++                            <div class="lp-trust-logo">A-LEVEL</div>
++                            <div class="lp-trust-logo">IB DIPLOMA</div>
++                            <div class="lp-trust-logo">IP PROGRAMME</div>
++                        </div>
++                    </div>
++                </section>
++
++                <!-- FEATURES SECTION -->
++                <section class="lp-features" id="features">
++                    <div class="lp-features-header">
++                        <div class="lp-section-label">Features</div>
++                        <h2 class="lp-section-title">Engineered for your performance</h2>
++                    </div>
++
++                    <div class="lp-features-grid">
++                        <!-- Column 1: Main Feature -->
++                        <div class="lp-feature-col lp-col-main">
++                            <div class="lp-feature-card lp-card-large">
++                                <div class="lp-card-header">
++                                    <span class="lp-tag blue">Algorithm</span>
++                                    <h3>Spaced Repetition System</h3>
++                                    <p>Our SRS algorithm predicts exactly when you're about to forget something and
++                                        surfaces it at the perfect moment for maximum memory retention.</p>
++                                </div>
++                                <div class="lp-card-visual">
++                                    <div class="lp-srs-graphic">
++                                        <div class="lp-srs-bar" style="--h: 40%; --d: 0s;"></div>
++                                        <div class="lp-srs-bar" style="--h: 65%; --d: 0.1s;"></div>
++                                        <div class="lp-srs-bar" style="--h: 45%; --d: 0.2s;"></div>
++                                        <div class="lp-srs-bar active" style="--h: 90%; --d: 0.3s;"></div>
++                                        <div class="lp-srs-bar" style="--h: 55%; --d: 0.4s;"></div>
++                                    </div>
++                                </div>
++                            </div>
++                        </div>
++
++                        <!-- Column 2: Stacked Features -->
++                        <div class="lp-feature-col lp-col-side">
++                            <div class="lp-feature-card lp-card-accent">
++                                <div class="lp-card-header">
++                                    <span class="lp-tag purple">AI COACH</span>
++                                    <h3>Personalized Learning</h3>
++                                    <p>Daily game plans and insights tailored to your study habits.</p>
++                                </div>
++                                <div class="lp-ai-micro">
++                                    <div class="lp-ai-wave"></div>
++                                    <span class="lp-ai-text">"You're 20% faster at Biology today!"</span>
++                                </div>
++                            </div>
++                            <div class="lp-feature-card">
++                                <div class="lp-card-header">
++                                    <span class="lp-tag green">COMMUNITY</span>
++                                    <h3>15k+ Free Decks</h3>
++                                    <p>Access high-quality cards made by top students in Singapore.</p>
++                                </div>
++                                <div class="lp-deck-stack">
++                                    <div class="lp-mini-deck"></div>
++                                    <div class="lp-mini-deck"></div>
++                                    <div class="lp-mini-deck"></div>
++                                </div>
++                            </div>
++                        </div>
++
++                        <!-- Column 3: Full Height Features -->
++                        <div class="lp-feature-col">
++                            <div class="lp-feature-card lp-card-dark">
++                                <div class="lp-card-header">
++                                    <span class="lp-tag white">GROUPS</span>
++                                    <h3>Collaborative Study</h3>
++                                    <p>Build shared decks and compete on private leaderboards with your classmates.</p>
++                                </div>
++                                <div class="lp-group-mini">
++                                    <div class="lp-group-avatars">
++                                        <span>J</span><span>A</span><span>K</span>
++                                    </div>
++                                    <div class="lp-group-progress">
++                                        <div class="lp-progress-track"></div>
++                                    </div>
++                                </div>
++                            </div>
++                            <div class="lp-feature-card">
++                                <div class="lp-card-header">
++                                    <span class="lp-tag blue">ANALYTICS</span>
++                                    <h3>Track Mastery</h3>
++                                    <p>Visualize your progress with beautiful heatmaps and charts.</p>
++                                </div>
++                                <div class="lp-heatmap-mini">
++                                    <div class="lp-heat-dot" style="opacity:0.3"></div>
++                                    <div class="lp-heat-dot" style="opacity:0.6"></div>
++                                    <div class="lp-heat-dot" style="opacity:0.9"></div>
++                                    <div class="lp-heat-dot" style="opacity:0.4"></div>
++                                    <div class="lp-heat-dot" style="opacity:0.8"></div>
++                                    <div class="lp-heat-dot" style="opacity:1"></div>
++                                </div>
++                            </div>
++                        </div>
++                    </div>
++                </section>
++
++                <!-- TESTIMONIALS -->
++                <section class="lp-testimonials">
++                    <div class="lp-testimonials-header">
++                        <div class="lp-section-label" style="color:rgba(255,255,255,0.4)">Success Stories</div>
++                        <h2 class="lp-section-title" style="color:white">Loved by students across Singapore</h2>
++                    </div>
++
++                    <div class="lp-testimonials-masonry">
++                        <div class="lp-testimonial-item">
++                            <div class="lp-t-stars">★★★★★</div>
++                            <p>"Flashly helped me organize my O-Level Bio notes. The SRS algorithm really works — I
++                                spent less time studying but remembered more."</p>
++                            <div class="lp-t-author">
++                                <div class="lp-t-avatar" style="background:#fee2e2;color:#991b1b">JW</div>
++                                <div class="lp-t-info">
++                                    <span class="lp-t-name">Jeryl W.</span>
++                                    <span class="lp-t-school">RI Student</span>
++                                </div>
++                            </div>
++                        </div>
++                        <div class="lp-testimonial-item lp-t-featured">
++                            <div class="lp-t-stars">★★★★★</div>
++                            <p>"The community decks are a lifesaver. I found a full set of E-Maths cards that were
++                                better than my own notes. The layout is so clean."</p>
++                            <div class="lp-t-author">
++                                <div class="lp-t-avatar" style="background:#e0f2fe;color:#0369a1">SH</div>
++                                <div class="lp-t-info">
++                                    <span class="lp-t-name">Sarah H.</span>
++                                    <span class="lp-t-school">VJC Student</span>
++                                </div>
++                            </div>
++                        </div>
++                        <div class="lp-testimonial-item">
++                            <div class="lp-t-stars">★★★★★</div>
++                            <p>"Finally an app that understands Singapore exams. The AI coaching gives me a game plan
++                                every morning so I don't feel overwhelmed."</p>
++                            <div class="lp-t-author">
++                                <div class="lp-t-avatar" style="background:#f0fdf4;color:#15803d">AK</div>
++                                <div class="lp-t-info">
++                                    <span class="lp-t-name">Arjun K.</span>
++                                    <span class="lp-t-school">NYP Student</span>
++                                </div>
++                            </div>
++                        </div>
++                    </div>
++                </section>
++
++                <!-- FINAL CTA -->
++                <section class="lp-cta">
++                    <div class="lp-cta-content">
++                        <div class="lp-cta-orb-v2"></div>
++                        <div class="lp-section-label" style="color:rgba(255,255,255,0.6)">GET STARTED TODAY</div>
++                        <h2 class="lp-cta-title">Ready to reach your potential?</h2>
++                        <p class="lp-cta-sub">Join 10,000+ students on the path to mastery. Free forever.</p>
++                        <div class="lp-cta-actions">
++                            <button class="lp-btn-primary-large btn-signup-toggle">Create your free account →</button>
++                            <p class="lp-cta-note">No credit card required · Free for all students</p>
++                        </div>
++                    </div>
++                </section>
++
++                <!-- FOOTER -->
++                <footer class="lp-footer">
++                    <div class="lp-footer-inner">
++                        <div class="lp-footer-logo">
++                            <span class="lp-logo-mark">F</span>
++                            <span>Flashly</span>
++                        </div>
++                        <p class="lp-footer-copy">© 2026 Flashly. Built for focused learners.</p>
++                        <div class="lp-footer-links">
++                            <a href="about/index.html">About</a>
++                            <a href="privacy/index.html">Privacy</a>
++                            <a href="support/index.html">Support</a>
++                        </div>
++                    </div>
++                </footer>
+ 
+-            <!-- Trusted By Section -->
+-            <section class="landing-trust-section">
++            </div>
++            <!-- ========= END REDESIGNED LANDING ========= -->
++
++            <!-- ============ KEEP OLD AUTH SECTIONS (hidden from landing, used by modal) ============ -->
++            <!-- Trusted By Section (legacy, hidden, kept for any JS references) -->
++            <section class="landing-trust-section" style="display:none;">
+                 <div class="section-content-wrapper">
+                     <div class="trust-container card">
+                         <span class="trust-badge">TRUSTED BY STUDENTS ACROSS SINGAPORE</span>
+@@ -271,199 +509,14 @@
+                                 <div class="stat-label">Accounts Created</div>
+                             </div>
+                         </div>
+-                        <p class="trust-footer">Join the community of students acing their exams</p>
+-                    </div>
+-                </div>
+-            </section>
+-
+-            <!-- Science Section (SRS) -->
+-            <section class="landing-page-section" style="background: var(--surface);">
+-                <div class="section-content-wrapper" style="grid-template-columns: 1fr 1fr;">
+-                    <div class="landing-visual-block" style="order: 2;">
+-                        <div class="srs-mockup" style="transform: perspective(1000px) rotateY(10deg) rotateX(5deg);">
+-                            <div class="flex flex-col gap-4">
+-                                <div class="card" style="border-left: 4px solid var(--primary);">
+-                                    <div class="text-sm font-bold text-primary mb-1">REVIEW DUE</div>
+-                                    <div class="text-lg font-semibold">"Photosynthesis Process"</div>
+-                                    <div class="text-xs text-secondary mt-2">Last seen 3 days ago</div>
+-                                </div>
+-                                <div class="card" style="opacity: 0.6;">
+-                                    <div class="text-sm font-bold text-secondary mb-1">STABLE</div>
+-                                    <div class="text-lg font-semibold">"Mitochondria Function"</div>
+-                                    <div class="text-xs text-secondary mt-2">Review in 14 days</div>
+-                                </div>
+-                            </div>
+-                        </div>
+-                    </div>
+-                    <div class="landing-text-block" style="order: 1;">
+-                        <span class="feature-pill">The Algorithm</span>
+-                        <h2>Beat the forgetting curve.</h2>
+-                        <p>Our optimized Spaced Repetition System (SRS) predicts exactly when you're about to forget a
+-                            concept and surfaces it for review at the perfect moment.</p>
+-                    </div>
+-                </div>
+-            </section>
+-
+-            <!-- New AI Section -->
+-            <section class="landing-page-section">
+-                <div class="section-content-wrapper" style="grid-template-columns: 1fr 1fr;">
+-                    <div class="landing-text-block">
+-                        <span class="feature-pill" style="background: #f5f3ff; color: #8b5cf6;">AI COACH</span>
+-                        <h2>Your personal tutor.</h2>
+-                        <p>Flashly AI analyzes your study habits and provides daily, actionable insights. Get custom
+-                            game plans, motivational coaching, and smart recommendations tailored just for you.</p>
+-                        <button class="btn btn-primary btn-lg btn-signup-toggle">Meet Your AI Coach</button>
+-                    </div>
+-                    <div class="landing-visual-block">
+-                        <div class="ai-mockup" style="padding: 2rem;">
+-                            <div class="card" style="margin-bottom: 1rem; border-left: 4px solid #8b5cf6;">
+-                                <div class="ai-insight-badge mb-2">
+-                                    <div class="ai-insight-dot"></div>
+-                                    <span>AI INSIGHT</span>
+-                                </div>
+-                                <p class="text-sm font-medium">"You've mastered 85% of Pure Chemistry. Focus on 'Organic
+-                                    Compounds' today to hit your 90% goal!"</p>
+-                            </div>
+-                            <div class="flex gap-2">
+-                                <div class="ai-stat-card">
+-                                    <div class="font-bold mb-1 text-xs">Study Chemistry</div>
+-                                    <div class="text-secondary text-xs">Weakest deck</div>
+-                                </div>
+-                                <div class="ai-stat-card">
+-                                    <div class="font-bold mb-1 text-xs">View Stats</div>
+-                                    <div class="text-secondary text-xs">Track progress</div>
+-                                </div>
+-                            </div>
+-                        </div>
+-                    </div>
+-                </div>
+-            </section>
+-
+-            <!-- Community Section -->
+-            <section class="landing-page-section">
+-                <div class="section-content-wrapper">
+-                    <div class="landing-text-block">
+-                        <span class="feature-pill">Community</span>
+-                        <h2>Learn from the best.</h2>
+-                        <p>Access thousands of student-made decks and premium notes. GCE 'O' Levels, IB, or
+-                            University—whatever you're studying, someone has already mastered it here.</p>
+-                        <button class="btn btn-secondary btn-lg"
+-                            onclick="state.isGuest = true; showApp(); loadCommunityDecks();">Explore Decks</button>
+-                    </div>
+-                    <div class="landing-visual-block">
+-                        <div class="community-mockup">
+-                            <div class="grid grid-cols-2 gap-2" style="gap: 5px;">
+-                                <div class="card p-4 text-center"
+-                                    style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
+-                                    <div class="text-2xl mb-1">🧪</div>
+-                                    <div class="text-sm font-bold">Pure Chemistry</div>
+-                                    <div class="text-xs text-secondary">1.2k Cards</div>
+-                                </div>
+-                                <div class="card p-4 text-center"
+-                                    style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
+-                                    <div class="text-2xl mb-1">📐</div>
+-                                    <div class="text-sm font-bold">A-Maths</div>
+-                                    <div class="text-xs text-secondary">850 Cards</div>
+-                                </div>
+-                                <div class="card p-4 text-center"
+-                                    style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
+-                                    <div class="text-2xl mb-1">🌍</div>
+-                                    <div class="text-sm font-bold">Geography</div>
+-                                    <div class="text-xs text-secondary">430 Cards</div>
+-                                </div>
+-                            </div>
+-                        </div>
+                     </div>
+                 </div>
+             </section>
+ 
+-            <!-- Analytics Section -->
+-            <section class="landing-page-section" style="background: var(--surface);">
+-                <div class="section-content-wrapper" style="grid-template-columns: 1fr 1fr;">
+-                    <div class="landing-visual-block" style="order: 2;">
+-                        <div class="analytics-mockup"
+-                            style="transform: perspective(1000px) rotateY(10deg) rotateX(5deg);">
+-                            <div class="card" style="padding: 1.5rem;">
+-                                <div class="text-sm font-bold mb-4">RETENTION RATE</div>
+-                                <div
+-                                    style="height: 120px; width: 100%; background: linear-gradient(0deg, var(--primary-light) 0%, transparent 100%); border-radius: 4px; display: flex; align-items: flex-end; gap: 4px; padding: 10px;">
+-                                    <div style="height: 40%; flex: 1; background: var(--primary); border-radius: 2px;">
+-                                    </div>
+-                                    <div style="height: 60%; flex: 1; background: var(--primary); border-radius: 2px;">
+-                                    </div>
+-                                    <div style="height: 55%; flex: 1; background: var(--primary); border-radius: 2px;">
+-                                    </div>
+-                                    <div style="height: 80%; flex: 1; background: var(--primary); border-radius: 2px;">
+-                                    </div>
+-                                    <div style="height: 95%; flex: 1; background: var(--primary); border-radius: 2px;">
+-                                    </div>
+-                                </div>
+-                                <div class="text-xl font-bold mt-4">94.2%</div>
+-                            </div>
+-                        </div>
+-                    </div>
+-                    <div class="landing-text-block" style="order: 1;">
+-                        <span class="feature-pill">Performance</span>
+-                        <h2>Visualize your growth.</h2>
+-                        <p>Track your daily streaks, retention rates, and card maturity levels. Turn your learning into
+-                            an interactive journey with beautiful, data-driven insights.</p>
+-                    </div>
+-                </div>
+-            </section>
+-
+-            <!-- Groups Section -->
+-            <section class="landing-page-section">
+-                <div class="section-content-wrapper">
+-                    <div class="landing-text-block">
+-                        <span class="feature-pill">Collaboration</span>
+-                        <h2>Study better, together.</h2>
+-                        <p>Create shared groups to collaborate on decks with classmates. Compete on leaderboards and
+-                            track group-wide mastery in real-time.</p>
+-                        <button class="btn btn-primary btn-lg btn-signup-toggle">Form a Group</button>
+-                    </div>
+-                    <div class="landing-visual-block">
+-                        <div class="groups-mockup">
+-                            <div class="card p-4">
+-                                <div class="flex items-center gap-2 mb-4">
+-                                    <div
+-                                        class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs">
+-                                        J</div>
+-                                    <div
+-                                        class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white text-xs">
+-                                        A</div>
+-                                    <div
+-                                        class="w-8 h-8 rounded-full bg-warning flex items-center justify-center text-white text-xs">
+-                                        K</div>
+-                                    <div class="text-xs text-secondary">+12 active</div>
+-                                </div>
+-                                <div class="text-sm font-bold mb-2 text-primary">Class of 2026 - Bio</div>
+-                                <div class="progress-bar-container"
+-                                    style="height: 6px; background: var(--background); border-radius: 3px;">
+-                                    <div
+-                                        style="width: 75%; height: 100%; background: var(--primary); border-radius: 3px;">
+-                                    </div>
+-                                </div>
+-                            </div>
+-                        </div>
+-                    </div>
+-                </div>
+-            </section>
+-
+-
+-            <footer class="landing-footer" style="padding: 4rem 2rem; border-top: 1px solid var(--border);">
+-                <div class="footer-container"
+-                    style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+-                    <p>&copy; 2026 Flashly. Built for focused learners.</p>
+-                    <div class="footer-links" style="display: flex; gap: 2rem;">
+-                        <a href="about/index.html"
+-                            style="color: var(--text-secondary); text-decoration: none;">About</a>
+-                        <a href="privacy/index.html"
+-                            style="color: var(--text-secondary); text-decoration: none;">Privacy</a>
+-                        <a href="support/index.html"
+-                            style="color: var(--text-secondary); text-decoration: none;">Support</a>
+-                    </div>
+-                </div>
+-            </footer>
++            <!-- (old sections replaced by lp-root above) -->
++            <!-- placeholder for ai-stat-card reference -->
++            <div class="ai-stat-card" style="display:none;">
++                <!-- (old sections removed) -->
+         </section>
+ 
+         <!-- Main App Layout -->
+@@ -2256,7 +2309,9 @@
+                                 <h3 id="settings-display-name" class="text-lg font-semibold" style="margin: 0;">Username
+                                 </h3>
+                                 <p id="settings-display-email" class="text-secondary text-sm" style="margin: 0;">
+-                                    user@example.com</p>
++                                    <a href="/cdn-cgi/l/email-protection" class="__cf_email__"
++                                        data-cfemail="d4a1a7b1a694b1acb5b9a4b8b1fab7bbb9">[email&#160;protected]</a>
++                                </p>
+                             </div>
+                         </div>
+ 
+@@ -3025,6 +3080,7 @@
+         </div>
+     </div>
+ 
++    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+     <script src="landing-nav.js" defer></script>
+     <script src="script.js" defer></script>
+     <script src="welcome.js" defer></script>
+@@ -3368,11 +3424,24 @@
+             <div class="xp-explainer-actions">
+                 <button class="btn btn-primary w-full"
+                     onclick="document.getElementById('xp-explainer-modal').classList.add('hidden'); document.body.classList.remove('modal-open');">Got
+-                    it!</button>
++                    it</button>
+             </div>
+         </div>
+     </div>
+ 
++    <!-- Landing page scroll effects -->
++    <script>
++        (function () {
++            const authView = document.getElementById("auth-view");
++            const nav = document.getElementById("lp-nav");
++            if (authView && nav) {
++                authView.addEventListener("scroll", function () {
++                    nav.classList.toggle("scrolled", authView.scrollTop > 30);
++                });
++            }
++        })();
++    </script>
++
+ </body>
+ 
+ </html>
+\ No newline at end of file
+diff --git a/landing-nav.js b/landing-nav.js
+index c26bbb0..058f78a 100644
+--- a/landing-nav.js
++++ b/landing-nav.js
+@@ -85,4 +85,16 @@ document.addEventListener('DOMContentLoaded', () => {
+             }
+         });
+     });
++
++    // Handle scroll for nav highlight
++    const nav = document.getElementById('lp-nav');
++    if (nav) {
++        window.addEventListener('scroll', () => {
++            if (window.scrollY > 20) {
++                nav.classList.add('scrolled');
++            } else {
++                nav.classList.remove('scrolled');
++            }
++        });
++    }
+ });
+diff --git a/style.css b/style.css
+index b828679..670099c 100644
+--- a/style.css
++++ b/style.css
+@@ -508,6 +508,187 @@ body {
+     }
+ }
+ 
++/* Landing Page Revamp Extras */
++.testimonials-grid {
++    display: grid;
++    grid-template-columns: repeat(3, 1fr);
++    gap: 2rem;
++    margin-top: 2rem;
++}
++
++.testimonial-card {
++    background: var(--surface);
++    padding: 2rem;
++    border-radius: var(--radius);
++    border: 1px solid var(--border);
++    text-align: left;
++    display: flex;
++    flex-direction: column;
++    gap: 1.5rem;
++    transition: all 0.3s ease;
++    box-shadow: var(--shadow-sm);
++}
++
++.testimonial-card:hover {
++    transform: translateY(-8px);
++    box-shadow: var(--shadow-md);
++    border-color: var(--primary);
++}
++
++.testimonial-stars {
++    color: #fbbf24;
++    font-size: 1.25rem;
++    letter-spacing: 2px;
++}
++
++.testimonial-card p {
++    font-size: 1rem !important;
++    line-height: 1.6 !important;
++    color: var(--text-primary) !important;
++    margin-bottom: 0 !important;
++    font-style: italic;
++}
++
++.testimonial-author {
++    display: flex;
++    align-items: center;
++    gap: 1rem;
++    margin-top: auto;
++}
++
++.author-avatar {
++    width: 48px;
++    height: 48px;
++    border-radius: 50%;
++    display: flex;
++    align-items: center;
++    justify-content: center;
++    font-weight: 700;
++    font-size: 0.875rem;
++    color: var(--text-primary);
++}
++
++.author-info {
++    display: flex;
++    flex-direction: column;
++}
++
++.author-name {
++    font-weight: 700;
++    font-size: 0.9375rem;
++    color: var(--text-primary);
++}
++
++.author-meta {
++    font-size: 0.8125rem;
++    color: var(--text-secondary);
++}
++
++/* Pricing Styles */
++.pricing-grid {
++    display: grid;
++    grid-template-columns: repeat(2, 1fr);
++    gap: 2rem;
++    max-width: 900px;
++    margin: 0 auto;
++}
++
++.pricing-card {
++    background: var(--surface);
++    padding: 3rem 2rem;
++    border-radius: 2rem;
++    border: 1px solid var(--border);
++    position: relative;
++    display: flex;
++    flex-direction: column;
++    transition: all 0.3s ease;
++}
++
++.pricing-card.featured {
++    border: 2px solid var(--primary);
++    box-shadow: 0 20px 25px -5px rgba(var(--primary-rgb), 0.1);
++}
++
++.pricing-badge {
++    position: absolute;
++    top: 0;
++    left: 50%;
++    transform: translate(-50%, -50%);
++    background: var(--primary);
++    color: white;
++    padding: 0.5rem 1rem;
++    border-radius: 2rem;
++    font-size: 0.75rem;
++    font-weight: 800;
++    letter-spacing: 0.05em;
++}
++
++.pricing-header {
++    margin-bottom: 2rem;
++    text-align: center;
++}
++
++.plan-name {
++    font-size: 1.25rem;
++    font-weight: 700;
++    color: var(--text-primary);
++    margin-bottom: 1rem;
++}
++
++.plan-price {
++    font-size: 3rem;
++    font-weight: 800;
++    color: var(--text-primary);
++    margin-bottom: 0.5rem;
++}
++
++.plan-price span {
++    font-size: 1rem;
++    font-weight: 500;
++    color: var(--text-secondary);
++}
++
++.plan-desc {
++    font-size: 0.9375rem;
++    color: var(--text-secondary);
++}
++
++.plan-features {
++    list-style: none;
++    padding: 0;
++    margin: 0 0 2.5rem 0;
++    text-align: left;
++    display: flex;
++    flex-direction: column;
++    gap: 1rem;
++}
++
++.plan-features li {
++    display: flex;
++    align-items: center;
++    gap: 0.75rem;
++    font-size: 0.9375rem;
++    color: var(--text-secondary);
++}
++
++.plan-features li svg {
++    color: var(--primary);
++    flex-shrink: 0;
++}
++
++@media (max-width: 768px) {
++
++    .testimonials-grid,
++    .pricing-grid {
++        grid-template-columns: 1fr;
++    }
++
++    .landing-text-block h1,
++    .landing-text-block h2 {
++        font-size: 2.5rem;
++    }
++}
++
+ /* AI Landing Section Styles */
+ .ai-mockup {
+     background: linear-gradient(135deg, #fdf4ff 0%, #f5f3ff 100%) !important;
+@@ -9527,4 +9708,1032 @@ html {
+ .skeleton-xp {
+     width: 60px;
+     margin-left: auto;
++}
++
++/* ============================================================
++   FLASHLY LANDING PAGE — REDESIGN 2026
++   ============================================================ */
++
++/* ---- SCROLL SETUP FOR AUTH VIEW ---- */
++#auth-view {
++    overflow-y: auto !important;
++    overflow-x: hidden !important;
++    height: 100dvh;
++}
++
++.lp-root {
++    font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
++    background: #f6f5f3;
++    color: #0f0f0f;
++    overflow-x: hidden;
++}
++
++/* ---- TYPOGRAPHY SCALE ---- */
++.lp-root h1,
++.lp-root h2,
++.lp-root h3 {
++    font-family: 'Sora', 'DM Sans', system-ui, sans-serif;
++    font-weight: 700;
++    line-height: 1.1;
++    letter-spacing: -0.03em;
++}
++
++/* ========================
++   NAV
++   ======================== */
++.lp-nav {
++    position: fixed;
++    top: 0;
++    left: 0;
++    right: 0;
++    z-index: 1000;
++    padding: 0 clamp(1.25rem, 5vw, 3rem);
++    height: 64px;
++    display: flex;
++    align-items: center;
++    background: rgba(246, 245, 243, 0.85);
++    backdrop-filter: blur(16px) saturate(1.4);
++    -webkit-backdrop-filter: blur(16px) saturate(1.4);
++    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
++    transition: all 0.3s ease;
++}
++
++.lp-nav.scrolled {
++    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
++}
++
++.lp-nav-inner {
++    max-width: 1200px;
++    width: 100%;
++    margin: 0 auto;
++    display: flex;
++    align-items: center;
++    gap: 2rem;
++}
++
++.lp-logo {
++    display: flex;
++    align-items: center;
++    gap: 0.5rem;
++    font-family: 'Sora', sans-serif;
++    font-size: 1.2rem;
++    font-weight: 800;
++    color: #0f0f0f;
++    letter-spacing: -0.04em;
++    cursor: pointer;
++    text-decoration: none;
++}
++
++.lp-logo-mark {
++    width: 30px;
++    height: 30px;
++    background: #2563eb;
++    color: white;
++    border-radius: 8px;
++    display: flex;
++    align-items: center;
++    justify-content: center;
++    font-size: 0.9rem;
++    font-weight: 900;
++    flex-shrink: 0;
++}
++
++.lp-nav-links {
++    display: flex;
++    gap: 0.25rem;
++    margin-left: auto;
++}
++
++.lp-nav-links a {
++    font-size: 0.9rem;
++    font-weight: 500;
++    color: #555;
++    text-decoration: none;
++    padding: 0.4rem 0.75rem;
++    border-radius: 8px;
++    transition: all 0.2s;
++}
++
++.lp-nav-links a:hover {
++    background: rgba(0, 0, 0, 0.05);
++    color: #0f0f0f;
++}
++
++.lp-nav-actions {
++    display: flex;
++    align-items: center;
++    gap: 0.5rem;
++}
++
++.lp-btn-ghost {
++    font-size: 0.875rem;
++    font-weight: 500;
++    color: #555;
++    background: none;
++    border: none;
++    padding: 0.5rem 1rem;
++    border-radius: 10px;
++    cursor: pointer;
++    transition: all 0.2s;
++    font-family: inherit;
++}
++
++.lp-btn-ghost:hover {
++    background: rgba(0, 0, 0, 0.05);
++    color: #0f0f0f;
++}
++
++.lp-btn-solid {
++    font-size: 0.875rem;
++    font-weight: 600;
++    color: white;
++    background: #0f0f0f;
++    border: none;
++    padding: 0.5rem 1.1rem;
++    border-radius: 10px;
++    cursor: pointer;
++    transition: all 0.2s;
++    font-family: inherit;
++    letter-spacing: -0.01em;
++}
++
++.lp-btn-solid:hover {
++    background: #2563eb;
++    transform: translateY(-1px);
++    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
++}
++
++.lp-hamburger {
++    display: none;
++    flex-direction: column;
++    gap: 5px;
++    background: none;
++    border: none;
++    cursor: pointer;
++    padding: 0.5rem;
++    margin-left: auto;
++}
++
++.lp-hamburger span {
++    display: block;
++    width: 22px;
++    height: 2px;
++    background: #0f0f0f;
++    border-radius: 2px;
++    transition: all 0.3s;
++}
++
++/* ========================
++   HERO
++   ======================== */
++.lp-hero {
++    min-height: 100dvh;
++    display: grid;
++    grid-template-columns: 1fr 1.1fr;
++    align-items: center;
++    gap: 2rem;
++    max-width: 1300px;
++    margin: 0 auto;
++    padding: 120px clamp(1.25rem, 5vw, 4rem) 80px;
++    position: relative;
++    z-index: 10;
++}
++
++.lp-hero-bg {
++    position: fixed;
++    inset: 0;
++    pointer-events: none;
++    z-index: -1;
++    overflow: hidden;
++    background: #f6f5f3;
++}
++
++.lp-orb {
++    position: absolute;
++    border-radius: 50%;
++    filter: blur(100px);
++    opacity: 0.25;
++}
++
++.lp-orb-1 {
++    width: 600px;
++    height: 600px;
++    background: radial-gradient(circle, #3b82f6, #60a5fa);
++    top: -100px;
++    right: -100px;
++    animation: lp-float-orb 20s infinite alternate;
++}
++
++.lp-orb-2 {
++    width: 500px;
++    height: 500px;
++    background: radial-gradient(circle, #8b5cf6, #a78bfa);
++    bottom: -100px;
++    left: -100px;
++    animation: lp-float-orb 25s infinite alternate-reverse;
++}
++
++.lp-orb-3 {
++    width: 400px;
++    height: 400px;
++    background: radial-gradient(circle, #f59e0b, #fbbf24);
++    top: 40%;
++    left: 30%;
++    opacity: 0.1;
++    animation: lp-float-orb 30s infinite linear;
++}
++
++@keyframes lp-float-orb {
++    0% {
++        transform: translate(0, 0) scale(1);
++    }
++
++    100% {
++        transform: translate(100px, 50px) scale(1.1);
++    }
++}
++
++.lp-grid-lines {
++    position: absolute;
++    inset: 0;
++    background-image: linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
++    background-size: 80px 80px;
++}
++
++.lp-hero-content {
++    max-width: 620px;
++}
++
++.lp-hero-badge {
++    display: inline-flex;
++    align-items: center;
++    gap: 0.6rem;
++    background: rgba(255, 255, 255, 0.8);
++    backdrop-filter: blur(10px);
++    border: 1px solid rgba(0, 0, 0, 0.05);
++    padding: 0.5rem 1rem;
++    border-radius: 100px;
++    font-size: 0.85rem;
++    font-weight: 600;
++    color: #444;
++    margin-bottom: 2rem;
++    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
++}
++
++.lp-badge-dot {
++    width: 8px;
++    height: 8px;
++    background: #22c55e;
++    border-radius: 50%;
++    position: relative;
++}
++
++.lp-badge-dot::after {
++    content: '';
++    position: absolute;
++    inset: -4px;
++    border-radius: 50%;
++    border: 2px solid #22c55e;
++    animation: lp-ping 1.5s infinite;
++}
++
++@keyframes lp-ping {
++    0% {
++        transform: scale(1);
++        opacity: 0.8;
++    }
++
++    100% {
++        transform: scale(2.5);
++        opacity: 0;
++    }
++}
++
++.lp-hero-title {
++    font-size: clamp(3rem, 6vw, 5.5rem);
++    letter-spacing: -0.04em;
++    line-height: 0.95;
++    margin-bottom: 1.5rem;
++}
++
++.lp-hero-accent {
++    background: linear-gradient(to right, #2563eb, #7c3aed);
++    -webkit-background-clip: text;
++    background-clip: text;
++    color: transparent;
++}
++
++.lp-hero-sub {
++    font-size: 1.25rem;
++    color: #555;
++    line-height: 1.6;
++    margin-bottom: 2.5rem;
++    max-width: 520px;
++}
++
++/* Hero Visual Layout */
++.lp-hero-visual {
++    position: relative;
++    perspective: 1000px;
++}
++
++.lp-visual-stack {
++    position: relative;
++    width: 100%;
++    max-width: 600px;
++    margin: 0 auto;
++}
++
++.lp-card-main-wrapper {
++    transform: rotateX(10deg) rotateY(-15deg) rotateZ(2deg);
++    transition: transform 0.6s cubic-bezier(0.2, 0, 0.2, 1);
++}
++
++.lp-card-main-wrapper:hover {
++    transform: rotateX(5deg) rotateY(-5deg) rotateZ(0deg);
++}
++
++.lp-card-main {
++    background: white;
++    border-radius: 24px;
++    padding: 1.5rem;
++    box-shadow:
++        0 20px 50px -12px rgba(0, 0, 0, 0.15),
++        0 0 0 1px rgba(0, 0, 0, 0.02);
++}
++
++/* Floating UI Elements Layout */
++.lp-floating-ui {
++    position: absolute;
++    background: rgba(255, 255, 255, 0.9);
++    backdrop-filter: blur(12px);
++    border: 1px solid rgba(255, 255, 255, 0.4);
++    padding: 0.75rem 1rem;
++    border-radius: 18px;
++    display: flex;
++    align-items: center;
++    gap: 0.75rem;
++    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
++    z-index: 20;
++    transition: all 0.4s ease;
++}
++
++.lp-ui-icon {
++    width: 36px;
++    height: 36px;
++    border-radius: 10px;
++    display: flex;
++    align-items: center;
++    justify-content: center;
++    color: white;
++    font-size: 1.1rem;
++}
++
++.lp-ui-text {
++    display: flex;
++    flex-direction: column;
++}
++
++.lp-ui-text strong {
++    font-size: 1rem;
++    font-weight: 800;
++    color: #0f0f0f;
++}
++
++.lp-ui-text span {
++    font-size: 0.75rem;
++    color: #666;
++    font-weight: 500;
++}
++
++.lp-ui-1 {
++    top: 10%;
++    right: -20px;
++    animation: lp-float-y 4s infinite ease-in-out;
++}
++
++.lp-ui-2 {
++    bottom: 20%;
++    left: -40px;
++    animation: lp-float-y 5s infinite ease-in-out -1s;
++}
++
++.lp-ui-3 {
++    top: 50%;
++    right: -40px;
++    animation: lp-float-y 4.5s infinite ease-in-out -2s;
++}
++
++@keyframes lp-float-y {
++
++    0%,
++    100% {
++        transform: translateY(0);
++    }
++
++    50% {
++        transform: translateY(-15px);
++    }
++}
++
++/* ========================
++   TRUST BAR
++   ======================== */
++.lp-trust-bar {
++    padding: 3rem 0;
++    border-top: 1px solid rgba(0, 0, 0, 0.05);
++    background: rgba(255, 255, 255, 0.3);
++}
++
++.lp-trust-inner {
++    max-width: 1200px;
++    margin: 0 auto;
++    display: flex;
++    flex-direction: column;
++    align-items: center;
++    gap: 1.5rem;
++}
++
++.lp-trust-label {
++    font-size: 0.7rem;
++    font-weight: 800;
++    letter-spacing: 0.15em;
++    color: #999;
++}
++
++.lp-trust-logos {
++    display: flex;
++    gap: 4rem;
++    align-items: center;
++    opacity: 0.5;
++    filter: grayscale(1);
++    transition: opacity 0.3s;
++}
++
++.lp-trust-logos:hover {
++    opacity: 0.8;
++    filter: grayscale(0.5);
++}
++
++.lp-trust-logo {
++    font-weight: 700;
++    font-size: 1.1rem;
++    letter-spacing: -0.02em;
++}
++
++/* ========================
++   FEATURES SECTION LAYOUT
++   ======================== */
++.lp-features {
++    padding: 100px clamp(1.25rem, 5vw, 4rem);
++    max-width: 1300px;
++    margin: 0 auto;
++}
++
++.lp-features-header {
++    text-align: center;
++    margin-bottom: 4rem;
++}
++
++.lp-features-grid {
++    display: grid;
++    grid-template-columns: 1.2fr 1fr 1fr;
++    gap: 1.5rem;
++    align-items: stretch;
++}
++
++.lp-feature-col {
++    display: flex;
++    flex-direction: column;
++    gap: 1.5rem;
++}
++
++.lp-feature-card {
++    background: white;
++    border-radius: 28px;
++    padding: 2.25rem;
++    border: 1px solid rgba(0, 0, 0, 0.06);
++    display: flex;
++    flex-direction: column;
++    position: relative;
++    overflow: hidden;
++    transition: transform 0.4s, box-shadow 0.4s;
++    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
++}
++
++.lp-feature-card:hover {
++    transform: translateY(-6px);
++    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
++}
++
++.lp-card-large {
++    flex: 1;
++    min-height: 480px;
++}
++
++.lp-card-accent {
++    background: #f5f3ff;
++    border-color: #ddd6fe;
++}
++
++.lp-card-dark {
++    background: #0f0f0f;
++    color: white;
++}
++
++.lp-tag {
++    display: inline-block;
++    padding: 0.4rem 0.8rem;
++    border-radius: 100px;
++    font-size: 0.7rem;
++    font-weight: 800;
++    text-transform: uppercase;
++    letter-spacing: 0.1em;
++    margin-bottom: 1.25rem;
++}
++
++.lp-tag.blue {
++    background: #eff6ff;
++    color: #2563eb;
++}
++
++.lp-tag.purple {
++    background: #ede9fe;
++    color: #7c3aed;
++}
++
++.lp-tag.green {
++    background: #f0fdf4;
++    color: #16a34a;
++}
++
++.lp-tag.white {
++    background: rgba(255, 255, 255, 0.1);
++    color: white;
++}
++
++.lp-feature-card h3 {
++    font-size: 1.5rem;
++    margin-bottom: 1rem;
++    line-height: 1.2;
++}
++
++.lp-feature-card p {
++    font-size: 1rem;
++    color: #666;
++    line-height: 1.5;
++}
++
++.lp-card-dark p {
++    color: #aaa;
++}
++
++/* Visual Components within cards */
++.lp-card-visual {
++    margin-top: auto;
++    padding-top: 2rem;
++}
++
++.lp-srs-graphic {
++    display: flex;
++    align-items: flex-end;
++    gap: 12px;
++    height: 120px;
++}
++
++.lp-srs-bar {
++    flex: 1;
++    background: #e2e8f0;
++    border-radius: 6px;
++    height: var(--h);
++    animation: lp-grow-h 1.5s ease-out var(--d) both;
++}
++
++@keyframes lp-grow-h {
++    from {
++        height: 0;
++    }
++}
++
++.lp-srs-bar.active {
++    background: #2563eb;
++    position: relative;
++}
++
++.lp-srs-bar.active::after {
++    content: 'DUE';
++    position: absolute;
++    top: -25px;
++    left: 50%;
++    transform: translateX(-50%);
++    font-size: 0.6rem;
++    font-weight: 900;
++    color: #2563eb;
++}
++
++.lp-ai-micro {
++    background: white;
++    border-radius: 16px;
++    padding: 1rem;
++    margin-top: 1.5rem;
++    border: 1px solid #ddd6fe;
++    display: flex;
++    align-items: center;
++    gap: 0.75rem;
++    font-size: 0.85rem;
++    font-weight: 600;
++}
++
++.lp-ai-wave {
++    width: 10px;
++    height: 10px;
++    background: #7c3aed;
++    border-radius: 50%;
++    animation: lp-pulse-purple 2s infinite;
++}
++
++.lp-deck-stack {
++    position: relative;
++    height: 60px;
++    margin-top: 1.5rem;
++}
++
++.lp-mini-deck {
++    position: absolute;
++    width: 60px;
++    height: 40px;
++    background: #f1f5f9;
++    border: 1px solid #cbd5e1;
++    border-radius: 8px;
++    transition: transform 0.3s;
++}
++
++.lp-mini-deck:nth-child(1) {
++    transform: rotate(-5deg);
++    left: 0;
++    z-index: 3;
++}
++
++.lp-mini-deck:nth-child(2) {
++    transform: rotate(5deg);
++    left: 20px;
++    z-index: 2;
++    opacity: 0.7;
++}
++
++.lp-mini-deck:nth-child(3) {
++    transform: rotate(15deg);
++    left: 40px;
++    z-index: 1;
++    opacity: 0.4;
++}
++
++.lp-group-mini {
++    margin-top: 1.5rem;
++    background: rgba(255, 255, 255, 0.05);
++    padding: 1rem;
++    border-radius: 16px;
++}
++
++.lp-group-avatars {
++    display: flex;
++    gap: -5px;
++}
++
++.lp-group-avatars span {
++    width: 28px;
++    height: 28px;
++    border-radius: 50%;
++    background: #333;
++    display: flex;
++    align-items: center;
++    justify-content: center;
++    font-size: 0.7rem;
++    border: 2px solid #0f0f0f;
++    margin-left: -8px;
++}
++
++.lp-group-avatars span:first-child {
++    margin-left: 0;
++}
++
++.lp-heatmap-mini {
++    display: grid;
++    grid-template-columns: repeat(6, 1fr);
++    gap: 4px;
++    margin-top: 1.5rem;
++}
++
++.lp-heat-dot {
++    width: 12px;
++    height: 12px;
++    background: #2563eb;
++    border-radius: 3px;
++}
++
++
++/* ========================
++   TESTIMONIALS MASONRY
++   ======================== */
++.lp-testimonials {
++    background: #0f0f0f;
++    padding: 100px clamp(1.25rem, 5vw, 4rem);
++    position: relative;
++    overflow: hidden;
++}
++
++.lp-testimonials-header {
++    text-align: center;
++    margin-bottom: 4rem;
++}
++
++.lp-testimonials-masonry {
++    max-width: 1200px;
++    margin: 0 auto;
++    display: grid;
++    grid-template-columns: repeat(3, 1fr);
++    gap: 1.5rem;
++}
++
++.lp-testimonial-item {
++    background: rgba(255, 255, 255, 0.05);
++    border: 1px solid rgba(255, 255, 255, 0.08);
++    border-radius: 24px;
++    padding: 2rem;
++    display: flex;
++    flex-direction: column;
++    gap: 1.25rem;
++    transition: all 0.3s ease;
++}
++
++.lp-testimonial-item:hover {
++    background: rgba(255, 255, 255, 0.08);
++    transform: translateY(-5px);
++}
++
++.lp-t-featured {
++    background: rgba(37, 99, 235, 0.1);
++    border-color: rgba(37, 99, 235, 0.3);
++}
++
++.lp-t-stars {
++    color: #fbbf24;
++    font-size: 0.9rem;
++    letter-spacing: 2px;
++}
++
++.lp-testimonial-item p {
++    font-size: 1.05rem;
++    line-height: 1.6;
++    color: rgba(255, 255, 255, 0.8) !important;
++    font-style: italic;
++    margin: 0 !important;
++}
++
++.lp-t-author {
++    display: flex;
++    align-items: center;
++    gap: 1rem;
++    margin-top: auto;
++}
++
++.lp-t-avatar {
++    width: 44px;
++    height: 44px;
++    border-radius: 50%;
++    display: flex;
++    align-items: center;
++    justify-content: center;
++    font-weight: 700;
++    font-size: 0.8rem;
++}
++
++.lp-t-info {
++    display: flex;
++    flex-direction: column;
++}
++
++.lp-t-name {
++    font-weight: 600;
++    color: white;
++}
++
++.lp-t-school {
++    font-size: 0.8rem;
++    color: rgba(255, 255, 255, 0.4);
++}
++
++/* ========================
++   CTA SECTION
++   ======================== */
++.lp-cta {
++    padding: 120px clamp(1.25rem, 5vw, 4rem);
++    background: #0f0f0f;
++    position: relative;
++    overflow: hidden;
++}
++
++.lp-cta-content {
++    max-width: 800px;
++    margin: 0 auto;
++    text-align: center;
++    position: relative;
++    z-index: 10;
++}
++
++.lp-cta-orb-v2 {
++    position: absolute;
++    top: 50%;
++    left: 50%;
++    transform: translate(-50%, -50%);
++    width: 600px;
++    height: 600px;
++    background: radial-gradient(circle, rgba(37, 99, 235, 0.2), transparent 70%);
++    filter: blur(60px);
++    z-index: -1;
++}
++
++.lp-cta-title {
++    font-size: clamp(2.5rem, 5vw, 4.5rem);
++    color: white;
++    letter-spacing: -0.04em;
++    line-height: 1;
++    margin: 1rem 0 1.5rem;
++}
++
++.lp-cta-sub {
++    font-size: 1.25rem;
++    color: rgba(255, 255, 255, 0.6);
++    margin-bottom: 3rem;
++}
++
++.lp-btn-primary-large {
++    background: #2563eb;
++    color: white;
++    border: none;
++    padding: 1.25rem 2.5rem;
++    border-radius: 16px;
++    font-size: 1.1rem;
++    font-weight: 700;
++    cursor: pointer;
++    transition: all 0.3s;
++    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
++}
++
++.lp-btn-primary-large:hover {
++    background: #1d4ed8;
++    transform: translateY(-3px);
++    box-shadow: 0 15px 35px rgba(37, 99, 235, 0.5);
++}
++
++.lp-cta-note {
++    font-size: 0.85rem;
++    color: rgba(255, 255, 255, 0.4);
++    margin-top: 1.5rem;
++}
++
++/* ========================
++   RESPONSIVE OPTIMIZATIONS
++   ======================== */
++@media (max-width: 1024px) {
++    .lp-hero {
++        grid-template-columns: 1fr;
++        text-align: center;
++        padding-top: 100px;
++    }
++
++    .lp-hero-content {
++        margin: 0 auto;
++    }
++
++    .lp-hero-sub {
++        margin-left: auto;
++        margin-right: auto;
++    }
++
++    .lp-hero-actions {
++        justify-content: center;
++    }
++
++    .lp-hero-social {
++        justify-content: center;
++    }
++
++    .lp-features-grid {
++        grid-template-columns: 1fr;
++    }
++
++    .lp-testimonials-masonry {
++        grid-template-columns: 1fr 1fr;
++    }
++}
++
++@media (max-width: 768px) {
++    .lp-testimonials-masonry {
++        grid-template-columns: 1fr;
++    }
++
++    .lp-trust-logos {
++        gap: 2rem;
++        flex-wrap: wrap;
++        justify-content: center;
++    }
++
++    .lp-hero-title {
++        font-size: 3.5rem;
++    }
++
++    .lp-visual-stack {
++        max-width: 400px;
++        margin-top: 3rem;
++    }
++
++    .lp-floating-ui {
++        transform: scale(0.85);
++    }
++
++    .lp-ui-1 {
++        right: -10px;
++    }
++
++    .lp-ui-2 {
++        left: -10px;
++    }
++
++    .lp-ui-3 {
++        right: -10px;
++    }
++}
++
++
++/* ========================
++   FOOTER
++   ======================== */
++.lp-footer {
++    background: #0a0a0a;
++    padding: 2.5rem clamp(1.25rem, 5vw, 3rem);
++}
++
++.lp-footer-inner {
++    max-width: 1200px;
++    margin: 0 auto;
++    display: flex;
++    align-items: center;
++    gap: 2rem;
++    flex-wrap: wrap;
++}
++
++.lp-footer-logo {
++    display: flex;
++    align-items: center;
++    gap: 0.5rem;
++    font-family: 'Sora', sans-serif;
++    font-size: 1rem;
++    font-weight: 700;
++    color: white;
++    letter-spacing: -0.03em;
++}
++
++.lp-footer-copy {
++    color: rgba(255, 255, 255, 0.35);
++    font-size: 0.85rem;
++    margin: 0;
++    margin-left: auto;
++}
++
++.lp-footer-links {
++    display: flex;
++    gap: 1.5rem;
++}
++
++.lp-footer-links a {
++    font-size: 0.85rem;
++    color: rgba(255, 255, 255, 0.35);
++    text-decoration: none;
++    transition: color 0.2s;
++}
++
++.lp-footer-links a:hover {
++    color: white;
++}
++
++/* ========================
++   ANIMATIONS
++   ======================== */
++@keyframes lp-fade-up {
++    from {
++        opacity: 0;
++        transform: translateY(20px);
++    }
++
++    to {
++        opacity: 1;
++        transform: translateY(0);
++    }
++}
++
++
++/* Scrolled nav effect (JS adds class) */
++#lp-nav.scrolled {
++    box-shadow: 0 2px 24px rgba(0, 0, 0, 0.08);
+ }
+\ No newline at end of file
