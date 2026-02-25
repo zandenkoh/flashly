@@ -438,7 +438,7 @@
                                 here. Share your own knowledge and earn a reputation.</p>
                             <button class="lp-btn-solid"
                                 onclick="state.isGuest = true; showApp(); loadCommunityDecks();">Explore 15k+ Decks
-                                </button>
+                            </button>
                         </div>
                         <div class="lp-detail-visual">
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -519,7 +519,7 @@
                                     </svg> Advanced Analytics</li>
                             </ul>
                             <button class="lp-btn-solid btn-signup-toggle" style="margin-top:auto;">Register Free
-                                </button>
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -843,26 +843,28 @@
 
                         <!-- Daily AI Insights Container -->
                         <div id="daily-ai-insights-container" class="daily-ai-insights-card hidden">
-                            <div class="flex items-start gap-3">
+                            <div class="flex items-start gap-3" style="padding-left: 1.5rem;">
                                 <!-- Icon removed -->
-                                <p class="ai-insights-text" id="ai-insights-text">Loading your personalized insight...
+                                <p class="ai-insights-text" id="ai-insights-text">Loading your personalized
+                                    insight...
                                 </p>
                             </div>
-
-                            <!-- Actionable Cards Carousel -->
-                            <div class="ai-actions-header">
-                                <span class="ai-actions-label">Suggested Actions</span>
-                                <span class="ai-carousel-hint">Swipe for more
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="2" stroke="currentColor" class="icon-xs"
-                                        style="width: 12px; height: 12px;">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                    </svg>
-                                </span>
-                            </div>
-                            <div id="ai-actions-carousel" class="ai-actions-carousel">
-                                <!-- Action cards will be injected here -->
+                            <div class="inside-daily-insights-container">
+                                <!-- Actionable Cards Carousel -->
+                                <div class="ai-actions-header">
+                                    <span class="ai-actions-label">Suggested Actions</span>
+                                    <span class="ai-carousel-hint">Swipe for more
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="2" stroke="currentColor" class="icon-xs"
+                                            style="width: 12px; height: 12px;">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                        </svg>
+                                    </span>
+                                </div>
+                                <div id="ai-actions-carousel" class="ai-actions-carousel">
+                                    <!-- Action cards will be injected here -->
+                                </div>
                             </div>
                         </div>
 
@@ -2636,7 +2638,7 @@
                             <img src="./Assets/logo.png" alt="Flashly Logo"
                                 style="width: 80px; height: 80px; margin-bottom: 1.5rem;">
                             <h2 class="text-2xl font-bold">Flashly</h2>
-                            <p class="text-secondary mb-8">Version 0.51</p>
+                            <p class="text-secondary mb-8">Version 0.54</p>
 
                             <div
                                 style="max-width: 400px; margin: 0 auto; line-height: 1.6; color: var(--text-secondary);">
