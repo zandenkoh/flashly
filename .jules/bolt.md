@@ -1,0 +1,3 @@
+## 2024-05-24 - Redundant DB queries for global daily review limit
+**Learning:** Flashcard study sessions enforce a global daily review limit by counting unique `card_id` entries in the `study_logs` table for the current date. This count was being queried via `getGlobalCompletedTodayCount()` while the exact same data was fetched subsequently via `logsToday` to create a `studiedTodayIds` Set.
+**Action:** Compute the completed today count locally from the size of the `studiedTodayIds` Set derived from the `logsToday` fetch result, eliminating the redundant network query and speeding up `loadTodayView()` and `startStudySession()`.

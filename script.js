@@ -1770,8 +1770,6 @@ async function loadTodayView() {
                 });
 
 
-                const reviewedTodayCount = await getGlobalCompletedTodayCount();
-
                 // Get the set of IDs studied today from study_logs to accurately filter stillDue
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
@@ -1780,6 +1778,8 @@ async function loadTodayView() {
                     .eq('user_id', state.user.id)
                     .gte('review_time', today.toISOString());
                 const studiedTodayIds = new Set(logsToday ? logsToday.map(l => l.card_id) : []);
+
+                const reviewedTodayCount = studiedTodayIds.size;
 
                 // 2. Identify candidates for study (Not reviewed today, or Learning cards due again)
                 const stillDue = pertinentCards.filter(c => {
@@ -4232,27 +4232,6 @@ if (fullscreenBtn) {
 // --- Study Logic ---
 
 // Helper to get all accessible deck IDs (Owned, Shared, Group)
-async function getGlobalCompletedTodayCount() {
-    if (!state.user) return 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayISO = today.toISOString();
-
-    const { data, error } = await sb.from('study_logs')
-        .select('card_id')
-        .eq('user_id', state.user.id)
-        .gte('review_time', todayISO);
-
-    if (error) {
-        console.error("Error fetching global completed today count:", error);
-        return 0;
-    }
-
-    if (!data) return 0;
-    const uniqueCards = new Set(data.map(log => log.card_id));
-    return uniqueCards.size;
-}
-
 async function getMyDeckIds() {
     const [gpRes, dsRes] = await Promise.all([
         sb.from('group_members').select('group_id').eq('user_id', state.user.id),
@@ -4343,11 +4322,22 @@ async function startStudySession(restart = false) {
 
     let queue = [];
     const config = state.studySessionConfig || { type: 'standard' };
-    const globalCompletedToday = await getGlobalCompletedTodayCount();
+
+    const now = new Date();
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    // 1. Identify studied today cards to filter standard candidates and for global count
+    const { data: logsToday } = await sb.from('study_logs')
+        .select('card_id')
+        .eq('user_id', state.user.id)
+        .gte('review_time', todayStart.toISOString());
+    const studiedTodayIds = new Set(logsToday ? logsToday.map(l => l.card_id) : []);
+
+    const globalCompletedToday = studiedTodayIds.size;
     const dailyLimit = state.settings.dailyLimit || 50;
     let remainingQuota = config.isStudyMore ? dailyLimit : Math.max(0, dailyLimit - globalCompletedToday);
 
-    const now = new Date();
     if (config.type === 'due') {
         // Match updated stats logic: Only cards with reviews that are due or in learning
         queue = allCards.filter(c => c.reviews_count > 0 && (c.interval_days === 0 || (c.due_at && new Date(c.due_at) <= now)));
@@ -4374,17 +4364,6 @@ async function startStudySession(restart = false) {
             queue = queue.slice(0, remainingQuota);
         }
     } else {
-        const now = new Date();
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-
-        // 1. Identify studied today cards to filter standard candidates
-        const { data: logsToday } = await sb.from('study_logs')
-            .select('card_id')
-            .eq('user_id', state.user.id)
-            .gte('review_time', todayStart.toISOString());
-        const studiedTodayIds = new Set(logsToday ? logsToday.map(l => l.card_id) : []);
-
         // 2. Identify candidates for study (Exclude cards reviewed today)
         const candidates = allCards.filter(c => {
             const reviewedToday = studiedTodayIds.has(c.id);
