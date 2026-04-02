@@ -8625,7 +8625,7 @@ function renderSummary(content, container) {
         }
 
         // Process bold text (**text**)
-        const processedLine = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold" style="color: var(--primary);">$1</strong>');
+        const processedLine = escapeHtml(text).replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold" style="color: var(--primary);">$1</strong>');
 
         return `
         <li style="display: flex; gap: 0.75rem; margin-bottom: 1rem; align-items: flex-start;">
@@ -8641,14 +8641,14 @@ function renderSummary(content, container) {
             <div class="summary-eval" style="margin-bottom: 2rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
                 <div style="background: var(--background); padding: 1rem; border-radius: 12px; border: 1px solid var(--border);">
                     <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.25rem;">Depth Grade</div>
-                    <div style="font-weight: 700; color: var(--primary);">${metrics.depth_grade || 'Silver'}</div>
+                    <div style="font-weight: 700; color: var(--primary);">${escapeHtml(metrics.depth_grade || 'Silver')}</div>
                 </div>
                 <div style="background: var(--background); padding: 1rem; border-radius: 12px; border: 1px solid var(--border);">
                     <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.25rem;">Exam Readiness</div>
-                    <div style="font-weight: 700; color: #f59e0b;">${metrics.exam_readiness || 'N/A'}</div>
+                    <div style="font-weight: 700; color: #f59e0b;">${escapeHtml(metrics.exam_readiness || 'N/A')}</div>
                 </div>
                 <div style="grid-column: 1 / -1; background: var(--primary-light); padding: 1rem; border-radius: 12px; border: 1px solid rgba(37, 99, 235, 0.1);">
-                    <p style="font-size: 0.85rem; color: var(--text-primary); margin: 0; line-height: 1.5;"><strong>Evaluation:</strong> ${metrics.assessment || 'Great material for a quick review session.'}</p>
+                    <p style="font-size: 0.85rem; color: var(--text-primary); margin: 0; line-height: 1.5;"><strong>Evaluation:</strong> ${escapeHtml(metrics.assessment || 'Great material for a quick review session.')}</p>
                 </div>
             </div>
         `;
@@ -8667,7 +8667,7 @@ function renderSummary(content, container) {
                     </div>
                     <div>
                         <div style="font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: #92400e; margin-bottom: 0.25rem;">Strategic Study Tip</div>
-                        <p style="font-size: 0.9rem; color: #92400e; margin: 0; line-height: 1.5; font-weight: 600;">${content.strategic_tip}</p>
+                        <p style="font-size: 0.9rem; color: #92400e; margin: 0; line-height: 1.5; font-weight: 600;">${escapeHtml(content.strategic_tip)}</p>
                     </div>
                 </div>
             </div>
@@ -8694,7 +8694,7 @@ function renderSummary(content, container) {
                     </div>
                     <div>
                         <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">AI Summary</div>
-                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary); margin-top: -2px;">${summaryTitle}</div>
+                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary); margin-top: -2px;">${escapeHtml(summaryTitle)}</div>
                     </div>
                 </div>
                 <div style="color: var(--text-tertiary);">
@@ -8706,7 +8706,7 @@ function renderSummary(content, container) {
 
             <div class="summary-body">
                 <div style="font-size: 0.8rem; background: var(--surface-hover); border-radius: 8px; padding: 0.5rem 0.75rem; display: inline-block; margin-bottom: 1.5rem; font-weight: 600; color: var(--text-secondary);">
-                   ${content.subject_context || 'General Context'}
+                   ${escapeHtml(content.subject_context || 'General Context')}
                 </div>
 
                 <ul style="list-style: none; padding: 0; margin: 0;">
@@ -8720,7 +8720,7 @@ function renderSummary(content, container) {
                 <div style="margin-top: 1.5rem;">
                     <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.5rem;">Action Items</h4>
                     <ul style="list-style: disc; padding-left: 1.2rem; color: var(--text-primary);">
-                        ${content.action_items.map(item => `<li style="margin-bottom: 0.25rem;">${item}</li>`).join('')}
+                        ${content.action_items.map(item => `<li style="margin-bottom: 0.25rem;">${escapeHtml(item)}</li>`).join('')}
                     </ul>
                 </div>` : ''}
 
@@ -8728,7 +8728,7 @@ function renderSummary(content, container) {
                 <div style="margin-top: 1.5rem;">
                     <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.5rem;">Potential Exam Questions</h4>
                     <ul style="list-style: none; padding: 0; color: var(--text-primary);">
-                        ${content.potential_exam_questions.map(q => `<li style="margin-bottom: 0.5rem; background: #f0fdf4; padding: 0.5rem; border-radius: 6px; border: 1px solid #dcfce7; color: #166534;"><strong>Q:</strong> ${q}</li>`).join('')}
+                        ${content.potential_exam_questions.map(q => `<li style="margin-bottom: 0.5rem; background: #f0fdf4; padding: 0.5rem; border-radius: 6px; border: 1px solid #dcfce7; color: #166534;"><strong>Q:</strong> ${escapeHtml(q)}</li>`).join('')}
                     </ul>
                 </div>` : ''}
 
