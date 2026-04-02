@@ -1,6 +1,20 @@
 // Initialize Supabase
 // NOTE: This is the public 'anon' key. It is safe to expose in the browser as long as Row Level Security (RLS) is enabled in Supabase.
 const supabaseUrl = 'https://grgcynxsmanqfsgkiytu.supabase.co';
+
+// Debounce helper for search input and other rapid events
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdyZ2N5bnhzbWFucWZzZ2tpeXR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NDkxMDQsImV4cCI6MjA4NjEyNTEwNH0.rlTuj58kCkZqb_nIGQhCeBkvFeY04FtFx-SLpwXp-Yg';
 const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
 
@@ -3754,10 +3768,15 @@ async function updateSaveDeckButton(deck) {
 // Search state
 let cardSearchQuery = '';
 
-document.getElementById('card-search-input').addEventListener('input', (e) => {
+// ⚡ Bolt Optimization: Debounce card search input to prevent main thread blocking
+// Expected impact: Prevents expensive DOM re-renders and list sorting/filtering on every keystroke.
+// Reduces CPU usage significantly during rapid typing by grouping execution within a 300ms window.
+const debouncedCardSearch = debounce((e) => {
     cardSearchQuery = e.target.value.toLowerCase();
     renderCardList();
-});
+}, 300);
+
+document.getElementById('card-search-input').addEventListener('input', debouncedCardSearch);
 
 async function loadCards(deckId) {
     // Reset selection mode when loading a new deck
@@ -6612,7 +6631,10 @@ function renderCommunityDecks() {
 }
 
 // Search Suggestions
-document.getElementById('community-search').addEventListener('input', (e) => {
+// ⚡ Bolt Optimization: Debounce community search input to prevent layout thrashing
+// Expected impact: Prevents multiple unneeded filter iterations over state.communityDecks
+// and unnecessary UI updates during fast typing, improving responsiveness and avoiding lag.
+const debouncedCommunitySearch = debounce((e) => {
     const val = e.target.value.trim().toLowerCase();
     const suggestions = document.getElementById('community-search-suggestions');
 
@@ -6638,7 +6660,9 @@ document.getElementById('community-search').addEventListener('input', (e) => {
         </div>
     `).join('');
     suggestions.classList.remove('hidden');
-});
+}, 300);
+
+document.getElementById('community-search').addEventListener('input', debouncedCommunitySearch);
 
 window.setCommunitySearch = (val) => {
     document.getElementById('community-search').value = val;
@@ -7527,17 +7551,7 @@ window.resetNotesFilters = () => {
 };
 
 // Debounce helper for search input
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
+// function debounce moved to top
 
 // This function is now just a trigger for the API call
 const handleNoteFilterChange = debounce(() => {
