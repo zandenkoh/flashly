@@ -1,0 +1,3 @@
+## 2024-05-24 - Eliminate Redundant Database Query for Today's Studied Cards
+**Learning:** Found a specific anti-pattern where a dedicated function (`getGlobalCompletedTodayCount()`) was fetching data (the count of unique studied cards today) from the database, while immediately below it, the codebase was fetching the exact same data again (`logsToday`) to compute a set of IDs (`studiedTodayIds`). This caused two sequential database queries where one was sufficient.
+**Action:** When a function computes a count from a database query, ensure the same data isn't being fetched nearby for other purposes. In `loadTodayView`, compute `reviewedTodayCount` from `studiedTodayIds.size` instead of making a separate call.
