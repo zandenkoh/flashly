@@ -1784,7 +1784,8 @@ async function loadTodayView() {
                 // 2. Identify candidates for study (Not reviewed today, or Learning cards due again)
                 const stillDue = pertinentCards.filter(c => {
                     const interval = Number(c.interval_days || 0);
-                    const due = c.due_at ? new Date(c.due_at) : null;
+                    // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+                    const dueStr = c.due_at || '';
                     const isLearning = (interval < 1 && c.reviews_count > 0);
 
                     const reviewedToday = studiedTodayIds.has(c.id);
@@ -1792,18 +1793,19 @@ async function loadTodayView() {
                     if (!reviewedToday) return true;
 
                     // SPECIAL CASE: Learning cards that are due again TODAY should stay in 'stillDue'
-                    if (isLearning && due && due <= now) return true;
+                    if (isLearning && dueStr && dueStr <= nowISO) return true;
 
                     return false;
                 });
 
                 // 3. Classify and Prioritize
                 let learningQueue = stillDue.filter(c => c.reviews_count > 0 && Number(c.interval_days) < 1);
-                let reviewQueue = stillDue.filter(c => c.reviews_count > 0 && Number(c.interval_days) >= 1 && (c.due_at && new Date(c.due_at) <= now));
+                let reviewQueue = stillDue.filter(c => c.reviews_count > 0 && Number(c.interval_days) >= 1 && (c.due_at && c.due_at <= nowISO));
                 let newQueue = stillDue.filter(c => !c.reviews_count || c.reviews_count === 0);
 
-                learningQueue.sort((a, b) => new Date(a.due_at || 0) - new Date(b.due_at || 0));
-                reviewQueue.sort((a, b) => new Date(a.due_at || 0) - new Date(b.due_at || 0));
+                // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+                learningQueue.sort((a, b) => (a.due_at || '') < (b.due_at || '') ? -1 : (a.due_at || '') > (b.due_at || '') ? 1 : 0);
+                reviewQueue.sort((a, b) => (a.due_at || '') < (b.due_at || '') ? -1 : (a.due_at || '') > (b.due_at || '') ? 1 : 0);
 
                 const totalDueQueue = [...learningQueue, ...reviewQueue];
 
@@ -2267,8 +2269,10 @@ async function loadTodayMyDecks() {
     focusDecks.sort((a, b) => {
         const statsA = deckStats[a.id];
         const statsB = deckStats[b.id];
-        if (new Date(statsA.earliest) - new Date(statsB.earliest) !== 0)
-            return new Date(statsA.earliest) - new Date(statsB.earliest);
+        // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+        const earliestA = statsA.earliest || '';
+        const earliestB = statsB.earliest || '';
+        if (earliestA !== earliestB) return earliestA < earliestB ? -1 : 1;
         return statsB.count - statsA.count;
     });
 
@@ -3784,8 +3788,9 @@ function renderCardList() {
     // Sort strategy
     const sortVal = document.getElementById('card-sort-select').value;
     const sorted = [...state.cards].sort((a, b) => {
-        if (sortVal === 'newest') return new Date(b.created_at) - new Date(a.created_at);
-        if (sortVal === 'oldest') return new Date(a.created_at) - new Date(b.created_at);
+        // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+        if (sortVal === 'newest') return (b.created_at || '') < (a.created_at || '') ? -1 : (b.created_at || '') > (a.created_at || '') ? 1 : 0;
+        if (sortVal === 'oldest') return (a.created_at || '') < (b.created_at || '') ? -1 : (a.created_at || '') > (b.created_at || '') ? 1 : 0;
         if (sortVal === 'az') return a.front.localeCompare(b.front);
         if (sortVal === 'za') return b.front.localeCompare(a.front);
         return 0;
@@ -4386,28 +4391,31 @@ async function startStudySession(restart = false) {
         const studiedTodayIds = new Set(logsToday ? logsToday.map(l => l.card_id) : []);
 
         // 2. Identify candidates for study (Exclude cards reviewed today)
+        const nowISO = new Date().toISOString();
         const candidates = allCards.filter(c => {
             const reviewedToday = studiedTodayIds.has(c.id);
             const interval = Number(c.interval_days || 0);
-            const due = c.due_at ? new Date(c.due_at) : null;
+            // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+            const dueStr = c.due_at || '';
             const isLearning = (interval < 1 && c.reviews_count > 0);
 
             if (!reviewedToday) return true;
 
             // SPECIAL CASE: Learning cards that are due again TODAY should stay in candidates
-            if (isLearning && due && due <= now) return true;
+            if (isLearning && dueStr && dueStr <= nowISO) return true;
 
             return false;
         });
 
         // 3. Separate Categories
         let learningList = candidates.filter(c => c.reviews_count > 0 && Number(c.interval_days) < 1);
-        let reviewList = candidates.filter(c => c.reviews_count > 0 && Number(c.interval_days) >= 1 && (c.due_at && new Date(c.due_at) <= now));
+        let reviewList = candidates.filter(c => c.reviews_count > 0 && Number(c.interval_days) >= 1 && (c.due_at && c.due_at <= nowISO));
         let newList = candidates.filter(c => !c.reviews_count || c.reviews_count === 0);
 
         // Sort Due: Learning first, then Due Review
-        learningList.sort((a, b) => new Date(a.due_at || 0) - new Date(b.due_at || 0));
-        reviewList.sort((a, b) => new Date(a.due_at || 0) - new Date(b.due_at || 0));
+        // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+        learningList.sort((a, b) => (a.due_at || '') < (b.due_at || '') ? -1 : (a.due_at || '') > (b.due_at || '') ? 1 : 0);
+        reviewList.sort((a, b) => (a.due_at || '') < (b.due_at || '') ? -1 : (a.due_at || '') > (b.due_at || '') ? 1 : 0);
 
         const totalDueList = [...learningList, ...reviewList];
 
@@ -6560,7 +6568,8 @@ function renderCommunityDecks() {
     } else if (sortBy === 'za') {
         sorted.sort((a, b) => b.title.localeCompare(a.title));
     } else {
-        sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+        sorted.sort((a, b) => (b.created_at || '') < (a.created_at || '') ? -1 : (b.created_at || '') > (a.created_at || '') ? 1 : 0);
     }
 
     if (sorted.length === 0) {
