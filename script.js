@@ -1770,8 +1770,6 @@ async function loadTodayView() {
                 });
 
 
-                const reviewedTodayCount = await getGlobalCompletedTodayCount();
-
                 // Get the set of IDs studied today from study_logs to accurately filter stillDue
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
@@ -1780,6 +1778,8 @@ async function loadTodayView() {
                     .eq('user_id', state.user.id)
                     .gte('review_time', today.toISOString());
                 const studiedTodayIds = new Set(logsToday ? logsToday.map(l => l.card_id) : []);
+
+                const reviewedTodayCount = studiedTodayIds.size;
 
                 // 2. Identify candidates for study (Not reviewed today, or Learning cards due again)
                 const stillDue = pertinentCards.filter(c => {
