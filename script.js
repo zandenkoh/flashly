@@ -7385,7 +7385,7 @@ checkUser();
 
 // --- Notes Marketplace Logic ---
 
-async function initNotes(loadMore = false) {
+async function initNotes(targetPage = null) {
     if (state.notesLoading) return;
     state.notesLoading = true;
 
@@ -7400,16 +7400,22 @@ async function initNotes(loadMore = false) {
     const type = typeEl ? typeEl.value : 'all';
 
     const grid = document.getElementById('notes-grid');
-    if (!loadMore && grid) {
+
+    // Compute current page
+    const page = targetPage !== null ? targetPage : (parseInt(new URLSearchParams(window.location.search).get('page')) || 1);
+    state.notesPage = page;
+
+    // Update URL
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', page);
+    window.history.pushState({ page: page }, '', url.toString());
+
+    if (grid) {
         grid.innerHTML = getComponentLoader('Gathering the best notes...');
     }
 
     const limit = 10;
-    // If not loading more (i.e., new search/filter), reset list
-    if (!loadMore) {
-        state.notes = [];
-    }
-    const offset = state.notes.length;
+    const offset = (page - 1) * limit;
 
     // Build query with filters
     let query = sb.from('notes')
@@ -7468,19 +7474,14 @@ async function initNotes(loadMore = false) {
 
     if (error) {
         console.error('Error fetching notes:', error);
-        if (!loadMore) state.notes = [];
+        state.notes = [];
         state.hasMoreNotes = false;
     } else {
         const fetched = data || [];
+        state.notes = fetched;
 
-        if (loadMore) {
-            state.notes = [...state.notes, ...fetched];
-        } else {
-            state.notes = fetched;
-        }
-
-        // Determine if there are more results
-        state.hasMoreNotes = (state.notes.length < count);
+        state.totalPages = Math.ceil(count / limit);
+        state.hasMoreNotes = (offset + limit) < count;
     }
 
     state.notesLoaded = true;
@@ -7513,7 +7514,7 @@ window.clearFilter = (id) => {
     const el = document.getElementById(id);
     if (el) {
         el.value = 'all';
-        initNotes(false);
+        initNotes(1);
     }
 };
 
@@ -7522,7 +7523,7 @@ window.resetNotesFilters = () => {
     document.getElementById('filter-category').value = 'all';
     document.getElementById('filter-subject').value = 'all';
     document.getElementById('filter-type').value = 'all';
-    initNotes(false);
+    initNotes(1);
 };
 
 // Debounce helper for search input
@@ -7540,22 +7541,22 @@ function debounce(func, wait) {
 
 // This function is now just a trigger for the API call
 const handleNoteFilterChange = debounce(() => {
-    initNotes(false); // Reset and search
+    initNotes(1); // Reset and search
 }, 500);
 
-async function loadMoreNotes() {
-    const btn = document.querySelector('#notes-footer .btn');
-    if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Loading...';
-    }
-    await initNotes(true); // Load next page
-}
+window.changeNotesPage = async function(change) {
+    const newPage = (state.notesPage || 1) + change;
+    if (newPage < 1 || newPage > (state.totalPages || 1)) return;
+    const btns = document.querySelectorAll('#notes-footer .btn');
+    btns.forEach(b => b.disabled = true);
+    await initNotes(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
 function loadNotesView() {
     // Just initial load if empty
     if (!state.notes || state.notes.length === 0) {
-        initNotes(false);
+        initNotes();
     } else {
         const grid = document.getElementById('notes-grid');
         // Only render if the grid is empty, to prevent flickering/reloading when switching tabs
@@ -7636,16 +7637,19 @@ function renderNotes(notes) {
 
     // Update Footer
     if (footer) {
-        if (state.hasMoreNotes) {
-            footer.innerHTML = `
-                <button class="btn btn-outline" onclick="loadMoreNotes()" style="margin-top: 1rem;">
-                    View More
-                </button>
-            `;
-        } else if (state.notes.length > 0) {
-            footer.innerHTML = `
-                <p class="text-dim text-sm italic" style="margin-top: 1rem;">That's everything for now!</p>
-            `;
+        if (state.notes.length > 0) {
+            let paginationHtml = '<div style="display: flex; gap: 1rem; align-items: center; justify-content: center; margin-top: 1rem;">';
+            if (state.notesPage > 1) {
+                paginationHtml += '<button class="btn btn-outline" onclick="changeNotesPage(-1)">Previous</button>';
+            }
+            if (state.totalPages > 0) {
+                paginationHtml += '<span class="text-sm font-medium">Page ' + state.notesPage + ' of ' + state.totalPages + '</span>';
+            }
+            if (state.hasMoreNotes) {
+                paginationHtml += '<button class="btn btn-outline" onclick="changeNotesPage(1)">See More</button>';
+            }
+            paginationHtml += '</div>';
+            footer.innerHTML = paginationHtml;
         } else {
             footer.innerHTML = '';
         }
@@ -7965,7 +7969,7 @@ if (similarMoreBtn) {
         const subjectEl = document.getElementById('filter-subject');
         if (subjectEl) {
             subjectEl.value = 'all'; // Reset to all subjects as requested
-            initNotes(false);
+            initNotes(1);
             switchView('notes-view');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
