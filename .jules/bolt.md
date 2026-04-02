@@ -1,0 +1,3 @@
+## 2025-01-20 - Removed Duplicated DB Queries in Study Setup
+**Learning:** The application was making redundant database requests to the `study_logs` table. `getGlobalCompletedTodayCount()` was called to count unique `card_id`s for the daily limit, and then another identical query was issued to fetch `studiedTodayIds` for filtering algorithm candidates.
+**Action:** Removed `getGlobalCompletedTodayCount()` entirely. Hoisted the `logsToday` fetch earlier in the flow for both `loadTodayView()` and `startStudySession()` and reused `studiedTodayIds.size` to derive the global completed limit without an extra network call.
