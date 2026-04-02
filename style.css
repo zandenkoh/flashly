@@ -10457,6 +10457,8 @@ html {
     transition: all 0.3s ease;
     box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.03);
     text-align: left;
+    display: flex;
+    flex-direction: column;
 }
 
 .lp-carousel-item:hover {

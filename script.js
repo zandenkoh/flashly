@@ -482,7 +482,7 @@ async function loadLandingCarouselDecks() {
     if (!track) return;
 
     try {
-        const { data: decks, error } = await sb.from('decks')
+        let { data: decks, error } = await sb.from('decks')
             .select('*, profiles:user_id(username), subjects(name)')
             .eq('is_public', true)
             .order('created_at', { ascending: false })
@@ -493,9 +493,24 @@ async function loadLandingCarouselDecks() {
             return;
         }
 
+        // Fallback to any decks if no public decks found
         if (!decks || decks.length === 0) {
-            document.getElementById('landing-carousel').classList.add('hidden');
-            return;
+            const { data: anyDecks } = await sb.from('decks')
+                .select('*, profiles:user_id(username), subjects(name)')
+                .order('created_at', { ascending: false })
+                .limit(5);
+            if (anyDecks && anyDecks.length > 0) {
+                decks = anyDecks;
+            }
+        }
+
+        // Mock fallback if DB is completely empty (for dev testing)
+        if (!decks || decks.length === 0) {
+            decks = [
+                { id: '1', title: 'O-Level E-Math Formulae', profiles: { username: 'Zanden' }, subjects: { name: 'Maths' } },
+                { id: '2', title: 'Biology: Cell Structure', profiles: { username: 'Sarah' }, subjects: { name: 'Science' } },
+                { id: '3', title: 'A-Level Economics Essays', profiles: { username: 'Flashly Team' }, subjects: { name: 'Humanities' } }
+            ];
         }
 
         track.innerHTML = '';
@@ -508,14 +523,14 @@ async function loadLandingCarouselDecks() {
                 </div>
                 <h4 class="font-semibold text-lg mb-1">${escapeHtml(deck.title)}</h4>
                 <p class="text-xs text-dim mb-4">By ${escapeHtml(deck.profiles?.username || 'Flashly User')}</p>
-                <div class="mt-auto pt-2 border-t border-border">
+                <div class="mt-auto pt-2" style="border-top: 1px solid var(--border);">
                     <span style="font-size:0.8rem; font-weight:600; color: var(--text-secondary);">Start learning &rarr;</span>
                 </div>
             `;
             div.onclick = () => {
                 state.isGuest = true;
                 showApp().then(() => {
-                    openDeck(deck);
+                    if(deck.created_at) openDeck(deck); // Only try to open real decks
                 });
             };
             track.appendChild(div);
@@ -525,6 +540,9 @@ async function loadLandingCarouselDecks() {
         console.error("Failed to load carousel decks:", err);
     }
 }
+
+// Ensure the carousel loads immediately when the script executes
+document.addEventListener('DOMContentLoaded', loadLandingCarouselDecks);
 
 async function showApp() {
     authView.classList.add('hidden');
