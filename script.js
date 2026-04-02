@@ -194,6 +194,10 @@ async function checkUser() {
         updateAuthUI();
         authModal.classList.remove('hidden');
         document.body.classList.add('modal-open');
+    } else if (authAction === 'guest_library') {
+        console.log("URL Auth Action: Guest Library");
+        state.isGuest = true;
+        state.lastView = 'notes-view';
     }
 
     // Check for redirect params to show loader immediately
@@ -215,9 +219,16 @@ async function checkUser() {
         if (loader) loader.classList.add('hidden');
     } else {
         if (loader) loader.classList.add('hidden'); // Ensure hidden if no session
-        state.isGuest = false;
-        showAuth();
-        detectLinksEarly();
+
+        if (state.isGuest && state.lastView === 'notes-view') {
+            await showApp();
+            switchView('notes-view');
+            loadNotesView();
+        } else {
+            state.isGuest = false;
+            showAuth();
+            detectLinksEarly();
+        }
     }
 
     // Check for admin/uploader access
@@ -232,8 +243,9 @@ async function checkUser() {
     sb.auth.onAuthStateChange((_event, session) => {
         state.user = session ? session.user : null;
         if (state.user) {
+            state.isGuest = false;
             showApp();
-        } else {
+        } else if (!state.isGuest) {
             showAuth();
         }
     });
