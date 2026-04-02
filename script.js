@@ -218,6 +218,7 @@ async function checkUser() {
         state.isGuest = false;
         showAuth();
         detectLinksEarly();
+        loadLandingCarouselDecks();
     }
 
     // Check for admin/uploader access
@@ -474,6 +475,55 @@ function showAuth() {
     authView.classList.remove('hidden');
     mainLayout.classList.add('hidden');
     authModal.classList.add('hidden');
+}
+
+async function loadLandingCarouselDecks() {
+    const track = document.getElementById('landing-carousel-track');
+    if (!track) return;
+
+    try {
+        const { data: decks, error } = await sb.from('decks')
+            .select('*, profiles:user_id(username), subjects(name)')
+            .eq('is_public', true)
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+        if (error) {
+            console.error("Error loading landing carousel decks:", error);
+            return;
+        }
+
+        if (!decks || decks.length === 0) {
+            document.getElementById('landing-carousel').classList.add('hidden');
+            return;
+        }
+
+        track.innerHTML = '';
+        decks.forEach(deck => {
+            const div = document.createElement('div');
+            div.className = 'lp-carousel-item';
+            div.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <span class="text-xs font-bold text-primary uppercase">${escapeHtml(deck.subjects?.name || 'General')}</span>
+                </div>
+                <h4 class="font-semibold text-lg mb-1">${escapeHtml(deck.title)}</h4>
+                <p class="text-xs text-dim mb-4">By ${escapeHtml(deck.profiles?.username || 'Flashly User')}</p>
+                <div class="mt-auto pt-2 border-t border-border">
+                    <span style="font-size:0.8rem; font-weight:600; color: var(--text-secondary);">Start learning &rarr;</span>
+                </div>
+            `;
+            div.onclick = () => {
+                state.isGuest = true;
+                showApp().then(() => {
+                    openDeck(deck);
+                });
+            };
+            track.appendChild(div);
+        });
+
+    } catch (err) {
+        console.error("Failed to load carousel decks:", err);
+    }
 }
 
 async function showApp() {
