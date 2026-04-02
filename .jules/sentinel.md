@@ -1,0 +1,4 @@
+## 2025-02-14 - HTML sanitization missing for string interpolation within innerHTML
+**Vulnerability:** Several areas in `script.js` (specifically `renderNotes`, `openNote`, `renderSimilarNotes`) failed to sanitize user-generated data (e.g. `note.title`, `note.category`, `note.subject`, `note.type`) using the `escapeHtml` function before interpolating them into HTML structures via template literals.
+**Learning:** This repo relies heavily on assigning template literals to `innerHTML` dynamically for performance and templating simplicity. However, string interpolation does not automatically escape HTML, which led to a Cross-Site Scripting (XSS) vulnerability when user-controlled database fields were accessed and injected directly into the DOM.
+**Prevention:** Always verify that every interpolated variable containing user-generated content is wrapped in `escapeHtml()` when updating `innerHTML`, or prefer using safer APIs like `textContent` where applicable.

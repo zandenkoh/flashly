@@ -7622,13 +7622,13 @@ function renderNotes(notes) {
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                         </svg>
                     </div>
-                    <span class="note-type-badge ${catClass}">${displayCat}</span>
+                    <span class="note-type-badge ${catClass}">${escapeHtml(displayCat)}</span>
                 </div>
-                <h3 class="note-title" title="${note.title}">${note.title}</h3>
-                <p class="text-sm text-secondary mb-2">${displaySub || displayCat}</p>
+                <h3 class="note-title" title="${escapeHtml(note.title)}">${escapeHtml(note.title)}</h3>
+                <p class="text-sm text-secondary mb-2">${escapeHtml(displaySub || displayCat)}</p>
             </div>
             <div class="note-meta">
-                <span class="note-tag">${note.type}</span>
+                <span class="note-tag">${escapeHtml(note.type)}</span>
             </div>
         `;
         card.onclick = () => openNote(note);
@@ -7675,9 +7675,9 @@ function openNote(note) {
     const tagsContainer = document.getElementById('note-detail-tags');
     if (tagsContainer) {
         tagsContainer.innerHTML = `
-            <span class="note-tag-detail">${note.category}</span>
-            <span class="note-tag-detail">${note.subject}</span>
-            <span class="note-tag-detail">${note.type}</span>
+            <span class="note-tag-detail">${escapeHtml(note.category)}</span>
+            <span class="note-tag-detail">${escapeHtml(note.subject)}</span>
+            <span class="note-tag-detail">${escapeHtml(note.type)}</span>
         `;
     }
 
@@ -7815,8 +7815,8 @@ function renderSimilarNotes(currentNote) {
                 </svg>
             </div>
             <div class="similar-note-info">
-                <div class="similar-note-title" title="${note.title}">${note.title}</div>
-                <div class="similar-note-meta">${note.subject} • ${note.category}</div>
+                <div class="similar-note-title" title="${escapeHtml(note.title)}">${escapeHtml(note.title)}</div>
+                <div class="similar-note-meta">${escapeHtml(note.subject)} • ${escapeHtml(note.category)}</div>
             </div>
         `;
         card.onclick = () => openNote(note);
