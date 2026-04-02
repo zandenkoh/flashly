@@ -297,6 +297,17 @@
                     </div>
                 </section>
 
+                <!-- CAROUSEL SECTION -->
+                <section class="lp-carousel-section" id="landing-carousel">
+                    <div class="lp-carousel-header">
+                        <h2 class="lp-section-title">Popular Decks</h2>
+                        <button class="lp-btn-ghost-cta" onclick="state.isGuest = true; showApp(); updateNav('nav-community'); switchView('community-view'); loadCommunityDecks();">View more</button>
+                    </div>
+                    <div class="lp-carousel-track" id="landing-carousel-track">
+                        <!-- Decks injected by JS -->
+                    </div>
+                </section>
+
                 <!-- FEATURES SECTION -->
                 <section class="lp-features" id="features">
                     <div class="lp-features-header">

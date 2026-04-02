@@ -10416,6 +10416,73 @@ html {
 }
 
 /* ========================
+   CAROUSEL SECTION
+   ======================== */
+.lp-carousel-section {
+    padding: 60px clamp(1.25rem, 5vw, 4rem);
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+.lp-carousel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.lp-carousel-track {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    padding: 1rem 0 2rem 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-snap-type: x mandatory;
+}
+
+.lp-carousel-track::-webkit-scrollbar {
+    display: none;
+}
+
+.lp-carousel-item {
+    flex: 0 0 calc(33.333% - 1rem);
+    min-width: 280px;
+    scroll-snap-align: start;
+    cursor: pointer;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.03);
+    text-align: left;
+}
+
+.lp-carousel-item:hover {
+    border-color: var(--primary);
+    box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+}
+
+@media (max-width: 1024px) {
+    .lp-carousel-item {
+        flex: 0 0 calc(50% - 0.75rem);
+    }
+}
+
+@media (max-width: 640px) {
+    .lp-carousel-item {
+        flex: 0 0 85%;
+    }
+    .lp-carousel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}
+
+/* ========================
    FEATURES SECTION LAYOUT
    ======================== */
 .lp-features {
