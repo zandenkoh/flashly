@@ -1790,6 +1790,9 @@ async function loadTodayView() {
                 // Calculate reviewedTodayCount from studiedTodayIds to avoid redundant network query
                 const reviewedTodayCount = studiedTodayIds.size;
 
+                // Calculate completed count locally to avoid redundant DB queries
+                const reviewedTodayCount = studiedTodayIds.size;
+
                 // 2. Identify candidates for study (Not reviewed today, or Learning cards due again)
                 const stillDue = pertinentCards.filter(c => {
                     const interval = Number(c.interval_days || 0);

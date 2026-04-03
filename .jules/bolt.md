@@ -1,3 +1,6 @@
+## 2024-05-24 - Redundant Database Queries for Simple Counts
+**Learning:** Found an anti-pattern in `script.js` where `getGlobalCompletedTodayCount()` performed a completely separate Supabase query to get the exact same count that could be derived locally from `studiedTodayIds.size`, which was fetched right after. This duplicate query effectively doubled the latency and network overhead for that specific operation on the main dashboard load.
+**Action:** When querying for both a list of items and their count on the same criteria, always fetch the list and use `.length` or `.size` to derive the count locally instead of making an additional `count` query.
 ## 2025-01-20 - Redundant Database Queries for Aggregations
 **Learning:** Found a pattern where `getGlobalCompletedTodayCount()` was making a redundant network request to fetch and count today's study logs, while the very next lines of code fetched the exact same data (`logsToday`) for a different purpose (`studiedTodayIds` Set).
 **Action:** When computing aggregates like counts, check if the raw data is already being fetched or can be fetched once and processed locally to eliminate duplicate network requests.
