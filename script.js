@@ -3754,9 +3754,18 @@ async function updateSaveDeckButton(deck) {
 // Search state
 let cardSearchQuery = '';
 
+// ⚡ Bolt Optimization: Debounce card search
+// What: Wraps the expensive `renderCardList` call in a 300ms debounce.
+// Why: Prevents unnecessary DOM re-renders and filtering computations on every keystroke.
+// Impact: Reduces CPU usage and UI stuttering when searching through large decks, especially on slower devices.
+let searchTimeout;
 document.getElementById('card-search-input').addEventListener('input', (e) => {
     cardSearchQuery = e.target.value.toLowerCase();
-    renderCardList();
+
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        renderCardList();
+    }, 300);
 });
 
 async function loadCards(deckId) {
