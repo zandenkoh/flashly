@@ -6635,7 +6635,7 @@ function renderCommunityDecks() {
 }
 
 // Search Suggestions
-document.getElementById('community-search').addEventListener('input', (e) => {
+document.getElementById('community-search').addEventListener('input', debounce((e) => {
     const val = e.target.value.trim().toLowerCase();
     const suggestions = document.getElementById('community-search-suggestions');
 
@@ -6661,7 +6661,7 @@ document.getElementById('community-search').addEventListener('input', (e) => {
         </div>
     `).join('');
     suggestions.classList.remove('hidden');
-});
+}, 300));
 
 window.setCommunitySearch = (val) => {
     document.getElementById('community-search').value = val;

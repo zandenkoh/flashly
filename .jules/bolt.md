@@ -1,3 +1,6 @@
+## 2024-10-24 - Debouncing DOM filtering
+**Learning:** In a vanilla JS app with potentially thousands of items (like flashcards and decks), updating the DOM and executing array filters synchronously on every keystroke of an `input` event can severely block the main thread and degrade typing responsiveness. This codebase lacked debouncing for its primary search inputs (`card-search-input` and `community-search`).
+**Action:** Always verify if high-frequency events like typing, scrolling, or window resizing directly trigger expensive DOM manipulations or heavy computations. Wrap these handlers in a `debounce` function (or `throttle` depending on use case) to prevent unnecessary work.
 ## 2026-04-02 - Optimize daily review count queries
 **Learning:** Identical and conditional network queries to the database were discovered.
 **Action:** Use cached sizes of local sets to replace network calls where possible and conditionally invoke queries.
