@@ -1803,6 +1803,9 @@ async function loadTodayView() {
                 // Use the fetched studiedTodayIds to avoid a duplicate network call
                 const reviewedTodayCount = studiedTodayIds.size;
 
+                // ⚡ Bolt: Use cached local set size instead of identical DB query
+                const reviewedTodayCount = studiedTodayIds.size;
+
                 // 2. Identify candidates for study (Not reviewed today, or Learning cards due again)
                 const stillDue = pertinentCards.filter(c => {
                     const interval = Number(c.interval_days || 0);
