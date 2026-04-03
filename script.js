@@ -1203,7 +1203,8 @@ async function loadSettingsStats() {
         const cardRatings = new Map();
         logs.forEach(log => {
             // We'd need to sort by time to get LATEST rating, but let's approximate for now
-            if (!cardRatings.has(log.card_id) || new Date(log.review_time) > new Date(cardRatings.get(log.card_id).time)) {
+            // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+            if (!cardRatings.has(log.card_id) || log.review_time > cardRatings.get(log.card_id).time) {
                 cardRatings.set(log.card_id, { rating: log.rating, time: log.review_time });
             }
         });
@@ -6136,7 +6137,9 @@ async function loadStats() {
     // Daily Average (30d)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const recentLogs = logs ? logs.filter(l => new Date(l.review_time) >= thirtyDaysAgo) : [];
+    const thirtyDaysAgoISO = thirtyDaysAgo.toISOString();
+    // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+    const recentLogs = logs ? logs.filter(l => l.review_time >= thirtyDaysAgoISO) : [];
     const dailyAvg = (recentLogs.length / 30).toFixed(1);
 
     // Total Study Time (Improved Estimation)
