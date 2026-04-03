@@ -2075,11 +2075,11 @@
                 <h3>Create New Deck</h3>
                 <form id="create-deck-form">
                     <div class="input-group">
-                        <label>Title</label>
+                        <label for="new-deck-title">Title</label>
                         <input type="text" id="new-deck-title" required>
                     </div>
                     <div class="input-group">
-                        <label>Description (optional)</label>
+                        <label for="new-deck-desc">Description (optional)</label>
                         <textarea id="new-deck-desc" rows="2"></textarea>
                     </div>
                     <div class="modal-actions">
@@ -2095,15 +2095,15 @@
                 <form id="card-form">
                     <input type="hidden" id="card-id">
                     <div class="input-group">
-                        <label>Front</label>
+                        <label for="card-front-input">Front</label>
                         <textarea id="card-front-input" rows="3" required></textarea>
                     </div>
                     <div class="input-group">
-                        <label>Back</label>
+                        <label for="card-back-input">Back</label>
                         <textarea id="card-back-input" rows="3" required></textarea>
                     </div>
                     <div class="input-group">
-                        <label>Tags (comma separated)</label>
+                        <label for="card-tags-input">Tags (comma separated)</label>
                         <input type="text" id="card-tags-input" placeholder="e.g. difficult, math, verb">
                     </div>
                     <div class="modal-actions">
