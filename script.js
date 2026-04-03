@@ -1796,32 +1796,6 @@ async function loadTodayView() {
                 const studiedTodayIds = new Set(logsToday ? logsToday.map(l => l.card_id) : []);
                 const reviewedTodayCount = studiedTodayIds.size;
 
-                const reviewedTodayCount = studiedTodayIds.size;
-
-                // Use studiedTodayIds size instead of an additional network request
-                const reviewedTodayCount = studiedTodayIds.size;
-
-                const reviewedTodayCount = studiedTodayIds.size;
-
-                // Calculate reviewedTodayCount from studiedTodayIds to avoid redundant network query
-                const reviewedTodayCount = studiedTodayIds.size;
-
-                // Calculate completed count locally to avoid redundant DB queries
-                const reviewedTodayCount = studiedTodayIds.size;
-
-                const reviewedTodayCount = studiedTodayIds.size;
-
-                const reviewedTodayCount = studiedTodayIds.size;
-
-                // ⚡ Bolt: Compute from local set instead of redundant network call to getGlobalCompletedTodayCount()
-                const reviewedTodayCount = studiedTodayIds.size;
-
-                // Use the fetched studiedTodayIds to avoid a duplicate network call
-                const reviewedTodayCount = studiedTodayIds.size;
-
-                // ⚡ Bolt: Use cached local set size instead of identical DB query
-                const reviewedTodayCount = studiedTodayIds.size;
-
                 // 2. Identify candidates for study (Not reviewed today, or Learning cards due again)
                 const stillDue = pertinentCards.filter(c => {
                     const interval = Number(c.interval_days || 0);
