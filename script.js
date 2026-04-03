@@ -2725,7 +2725,7 @@ function renderDecksViewWithSubjects() {
         subjectSection.innerHTML = `
             <div class="subject-header">
                 <div class="subject-title-group">
-                    <button class="btn-icon-only-sm" onclick="toggleSubject('${subject.id}')">
+                    <button class="btn-icon-only-sm" onclick="toggleSubject('${subject.id}')" aria-label="Toggle subject ${escapeHtml(subject.name)}">
                         <svg id="chevron-${subject.id}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm transition-transform">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
@@ -2735,7 +2735,7 @@ function renderDecksViewWithSubjects() {
                 </div>
                 ${state.deckTab === 'my' ? `
                 <div class="subject-actions">
-                     <button class="btn-icon-only-sm context-trigger" onclick="openSubjectContext(event, '${subject.id}')">
+                     <button class="btn-icon-only-sm context-trigger" onclick="openSubjectContext(event, '${subject.id}')" aria-label="Subject options">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon-sm">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                         </svg>
@@ -2831,7 +2831,7 @@ function renderDeckRow(deck, container) {
             ` : `<span class="badge badge-success">Done</span>`}
         </div>
         <div class="deck-actions-cell" onclick="event.stopPropagation()">
-            <button class="btn btn-icon-only context-trigger" onclick="openDeckContext(event, '${deck.id}')" style="width: 24px; height: 24px; padding: 0;">
+            <button class="btn btn-icon-only context-trigger" onclick="openDeckContext(event, '${deck.id}')" style="width: 24px; height: 24px; padding: 0;" aria-label="Deck options">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="icon-sm">
                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                 </svg>
@@ -5762,7 +5762,7 @@ function renderGroupDecks() {
                      <div class="deck-title" style="margin-bottom: 4px;">${escapeHtml(deck.title)}</div>
                      <div class="deck-desc">${escapeHtml(deck.description || '')}</div>
                 </div>
-                <button class="btn btn-icon-only-sm context-trigger" onclick="openGroupDeckContext(event, '${deck.id}')" style="padding: 4px;">
+                <button class="btn btn-icon-only-sm context-trigger" onclick="openGroupDeckContext(event, '${deck.id}')" style="padding: 4px;" aria-label="Group deck options">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon-sm">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                     </svg>
