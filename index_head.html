@@ -470,7 +470,7 @@
         <div id="main-layout" class="hidden app-shell">
             <!-- Mobile Header -->
             <header class="mobile-header">
-                <button id="mobile-menu-toggle" class="btn-icon-only">
+                <button id="mobile-menu-toggle" class="btn-icon-only" aria-label="Toggle mobile menu">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                         stroke="currentColor" class="icon-md">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -489,7 +489,7 @@
                         <img src="./Assets/logo.png" alt="Flashly Logo" class="logo-img"
                             style="width: 40px; height: 40px;">
                     </div>
-                    <button id="close-sidebar-btn" class="btn-icon-only">
+                    <button id="close-sidebar-btn" class="btn-icon-only" aria-label="Close sidebar">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                             stroke="currentColor" class="icon-md">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -581,7 +581,7 @@
                 <div class="sidebar-footer">
                     <div class="user-info-group">
                         <div id="user-display" class="text-sm text-secondary font-medium"></div>
-                        <button id="nav-settings" class="btn-icon-only-sm" title="Settings">
+                        <button id="nav-settings" class="btn-icon-only-sm" title="Settings" aria-label="Settings">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor" class="icon-sm">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -1142,7 +1142,7 @@
                         <div class="search-container" style="position: relative;">
                             <input type="text" id="community-search" class="search-input"
                                 placeholder="Search decks by title or creator..." style="padding-right: 40px;">
-                            <button id="community-search-btn" class="btn-icon-only"
+                            <button id="community-search-btn" class="btn-icon-only" aria-label="Search community"
                                 style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                                     stroke="currentColor" class="icon-sm" style="color: var(--text-secondary);">
@@ -1245,7 +1245,7 @@
                                         style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); opacity: 0.6;">Invite
                                         Code</span>
                                     <code id="group-invite-code">---------</code>
-                                    <button id="copy-invite-btn" class="btn-icon-only-sm" style="margin-left: 0.5rem;">
+                                    <button id="copy-invite-btn" class="btn-icon-only-sm" style="margin-left: 0.5rem;" aria-label="Copy invite code">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                             class="icon-sm">
                                             <path
@@ -1344,7 +1344,7 @@
                                 <div class="search-input-group">
                                     <input type="text" id="notes-search-input" class="modern-search-input"
                                         placeholder="Search by title, subject, or keywords...">
-                                    <button id="notes-clear-btn" class="clear-search-btn hidden">
+                                    <button id="notes-clear-btn" class="clear-search-btn hidden" aria-label="Clear notes search">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                             class="icon-xs">
                                             <path
@@ -1545,7 +1545,7 @@
                                 <div class="flex items-center gap-2">
                                     <a id="pdf-download-link" href="#" download
                                         class="btn btn-outline btn-sm hidden">Download</a>
-                                    <button id="close-pdf-btn" class="btn-icon-only"
+                                    <button id="close-pdf-btn" class="btn-icon-only" aria-label="Close PDF viewer"
                                         style="background: var(--surface-hover);">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="icon-sm">
@@ -1580,7 +1580,7 @@
                             <div class="deck-header card-style">
                                 <div class="deck-header-top-row">
                                     <div class="deck-title-group">
-                                        <button class="btn-icon-only" id="back-to-dashboard" title="Back"
+                                        <button class="btn-icon-only" id="back-to-dashboard" title="Back" aria-label="Back to dashboard"
                                             style="display: flex; align-self: flex-start; justify-self: flex-start;">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="2" stroke="currentColor" class="icon-md">
@@ -1617,7 +1617,7 @@
                                             </svg>
                                             Share
                                         </button>
-                                        <button id="deck-settings-btn" class="btn-icon-only" title="Settings">
+                                        <button id="deck-settings-btn" class="btn-icon-only" title="Settings" aria-label="Deck settings">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor" class="icon-sm">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -1626,7 +1626,7 @@
                                                     d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                             </svg>
                                         </button>
-                                        <button id="delete-deck-btn" class="btn-icon-only text-danger" title="Delete">
+                                        <button id="delete-deck-btn" class="btn-icon-only text-danger" title="Delete" aria-label="Delete deck">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="red" class="icon-sm">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -1732,7 +1732,7 @@
                                             </svg>
                                             Add Card
                                         </button>
-                                        <button class="btn btn-primary btn-sm dropdown-btn"
+                                        <button class="btn btn-primary btn-sm dropdown-btn" aria-label="Toggle options"
                                             id="add-card-dropdown-toggle" style="height: 100%;">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="2" stroke="currentColor" class="icon-xs">
@@ -1828,7 +1828,7 @@
                     <section id="study-view" class="view hidden">
                         <div class="study-header">
                             <div class="study-header-left">
-                                <button id="quit-study-btn" class="btn btn-circular"
+                                <button id="quit-study-btn" class="btn btn-circular" aria-label="Quit study session"
                                     style="scale: 1.2; border-radius: 25px;">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -1880,21 +1880,21 @@
                                     </label>
                                 </div>
                                 <div class="study-actions-right">
-                                    <button id="study-prev-btn" class="btn-circular" title="Previous Card">
+                                    <button id="study-prev-btn" class="btn-circular" title="Previous Card" aria-label="Previous card">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="2" stroke="currentColor" class="icon-sm">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
                                         </svg>
                                     </button>
-                                    <button id="shuffle-study-btn" class="btn-circular" title="Shuffle remaining cards">
+                                    <button id="shuffle-study-btn" class="btn-circular" title="Shuffle remaining cards" aria-label="Shuffle remaining cards">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="2" stroke="currentColor" class="icon-sm">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
                                         </svg>
                                     </button>
-                                    <button id="study-settings-btn" class="btn-circular" title="Study Options">
+                                    <button id="study-settings-btn" class="btn-circular" title="Study Options" aria-label="Study options">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="2" stroke="currentColor" class="icon-sm">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1903,7 +1903,7 @@
                                                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
                                     </button>
-                                    <button id="fullscreen-study-btn" class="btn-circular" title="Toggle Fullscreen">
+                                    <button id="fullscreen-study-btn" class="btn-circular" title="Toggle Fullscreen" aria-label="Toggle fullscreen">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="2" stroke="currentColor" class="icon-sm">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -2009,7 +2009,7 @@
             <div id="study-settings-modal" class="modal hidden">
                 <div class="modal-header">
                     <h3>Study Options</h3>
-                    <button class="modal-close" onclick="closeModal()">
+                    <button class="modal-close" onclick="closeModal()" aria-label="Close modal">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                             stroke="currentColor" class="icon-sm">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -2139,7 +2139,7 @@
                 style="max-width: 850px; width: 95%; padding: 0; overflow: hidden; display: flex; flex-direction: row; height: 600px; max-height: 90vh;">
                 <!-- Mobile Settings Header -->
                 <header class="mobile-settings-header">
-                    <button id="mobile-settings-menu-toggle" class="btn-icon-only">
+                    <button id="mobile-settings-menu-toggle" class="btn-icon-only" aria-label="Toggle settings menu">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                             stroke="currentColor" class="icon-md">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -2147,7 +2147,7 @@
                         </svg>
                     </button>
                     <span>Settings</span>
-                    <button class="btn-icon-only close-modal">
+                    <button class="btn-icon-only close-modal" aria-label="Close settings">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                             stroke="currentColor" class="icon-sm">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -2236,7 +2236,7 @@
                 <!-- Settings Content -->
                 <div class="settings-main"
                     style="flex: 1; padding: 2.5rem; overflow-y: auto; background: var(--surface); position: relative;">
-                    <button class="btn-icon-only close-modal" style="position: absolute; top: 1.5rem; right: 1.5rem;">
+                    <button class="btn-icon-only close-modal" style="position: absolute; top: 1.5rem; right: 1.5rem;" aria-label="Close settings">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                             stroke="currentColor" class="icon-sm">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -2520,7 +2520,7 @@
             <div id="bulk-add-modal" class="modal hidden" style="max-width: 700px;">
                 <div class="modal-header">
                     <h3>Import Flashcards</h3>
-                    <button type="button" class="btn-icon-only close-modal">
+                    <button type="button" class="btn-icon-only close-modal" aria-label="Close modal">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                             stroke="currentColor" class="icon-sm">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -2628,7 +2628,7 @@
             <div id="deck-settings-modal" class="modal hidden">
                 <div class="modal-header">
                     <h3>Deck Settings</h3>
-                    <button class="modal-close" onclick="closeModal()">
+                    <button class="modal-close" onclick="closeModal()" aria-label="Close modal">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                             stroke="currentColor" class="icon-sm">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -2696,7 +2696,7 @@
             <div id="add-note-modal" class="modal hidden">
                 <div class="modal-header">
                     <h3>Add New Note</h3>
-                    <button id="close-add-note-btn" class="btn-icon-only">
+                    <button id="close-add-note-btn" class="btn-icon-only" aria-label="Close add note modal">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="icon-sm">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -2799,7 +2799,7 @@
                             <p class="text-xs text-secondary m-0">Turn documents into flashcards instantly</p>
                         </div>
                     </div>
-                    <button id="close-ai-modal-btn" class="btn-icon-only-sm hover:text-danger transition-colors">
+                    <button id="close-ai-modal-btn" class="btn-icon-only-sm hover:text-danger transition-colors" aria-label="Close AI creator">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                             stroke="currentColor" class="icon-sm">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -2966,7 +2966,7 @@
     <!-- Auth Modal/Overlay (Moved to bottom) -->
     <div id="auth-modal" class="auth-modal-overlay hidden">
         <div class="auth-modal">
-            <button class="auth-modal-close btn-icon-only">
+            <button class="auth-modal-close btn-icon-only" aria-label="Close auth modal">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="icon-sm">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
