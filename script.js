@@ -6523,7 +6523,7 @@ async function loadCommunityDecks(force = false) {
 
     if (error) {
         console.error("Error loading community decks:", error);
-        grid.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        grid.innerHTML = `<p class="error">Error: ${escapeHtml(error.message)}</p>`;
         return;
     }
 
@@ -9298,7 +9298,7 @@ async function loadAdminFeedback() {
     const { data, error } = await sb.from('feedback').select('*').order('created_at', { ascending: false });
 
     if (error) {
-        container.innerHTML = `<p class="text-danger">Error: ${error.message}</p>`;
+        container.innerHTML = `<p class="text-danger">Error: ${escapeHtml(error.message)}</p>`;
         return;
     }
 

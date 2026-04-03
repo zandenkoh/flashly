@@ -14,3 +14,7 @@
 **Vulnerability:** User-generated content (like note titles, subjects, URLs, categories, etc.) was directly inserted into the DOM using template literals via `innerHTML` and `textContent` assignments in `script.js` without sanitization.
 **Learning:** Even though an `escapeHtml()` function exists in the codebase, it was inconsistently applied, particularly in the components related to rendering "Notes" and "Similar Notes" and extracting properties like `note.title`, `note.url`, etc.
 **Prevention:** Always consistently use `escapeHtml()` for ALL dynamic data interpolation within template literals that are assigned to `innerHTML` or rendered as text/attributes to prevent XSS. Regular audits of `innerHTML` assignments using regex are useful.
+## 2026-04-03 - DOM XSS in Error Messages
+**Vulnerability:** Error messages from external APIs or backend responses (e.g., `error.message`) were injected directly into the DOM via `innerHTML` without sanitization in community deck loading and feedback loading views.
+**Learning:** Error objects often contain user input or API responses that can be manipulated by an attacker to include malicious payloads. Even if the data source is the backend or Supabase, it is not safe to render directly.
+**Prevention:** Always sanitize any dynamic content, including error messages, using `escapeHtml()` before injecting it into `innerHTML`. Use `textContent` or `innerText` when HTML rendering is not necessary.
