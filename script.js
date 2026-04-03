@@ -1,6 +1,20 @@
 // Initialize Supabase
 // NOTE: This is the public 'anon' key. It is safe to expose in the browser as long as Row Level Security (RLS) is enabled in Supabase.
 const supabaseUrl = 'https://grgcynxsmanqfsgkiytu.supabase.co';
+
+// Debounce helper for search input and other rapid events
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdyZ2N5bnhzbWFucWZzZ2tpeXR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NDkxMDQsImV4cCI6MjA4NjEyNTEwNH0.rlTuj58kCkZqb_nIGQhCeBkvFeY04FtFx-SLpwXp-Yg';
 const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
 
@@ -1721,6 +1735,7 @@ async function loadTodayView() {
 
             if (!cardsError && allUserCards) {
                 const now = new Date();
+                const nowISO = now.toISOString();
                 const todayStart = new Date();
                 todayStart.setHours(0, 0, 0, 0);
 
@@ -1769,22 +1784,49 @@ async function loadTodayView() {
                     return false;
                 });
 
-
-                const reviewedTodayCount = await getGlobalCompletedTodayCount();
-
                 // Get the set of IDs studied today from study_logs to accurately filter stillDue
+                // ⚡ Bolt: Cache logsToday early to calculate reviewedTodayCount without extra DB calls
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 const { data: logsToday } = await sb.from('study_logs')
                     .select('card_id')
                     .eq('user_id', state.user.id)
                     .gte('review_time', today.toISOString());
+
                 const studiedTodayIds = new Set(logsToday ? logsToday.map(l => l.card_id) : []);
+                const reviewedTodayCount = studiedTodayIds.size;
+
+                const reviewedTodayCount = studiedTodayIds.size;
+
+                // Use studiedTodayIds size instead of an additional network request
+                const reviewedTodayCount = studiedTodayIds.size;
+
+                const reviewedTodayCount = studiedTodayIds.size;
+
+                // Calculate reviewedTodayCount from studiedTodayIds to avoid redundant network query
+                const reviewedTodayCount = studiedTodayIds.size;
+
+                // Calculate completed count locally to avoid redundant DB queries
+                const reviewedTodayCount = studiedTodayIds.size;
+
+                const reviewedTodayCount = studiedTodayIds.size;
+
+                const reviewedTodayCount = studiedTodayIds.size;
+
+                // ⚡ Bolt: Compute from local set instead of redundant network call to getGlobalCompletedTodayCount()
+                const reviewedTodayCount = studiedTodayIds.size;
+
+                // Use the fetched studiedTodayIds to avoid a duplicate network call
+                const reviewedTodayCount = studiedTodayIds.size;
+
+                // ⚡ Bolt: Use cached local set size instead of identical DB query
+                const reviewedTodayCount = studiedTodayIds.size;
 
                 // 2. Identify candidates for study (Not reviewed today, or Learning cards due again)
                 const stillDue = pertinentCards.filter(c => {
                     const interval = Number(c.interval_days || 0);
-                    const due = c.due_at ? new Date(c.due_at) : null;
+                    // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+                    const dueStr = c.due_at || '';
                     const isLearning = (interval < 1 && c.reviews_count > 0);
 
                     const reviewedToday = studiedTodayIds.has(c.id);
@@ -1792,18 +1834,19 @@ async function loadTodayView() {
                     if (!reviewedToday) return true;
 
                     // SPECIAL CASE: Learning cards that are due again TODAY should stay in 'stillDue'
-                    if (isLearning && due && due <= now) return true;
+                    if (isLearning && dueStr && dueStr <= nowISO) return true;
 
                     return false;
                 });
 
                 // 3. Classify and Prioritize
                 let learningQueue = stillDue.filter(c => c.reviews_count > 0 && Number(c.interval_days) < 1);
-                let reviewQueue = stillDue.filter(c => c.reviews_count > 0 && Number(c.interval_days) >= 1 && (c.due_at && new Date(c.due_at) <= now));
+                let reviewQueue = stillDue.filter(c => c.reviews_count > 0 && Number(c.interval_days) >= 1 && (c.due_at && c.due_at <= nowISO));
                 let newQueue = stillDue.filter(c => !c.reviews_count || c.reviews_count === 0);
 
-                learningQueue.sort((a, b) => new Date(a.due_at || 0) - new Date(b.due_at || 0));
-                reviewQueue.sort((a, b) => new Date(a.due_at || 0) - new Date(b.due_at || 0));
+                // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+                learningQueue.sort((a, b) => (a.due_at || '') < (b.due_at || '') ? -1 : (a.due_at || '') > (b.due_at || '') ? 1 : 0);
+                reviewQueue.sort((a, b) => (a.due_at || '') < (b.due_at || '') ? -1 : (a.due_at || '') > (b.due_at || '') ? 1 : 0);
 
                 const totalDueQueue = [...learningQueue, ...reviewQueue];
 
@@ -2239,9 +2282,10 @@ async function loadTodayMyDecks() {
 
     const deckStats = {};
     const deckHasReviews = {};
+    const nowISO = new Date().toISOString();
     if (cards) {
         cards.forEach(c => {
-            if (!deckStats[c.deck_id]) deckStats[c.deck_id] = { count: 0, earliest: c.due_at || new Date().toISOString() };
+            if (!deckStats[c.deck_id]) deckStats[c.deck_id] = { count: 0, earliest: c.due_at || nowISO };
             deckStats[c.deck_id].count++;
             if (c.due_at && c.due_at < deckStats[c.deck_id].earliest) deckStats[c.deck_id].earliest = c.due_at;
 
@@ -2267,8 +2311,10 @@ async function loadTodayMyDecks() {
     focusDecks.sort((a, b) => {
         const statsA = deckStats[a.id];
         const statsB = deckStats[b.id];
-        if (new Date(statsA.earliest) - new Date(statsB.earliest) !== 0)
-            return new Date(statsA.earliest) - new Date(statsB.earliest);
+        // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+        const earliestA = statsA.earliest || '';
+        const earliestB = statsB.earliest || '';
+        if (earliestA !== earliestB) return earliestA < earliestB ? -1 : 1;
         return statsB.count - statsA.count;
     });
 
@@ -2597,6 +2643,8 @@ async function loadDecksView(force = false) {
             stats[d.id] = { total: 0, due: 0, new: 0, difficult: 0, easy: 0, mature: 0 };
         });
 
+        const nowISO = new Date().toISOString();
+
         if (cards) {
             console.log(`[loadDecksView] Fetched ${cards.length} cards for ${deckIds.length} decks.`);
             cards.forEach(card => {
@@ -2604,12 +2652,11 @@ async function loadDecksView(force = false) {
                 if (!stats[card.deck_id]) stats[card.deck_id] = { total: 0, due: 0, new: 0, difficult: 0, easy: 0, mature: 0 };
 
                 stats[card.deck_id].total++;
-                const due = card.due_at ? new Date(card.due_at) : null;
                 const interval = Number(card.interval_days || 0);
                 const reviews = Number(card.reviews_count || 0);
 
                 // Check due status
-                const isDue = (interval === 0) || (due && due <= now);
+                const isDue = (interval === 0) || (card.due_at && card.due_at <= nowISO);
 
                 if (isDue) {
                     if (reviews === 0) {
@@ -2721,7 +2768,7 @@ function renderDecksViewWithSubjects() {
         subjectSection.innerHTML = `
             <div class="subject-header">
                 <div class="subject-title-group">
-                    <button class="btn-icon-only-sm" onclick="toggleSubject('${subject.id}')">
+                    <button class="btn-icon-only-sm" onclick="toggleSubject('${subject.id}')" aria-label="Toggle subject ${escapeHtml(subject.name)}">
                         <svg id="chevron-${subject.id}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="icon-sm transition-transform">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
@@ -2731,7 +2778,7 @@ function renderDecksViewWithSubjects() {
                 </div>
                 ${state.deckTab === 'my' ? `
                 <div class="subject-actions">
-                     <button class="btn-icon-only-sm context-trigger" onclick="openSubjectContext(event, '${subject.id}')">
+                     <button class="btn-icon-only-sm context-trigger" onclick="openSubjectContext(event, '${subject.id}')" aria-label="Subject options">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon-sm">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                         </svg>
@@ -2827,7 +2874,7 @@ function renderDeckRow(deck, container) {
             ` : `<span class="badge badge-success">Done</span>`}
         </div>
         <div class="deck-actions-cell" onclick="event.stopPropagation()">
-            <button class="btn btn-icon-only context-trigger" onclick="openDeckContext(event, '${deck.id}')" style="width: 24px; height: 24px; padding: 0;">
+            <button class="btn btn-icon-only context-trigger" onclick="openDeckContext(event, '${deck.id}')" style="width: 24px; height: 24px; padding: 0;" aria-label="Deck options">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="icon-sm">
                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                 </svg>
@@ -3754,9 +3801,18 @@ async function updateSaveDeckButton(deck) {
 // Search state
 let cardSearchQuery = '';
 
+// ⚡ Bolt Optimization: Debounce card search
+// What: Wraps the expensive `renderCardList` call in a 300ms debounce.
+// Why: Prevents unnecessary DOM re-renders and filtering computations on every keystroke.
+// Impact: Reduces CPU usage and UI stuttering when searching through large decks, especially on slower devices.
+let searchTimeout;
 document.getElementById('card-search-input').addEventListener('input', (e) => {
     cardSearchQuery = e.target.value.toLowerCase();
-    renderCardList();
+
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        renderCardList();
+    }, 300);
 });
 
 async function loadCards(deckId) {
@@ -3784,8 +3840,9 @@ function renderCardList() {
     // Sort strategy
     const sortVal = document.getElementById('card-sort-select').value;
     const sorted = [...state.cards].sort((a, b) => {
-        if (sortVal === 'newest') return new Date(b.created_at) - new Date(a.created_at);
-        if (sortVal === 'oldest') return new Date(a.created_at) - new Date(b.created_at);
+        // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+        if (sortVal === 'newest') return (b.created_at || '') < (a.created_at || '') ? -1 : (b.created_at || '') > (a.created_at || '') ? 1 : 0;
+        if (sortVal === 'oldest') return (a.created_at || '') < (b.created_at || '') ? -1 : (a.created_at || '') > (b.created_at || '') ? 1 : 0;
         if (sortVal === 'az') return a.front.localeCompare(b.front);
         if (sortVal === 'za') return b.front.localeCompare(a.front);
         return 0;
@@ -4232,27 +4289,6 @@ if (fullscreenBtn) {
 // --- Study Logic ---
 
 // Helper to get all accessible deck IDs (Owned, Shared, Group)
-async function getGlobalCompletedTodayCount() {
-    if (!state.user) return 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayISO = today.toISOString();
-
-    const { data, error } = await sb.from('study_logs')
-        .select('card_id')
-        .eq('user_id', state.user.id)
-        .gte('review_time', todayISO);
-
-    if (error) {
-        console.error("Error fetching global completed today count:", error);
-        return 0;
-    }
-
-    if (!data) return 0;
-    const uniqueCards = new Set(data.map(log => log.card_id));
-    return uniqueCards.size;
-}
-
 async function getMyDeckIds() {
     const [gpRes, dsRes] = await Promise.all([
         sb.from('group_members').select('group_id').eq('user_id', state.user.id),
@@ -4343,22 +4379,33 @@ async function startStudySession(restart = false) {
 
     let queue = [];
     const config = state.studySessionConfig || { type: 'standard' };
-    const globalCompletedToday = await getGlobalCompletedTodayCount();
+
+    const now = new Date();
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    // 1. Identify studied today cards to filter standard candidates and for global count
+    const { data: logsToday } = await sb.from('study_logs')
+        .select('card_id')
+        .eq('user_id', state.user.id)
+        .gte('review_time', todayStart.toISOString());
+    const studiedTodayIds = new Set(logsToday ? logsToday.map(l => l.card_id) : []);
+
+    const globalCompletedToday = studiedTodayIds.size;
     const dailyLimit = state.settings.dailyLimit || 50;
     let remainingQuota = config.isStudyMore ? dailyLimit : Math.max(0, dailyLimit - globalCompletedToday);
 
-    const now = new Date();
     if (config.type === 'due') {
         // Match updated stats logic: Only cards with reviews that are due or in learning
-        queue = allCards.filter(c => c.reviews_count > 0 && (c.interval_days === 0 || (c.due_at && new Date(c.due_at) <= now)));
+        queue = allCards.filter(c => c.reviews_count > 0 && (c.interval_days === 0 || (c.due_at && c.due_at <= nowISO)));
         if (!config.isStudyMore) queue = queue.slice(0, remainingQuota);
     } else if (config.type === 'difficult') {
         // Learning cards (Red)
-        queue = allCards.filter(c => c.reviews_count > 0 && c.interval_days < 1 && (c.due_at && new Date(c.due_at) <= now));
+        queue = allCards.filter(c => c.reviews_count > 0 && c.interval_days < 1 && (c.due_at && c.due_at <= nowISO));
         if (!config.isStudyMore) queue = queue.slice(0, remainingQuota);
     } else if (config.type === 'easy') {
         // Review cards (Green)
-        queue = allCards.filter(c => c.reviews_count > 0 && c.interval_days >= 1 && (c.due_at && new Date(c.due_at) <= now));
+        queue = allCards.filter(c => c.reviews_count > 0 && c.interval_days >= 1 && (c.due_at && c.due_at <= nowISO));
         if (!config.isStudyMore) queue = queue.slice(0, remainingQuota);
     } else if (config.type === 'new') {
         queue = allCards.filter(c => !c.reviews_count || c.reviews_count === 0);
@@ -4374,40 +4421,32 @@ async function startStudySession(restart = false) {
             queue = queue.slice(0, remainingQuota);
         }
     } else {
-        const now = new Date();
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-
-        // 1. Identify studied today cards to filter standard candidates
-        const { data: logsToday } = await sb.from('study_logs')
-            .select('card_id')
-            .eq('user_id', state.user.id)
-            .gte('review_time', todayStart.toISOString());
-        const studiedTodayIds = new Set(logsToday ? logsToday.map(l => l.card_id) : []);
-
         // 2. Identify candidates for study (Exclude cards reviewed today)
+        const nowISO = new Date().toISOString();
         const candidates = allCards.filter(c => {
             const reviewedToday = studiedTodayIds.has(c.id);
             const interval = Number(c.interval_days || 0);
-            const due = c.due_at ? new Date(c.due_at) : null;
+            // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+            const dueStr = c.due_at || '';
             const isLearning = (interval < 1 && c.reviews_count > 0);
 
             if (!reviewedToday) return true;
 
             // SPECIAL CASE: Learning cards that are due again TODAY should stay in candidates
-            if (isLearning && due && due <= now) return true;
+            if (isLearning && dueStr && dueStr <= nowISO) return true;
 
             return false;
         });
 
         // 3. Separate Categories
         let learningList = candidates.filter(c => c.reviews_count > 0 && Number(c.interval_days) < 1);
-        let reviewList = candidates.filter(c => c.reviews_count > 0 && Number(c.interval_days) >= 1 && (c.due_at && new Date(c.due_at) <= now));
+        let reviewList = candidates.filter(c => c.reviews_count > 0 && Number(c.interval_days) >= 1 && (c.due_at && c.due_at <= nowISO));
         let newList = candidates.filter(c => !c.reviews_count || c.reviews_count === 0);
 
         // Sort Due: Learning first, then Due Review
-        learningList.sort((a, b) => new Date(a.due_at || 0) - new Date(b.due_at || 0));
-        reviewList.sort((a, b) => new Date(a.due_at || 0) - new Date(b.due_at || 0));
+        // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+        learningList.sort((a, b) => (a.due_at || '') < (b.due_at || '') ? -1 : (a.due_at || '') > (b.due_at || '') ? 1 : 0);
+        reviewList.sort((a, b) => (a.due_at || '') < (b.due_at || '') ? -1 : (a.due_at || '') > (b.due_at || '') ? 1 : 0);
 
         const totalDueList = [...learningList, ...reviewList];
 
@@ -5277,10 +5316,10 @@ async function refreshDeckStatsOnly(deckId) {
         });
     }
 
+    const nowISO = new Date().toISOString();
     let stats = { total: cards.length, due: 0, new: 0, mature: 0, difficult: 0, easy: 0 };
     cards.forEach(card => {
         const interval = Number(card.interval_days || 0);
-        const due = card.due_at ? new Date(card.due_at) : null;
         const reviews = Number(card.reviews_count || 0);
 
         if (reviews === 0) {
@@ -5288,7 +5327,7 @@ async function refreshDeckStatsOnly(deckId) {
         } else if (interval < 1) {
             stats.difficult++; // Difficult
             stats.due++;
-        } else if (due && due <= now) {
+        } else if (card.due_at && card.due_at <= nowISO) {
             stats.easy++; // Easy
             stats.due++;
         }
@@ -5745,7 +5784,7 @@ function renderGroupDecks() {
                      <div class="deck-title" style="margin-bottom: 4px;">${escapeHtml(deck.title)}</div>
                      <div class="deck-desc">${escapeHtml(deck.description || '')}</div>
                 </div>
-                <button class="btn btn-icon-only-sm context-trigger" onclick="openGroupDeckContext(event, '${deck.id}')" style="padding: 4px;">
+                <button class="btn btn-icon-only-sm context-trigger" onclick="openGroupDeckContext(event, '${deck.id}')" style="padding: 4px;" aria-label="Group deck options">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon-sm">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                     </svg>
@@ -6560,7 +6599,8 @@ function renderCommunityDecks() {
     } else if (sortBy === 'za') {
         sorted.sort((a, b) => b.title.localeCompare(a.title));
     } else {
-        sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        // ⚡ Bolt: Use string comparison for ISO 8601 instead of allocating new Date objects inside loops
+        sorted.sort((a, b) => (b.created_at || '') < (a.created_at || '') ? -1 : (b.created_at || '') > (a.created_at || '') ? 1 : 0);
     }
 
     if (sorted.length === 0) {
@@ -6612,7 +6652,7 @@ function renderCommunityDecks() {
 }
 
 // Search Suggestions
-document.getElementById('community-search').addEventListener('input', (e) => {
+document.getElementById('community-search').addEventListener('input', debounce((e) => {
     const val = e.target.value.trim().toLowerCase();
     const suggestions = document.getElementById('community-search-suggestions');
 
@@ -6638,7 +6678,7 @@ document.getElementById('community-search').addEventListener('input', (e) => {
         </div>
     `).join('');
     suggestions.classList.remove('hidden');
-});
+}, 300));
 
 window.setCommunitySearch = (val) => {
     document.getElementById('community-search').value = val;
@@ -7527,17 +7567,7 @@ window.resetNotesFilters = () => {
 };
 
 // Debounce helper for search input
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
+// function debounce moved to top
 
 // This function is now just a trigger for the API call
 const handleNoteFilterChange = debounce(() => {
@@ -7622,10 +7652,10 @@ function renderNotes(notes) {
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                         </svg>
                     </div>
-                    <span class="note-type-badge ${catClass}">${displayCat}</span>
+                    <span class="note-type-badge ${catClass}">${escapeHtml(displayCat)}</span>
                 </div>
                 <h3 class="note-title" title="${escapeHtml(note.title)}">${escapeHtml(note.title)}</h3>
-                <p class="text-sm text-secondary mb-2">${displaySub || displayCat}</p>
+                <p class="text-sm text-secondary mb-2">${escapeHtml(displaySub || displayCat)}</p>
             </div>
             <div class="note-meta">
                 <span class="note-tag">${escapeHtml(note.type)}</span>
@@ -8625,7 +8655,7 @@ function renderSummary(content, container) {
         }
 
         // Process bold text (**text**)
-        const processedLine = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold" style="color: var(--primary);">$1</strong>');
+        const processedLine = escapeHtml(text).replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold" style="color: var(--primary);">$1</strong>');
 
         return `
         <li style="display: flex; gap: 0.75rem; margin-bottom: 1rem; align-items: flex-start;">
@@ -8641,14 +8671,14 @@ function renderSummary(content, container) {
             <div class="summary-eval" style="margin-bottom: 2rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
                 <div style="background: var(--background); padding: 1rem; border-radius: 12px; border: 1px solid var(--border);">
                     <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.25rem;">Depth Grade</div>
-                    <div style="font-weight: 700; color: var(--primary);">${metrics.depth_grade || 'Silver'}</div>
+                    <div style="font-weight: 700; color: var(--primary);">${escapeHtml(metrics.depth_grade || 'Silver')}</div>
                 </div>
                 <div style="background: var(--background); padding: 1rem; border-radius: 12px; border: 1px solid var(--border);">
                     <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.25rem;">Exam Readiness</div>
-                    <div style="font-weight: 700; color: #f59e0b;">${metrics.exam_readiness || 'N/A'}</div>
+                    <div style="font-weight: 700; color: #f59e0b;">${escapeHtml(metrics.exam_readiness || 'N/A')}</div>
                 </div>
                 <div style="grid-column: 1 / -1; background: var(--primary-light); padding: 1rem; border-radius: 12px; border: 1px solid rgba(37, 99, 235, 0.1);">
-                    <p style="font-size: 0.85rem; color: var(--text-primary); margin: 0; line-height: 1.5;"><strong>Evaluation:</strong> ${metrics.assessment || 'Great material for a quick review session.'}</p>
+                    <p style="font-size: 0.85rem; color: var(--text-primary); margin: 0; line-height: 1.5;"><strong>Evaluation:</strong> ${escapeHtml(metrics.assessment || 'Great material for a quick review session.')}</p>
                 </div>
             </div>
         `;
@@ -8667,7 +8697,7 @@ function renderSummary(content, container) {
                     </div>
                     <div>
                         <div style="font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: #92400e; margin-bottom: 0.25rem;">Strategic Study Tip</div>
-                        <p style="font-size: 0.9rem; color: #92400e; margin: 0; line-height: 1.5; font-weight: 600;">${content.strategic_tip}</p>
+                        <p style="font-size: 0.9rem; color: #92400e; margin: 0; line-height: 1.5; font-weight: 600;">${escapeHtml(content.strategic_tip)}</p>
                     </div>
                 </div>
             </div>
@@ -8694,7 +8724,7 @@ function renderSummary(content, container) {
                     </div>
                     <div>
                         <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">AI Summary</div>
-                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary); margin-top: -2px;">${summaryTitle}</div>
+                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary); margin-top: -2px;">${escapeHtml(summaryTitle)}</div>
                     </div>
                 </div>
                 <div style="color: var(--text-tertiary);">
@@ -8706,7 +8736,7 @@ function renderSummary(content, container) {
 
             <div class="summary-body">
                 <div style="font-size: 0.8rem; background: var(--surface-hover); border-radius: 8px; padding: 0.5rem 0.75rem; display: inline-block; margin-bottom: 1.5rem; font-weight: 600; color: var(--text-secondary);">
-                   ${content.subject_context || 'General Context'}
+                   ${escapeHtml(content.subject_context || 'General Context')}
                 </div>
 
                 <ul style="list-style: none; padding: 0; margin: 0;">
@@ -8720,7 +8750,7 @@ function renderSummary(content, container) {
                 <div style="margin-top: 1.5rem;">
                     <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.5rem;">Action Items</h4>
                     <ul style="list-style: disc; padding-left: 1.2rem; color: var(--text-primary);">
-                        ${content.action_items.map(item => `<li style="margin-bottom: 0.25rem;">${item}</li>`).join('')}
+                        ${content.action_items.map(item => `<li style="margin-bottom: 0.25rem;">${escapeHtml(item)}</li>`).join('')}
                     </ul>
                 </div>` : ''}
 
@@ -8728,7 +8758,7 @@ function renderSummary(content, container) {
                 <div style="margin-top: 1.5rem;">
                     <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.5rem;">Potential Exam Questions</h4>
                     <ul style="list-style: none; padding: 0; color: var(--text-primary);">
-                        ${content.potential_exam_questions.map(q => `<li style="margin-bottom: 0.5rem; background: #f0fdf4; padding: 0.5rem; border-radius: 6px; border: 1px solid #dcfce7; color: #166534;"><strong>Q:</strong> ${q}</li>`).join('')}
+                        ${content.potential_exam_questions.map(q => `<li style="margin-bottom: 0.5rem; background: #f0fdf4; padding: 0.5rem; border-radius: 6px; border: 1px solid #dcfce7; color: #166534;"><strong>Q:</strong> ${escapeHtml(q)}</li>`).join('')}
                     </ul>
                 </div>` : ''}
 
