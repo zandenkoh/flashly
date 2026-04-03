@@ -1,3 +1,6 @@
+## 2025-04-02 - Eliminated Redundant Supabase Query in loadTodayView
+**Learning:** The application was making duplicate identical queries to the `study_logs` table during `loadTodayView()` to count today's studied cards while separately fetching them for the `studiedTodayIds` set. Fetching identical network data twice blocks rendering and increases frontend SPA load time unnecessarily.
+**Action:** Removed the redundant `getGlobalCompletedTodayCount()` network call in `loadTodayView()` and computed the count locally from `studiedTodayIds.size`, halving the network requests for this critical dashboard loading path.
 ## 2024-05-24 - Eliminate Redundant Database Query for Today's Studied Cards
 **Learning:** Found a specific anti-pattern where a dedicated function (`getGlobalCompletedTodayCount()`) was fetching data (the count of unique studied cards today) from the database, while immediately below it, the codebase was fetching the exact same data again (`logsToday`) to compute a set of IDs (`studiedTodayIds`). This caused two sequential database queries where one was sufficient.
 **Action:** When a function computes a count from a database query, ensure the same data isn't being fetched nearby for other purposes. In `loadTodayView`, compute `reviewedTodayCount` from `studiedTodayIds.size` instead of making a separate call.
