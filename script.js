@@ -1777,6 +1777,7 @@ async function loadTodayView() {
                     .select('card_id')
                     .eq('user_id', state.user.id)
                     .gte('review_time', today.toISOString());
+
                 const studiedTodayIds = new Set(logsToday ? logsToday.map(l => l.card_id) : []);
                 const reviewedTodayCount = studiedTodayIds.size;
 
