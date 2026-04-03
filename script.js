@@ -1203,7 +1203,8 @@ async function loadSettingsStats() {
         const cardRatings = new Map();
         logs.forEach(log => {
             // We'd need to sort by time to get LATEST rating, but let's approximate for now
-            if (!cardRatings.has(log.card_id) || new Date(log.review_time) > new Date(cardRatings.get(log.card_id).time)) {
+            // ⚡ Bolt: Using direct ISO string comparison instead of `new Date()` allocation for performance
+            if (!cardRatings.has(log.card_id) || log.review_time > cardRatings.get(log.card_id).time) {
                 cardRatings.set(log.card_id, { rating: log.rating, time: log.review_time });
             }
         });
@@ -6136,15 +6137,18 @@ async function loadStats() {
     // Daily Average (30d)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const recentLogs = logs ? logs.filter(l => new Date(l.review_time) >= thirtyDaysAgo) : [];
+    // ⚡ Bolt: Cache ISO string outside the filter loop to avoid repetitive Date object allocations
+    const thirtyDaysAgoISO = thirtyDaysAgo.toISOString();
+    const recentLogs = logs ? logs.filter(l => l.review_time >= thirtyDaysAgoISO) : [];
     const dailyAvg = (recentLogs.length / 30).toFixed(1);
 
     // Total Study Time (Improved Estimation)
     let totalTimeMs = 0;
     if (logs && logs.length > 1) {
         for (let i = 0; i < logs.length - 1; i++) {
-            const current = new Date(logs[i].review_time);
-            const next = new Date(logs[i + 1].review_time);
+            // ⚡ Bolt: Use Date.parse() instead of new Date() to avoid object allocation in tight loop
+            const current = Date.parse(logs[i].review_time);
+            const next = Date.parse(logs[i + 1].review_time);
             const diff = Math.abs(current - next);
             if (diff < 5 * 60 * 1000) {
                 totalTimeMs += diff;
