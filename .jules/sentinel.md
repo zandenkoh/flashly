@@ -14,3 +14,19 @@
 **Vulnerability:** User-generated content (like note titles, subjects, URLs, categories, etc.) was directly inserted into the DOM using template literals via `innerHTML` and `textContent` assignments in `script.js` without sanitization.
 **Learning:** Even though an `escapeHtml()` function exists in the codebase, it was inconsistently applied, particularly in the components related to rendering "Notes" and "Similar Notes" and extracting properties like `note.title`, `note.url`, etc.
 **Prevention:** Always consistently use `escapeHtml()` for ALL dynamic data interpolation within template literals that are assigned to `innerHTML` or rendered as text/attributes to prevent XSS. Regular audits of `innerHTML` assignments using regex are useful.
+## 2026-04-03 - [Unescaped Input in HTML Template Literal]
+**Vulnerability:** Found `deck.subjects?.name` being directly injected into `innerHTML` without `escapeHtml()` sanitization.
+**Learning:** Nested optional chaining properties are easily overlooked when auditing for XSS vulnerabilities in template literals.
+**Prevention:** Consistently apply `escapeHtml()` to all dynamic data, even nested or optional properties, before injecting into the DOM.
+## 2026-04-03 - DOM XSS in Error Messages
+**Vulnerability:** Error messages from external APIs or backend responses (e.g., `error.message`) were injected directly into the DOM via `innerHTML` without sanitization in community deck loading and feedback loading views.
+**Learning:** Error objects often contain user input or API responses that can be manipulated by an attacker to include malicious payloads. Even if the data source is the backend or Supabase, it is not safe to render directly.
+**Prevention:** Always sanitize any dynamic content, including error messages, using `escapeHtml()` before injecting it into `innerHTML`. Use `textContent` or `innerText` when HTML rendering is not necessary.
+## 2024-04-03 - [Template Literal XSS]
+**Vulnerability:** Found unescaped `error.message` and `deck.subjects?.name` inserted directly into `innerHTML` using template literals.
+**Learning:** Even internal or dynamic data sources (like error properties and nested optional chaining properties) must be properly sanitized with `escapeHtml()` when updating the DOM with `innerHTML`.
+**Prevention:** Always wrap dynamically injected variables with `escapeHtml()` in template literals used for `innerHTML`, even if the source seems to come from an internal error object or a nested structural object.
+## 2025-05-18 - Missing HTML Sanitization in Dashboard and Error Messages
+**Vulnerability:** Found Cross-Site Scripting (XSS) vulnerabilities where `deck.subjects?.name` and `error.message` were inserted directly into `innerHTML` via template literals without calling `escapeHtml()` in `loadTodayMyDecks()`, `loadCommunityDecks()`, and `loadAdminFeedback()`.
+**Learning:** Relying on template literals alone to build HTML components often results in missed sanitization for deeply nested objects (e.g. `deck.subjects?.name`) or error responses that might echo untrusted input, even when `escapeHtml` is widely used elsewhere in the same component.
+**Prevention:** Enforce consistent wrapping of all interpolated variables inside `innerHTML` template strings with `escapeHtml()`, and consider linting rules to flag unescaped string interpolations in DOM manipulation.

@@ -1203,7 +1203,7 @@ async function loadSettingsStats() {
         const cardRatings = new Map();
         logs.forEach(log => {
             // We'd need to sort by time to get LATEST rating, but let's approximate for now
-            // ⚡ Bolt: Using direct ISO string comparison instead of `new Date()` allocation for performance
+            // ⚡ Bolt: optimized date comparison - directly compare ISO strings to avoid new Date() instantiation in loop
             if (!cardRatings.has(log.card_id) || log.review_time > cardRatings.get(log.card_id).time) {
                 cardRatings.set(log.card_id, { rating: log.rating, time: log.review_time });
             }
@@ -2314,7 +2314,7 @@ async function loadTodayMyDecks() {
                 <span class="badge ${stats.count > 0 ? 'badge-due' : 'badge-new'}">${stats.count} Pending</span>
             </div>
             <h4 class="font-semibold text-lg mb-1">${escapeHtml(deck.title)}</h4>
-            <p class="text-sm text-dim mb-4">${deck.subjects?.name || 'Flashcards'}</p>
+            <p class="text-sm text-dim mb-4">${escapeHtml(deck.subjects?.name || 'Flashcards')}</p>
             <button class="btn btn-primary btn-sm w-full">Study Now</button>
         `;
         div.onclick = () => {
@@ -6137,9 +6137,9 @@ async function loadStats() {
     // Daily Average (30d)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    // ⚡ Bolt: Cache ISO string outside the filter loop to avoid repetitive Date object allocations
-    const thirtyDaysAgoISO = thirtyDaysAgo.toISOString();
-    const recentLogs = logs ? logs.filter(l => l.review_time >= thirtyDaysAgoISO) : [];
+    const thirtyDaysAgoIso = thirtyDaysAgo.toISOString();
+    // ⚡ Bolt: optimized date comparison - directly compare ISO strings to avoid new Date() instantiation in loop
+    const recentLogs = logs ? logs.filter(l => l.review_time >= thirtyDaysAgoIso) : [];
     const dailyAvg = (recentLogs.length / 30).toFixed(1);
 
     // Total Study Time (Improved Estimation)
@@ -6527,7 +6527,7 @@ async function loadCommunityDecks(force = false) {
 
     if (error) {
         console.error("Error loading community decks:", error);
-        grid.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        grid.innerHTML = `<p class="error">Error: ${escapeHtml(error.message)}</p>`;
         return;
     }
 
@@ -9302,7 +9302,7 @@ async function loadAdminFeedback() {
     const { data, error } = await sb.from('feedback').select('*').order('created_at', { ascending: false });
 
     if (error) {
-        container.innerHTML = `<p class="text-danger">Error: ${error.message}</p>`;
+        container.innerHTML = `<p class="text-danger">Error: ${escapeHtml(error.message)}</p>`;
         return;
     }
 
