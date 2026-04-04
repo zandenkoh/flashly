@@ -3835,6 +3835,8 @@ function renderCardList() {
         return;
     }
 
+    const fragment = document.createDocumentFragment();
+
     filtered.forEach(card => {
         const isOwner = state.user && card.deck_id && state.decks.some(d => d.id === card.deck_id);
         const isSelected = state.selectedCardIds.has(card.id);
@@ -3870,9 +3872,13 @@ function renderCardList() {
             </div>
             ` : ''}
         `;
-        list.appendChild(item);
-        renderCardTags(card);
+        fragment.appendChild(item);
     });
+
+    list.appendChild(fragment);
+
+    // Render tags and math after appending to the DOM
+    filtered.forEach(card => renderCardTags(card));
     renderMath(list);
 }
 
@@ -7189,8 +7195,13 @@ function initImportManager() {
         return { separator: separator || '|', isSwapped };
     };
 
-    window.updateImportPreview = () => {
+    window.updateImportPreview = debounce(() => {
         const val = bulkInput.value.trim();
+        if (!val) {
+            if (previewDisp) previewDisp.innerHTML = `<span class="text-dim italic" style="font-size: 0.8rem;">No data yet.</span>`;
+            if (bulkCountDisp) bulkCountDisp.textContent = '0';
+            return;
+        }
         const lines = val.split('\n').filter(l => l.trim() !== '');
         const info = getParserInfo();
 
@@ -7201,31 +7212,38 @@ function initImportManager() {
         }
 
         const { separator, isSwapped } = info;
-        const validCards = lines.map(line => {
-            const parts = line.split(separator);
-            if (parts.length < 2) return null;
-            let front = isSwapped ? parts.slice(1).join(separator).trim() : parts[0].trim();
-            let back = isSwapped ? parts[0].trim() : parts.slice(1).join(separator).trim();
-            return { front, back };
-        }).filter(c => c !== null);
+        let validCount = 0;
+        const previewCards = [];
 
-        if (bulkCountDisp) bulkCountDisp.textContent = validCards.length;
+        // Optimize: Calculate count and only collect first 5 for preview
+        for (const line of lines) {
+            const parts = line.split(separator);
+            if (parts.length >= 2) {
+                validCount++;
+                if (previewCards.length < 5) {
+                    let front = isSwapped ? parts.slice(1).join(separator).trim() : parts[0].trim();
+                    let back = isSwapped ? parts[0].trim() : parts.slice(1).join(separator).trim();
+                    previewCards.push({ front, back });
+                }
+            }
+        }
+
+        if (bulkCountDisp) bulkCountDisp.textContent = validCount;
 
         if (previewDisp) {
-            if (validCards.length > 0) {
-                const card = validCards[0];
-                previewDisp.innerHTML = `
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            if (previewCards.length > 0) {
+                previewDisp.innerHTML = previewCards.map(card => `
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 4px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">
                         <span style="background: var(--surface-hover); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); font-size: 0.75rem;"><strong style="color: var(--primary);">[FRONT]</strong> ${escapeHtml(card.front)}</span>
                         <span style="color: var(--text-dim);">${escapeHtml(separator)}</span>
                         <span style="background: var(--surface-hover); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); font-size: 0.75rem;"><strong style="color: var(--primary);">[BACK]</strong> ${escapeHtml(card.back)}</span>
                     </div>
-                `;
+                `).join('') + (validCount > 5 ? `<div class="text-dim text-xs mt-2 italic">Showing first 5 of ${validCount} cards...</div>` : '');
             } else {
                 previewDisp.innerHTML = `<span class="text-dim italic" style="font-size: 0.8rem;">No cards matched pattern. Try "Auto-Detect".</span>`;
             }
         }
-    };
+    }, 250);
 
     const autoDetectSeparator = () => {
         const text = bulkInput.value.trim();
@@ -7298,18 +7316,43 @@ function initImportManager() {
 
         const submitBtn = document.getElementById('bulk-add-submit');
         const originalBtnText = submitBtn.textContent;
+        const progressContainer = document.getElementById('bulk-import-progress-container');
+        const progressBar = document.getElementById('bulk-import-progress');
+        const progressText = document.getElementById('bulk-import-progress-text');
+        const progressPercent = document.getElementById('bulk-import-progress-percent');
 
         try {
             submitBtn.disabled = true;
-            submitBtn.textContent = `Importing ${newCards.length} cards...`;
-            const { error } = await sb.from('cards').insert(newCards);
-            if (error) throw error;
+            submitBtn.textContent = `Processing...`;
+
+            if (progressContainer) progressContainer.classList.remove('hidden');
+            if (progressBar) {
+                progressBar.max = newCards.length;
+                progressBar.value = 0;
+            }
+
+            const BATCH_SIZE = 100;
+            const totalBatches = Math.ceil(newCards.length / BATCH_SIZE);
+
+            for (let i = 0; i < totalBatches; i++) {
+                const batch = newCards.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE);
+                const currentCount = i * BATCH_SIZE + batch.length;
+
+                if (progressText) progressText.textContent = `Importing batch ${i + 1} of ${totalBatches}...`;
+                if (progressBar) progressBar.value = currentCount;
+                if (progressPercent) progressPercent.textContent = `${Math.round((currentCount / newCards.length) * 100)}%`;
+
+                const { error } = await sb.from('cards').insert(batch);
+                if (error) throw error;
+            }
 
             showToast(`Successfully imported ${newCards.length} cards!`, 'success');
             bulkInput.value = '';
             closeModal();
-            loadCards(state.currentDeck.id);
-            // Refresh main list count immediately if this deck was modified
+
+            // Re-fetch all cards to ensure state is in sync
+            await loadCards(state.currentDeck.id);
+            // Refresh main list count immediately
             loadDecksView(true);
         } catch (error) {
             console.error('Import Error:', error);
@@ -7317,6 +7360,7 @@ function initImportManager() {
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = originalBtnText;
+            if (progressContainer) progressContainer.classList.add('hidden');
         }
     });
 
