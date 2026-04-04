@@ -34,10 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Detect if we are on the main landing page
     const isMainPage =
-        window.location.pathname === '/' ||
-        window.location.pathname.endsWith('/index.html') ||
-        window.location.pathname.endsWith('/flashly/') ||
-        document.getElementById('auth-view') !== null; // Robust check for the main page section
+        (window.location.pathname === '/' ||
+            window.location.pathname.endsWith('/index.html') ||
+            window.location.pathname.endsWith('/flashly/')) &&
+        document.getElementById('auth-view') !== null; // Ensure we are on the actual landing page
 
     // Simple helper to get the path to index.html from subfolders
     const getRootPath = () => {
@@ -45,28 +45,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return '../index.html';
     };
 
-    // Special handling for auth buttons in the mobile menu
-    const loginBtns = document.querySelectorAll('.btn-login-toggle, .mobile-login-btn');
-    const signupBtns = document.querySelectorAll('.btn-signup-toggle, .mobile-signup-btn');
+    // Special handling for auth buttons on subpages (redirect to landing with ?auth)
+    document.addEventListener('click', (e) => {
+        const loginBtn = e.target.closest('.btn-login-toggle, .mobile-login-btn');
+        const signupBtn = e.target.closest('.btn-signup-toggle, .mobile-signup-btn');
 
-    loginBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            if (!isMainPage) {
+        if (!isMainPage) {
+            if (loginBtn) {
                 e.preventDefault();
                 e.stopPropagation();
                 window.location.href = getRootPath() + '?auth=login';
-            }
-        });
-    });
-
-    signupBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            if (!isMainPage) {
+            } else if (signupBtn) {
                 e.preventDefault();
                 e.stopPropagation();
                 window.location.href = getRootPath() + '?auth=signup';
             }
-        });
+        }
     });
 
     // Close menu when clicking links (but NOT auth buttons)
