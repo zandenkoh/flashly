@@ -45,3 +45,6 @@
 ## 2026-04-02 - Native JavaScript Debounce Implementation
 **Learning:** When writing performance optimizations like debouncing in a pure vanilla JavaScript environment without global lodash imports or predefined utils, use native inline `setTimeout` and `clearTimeout` to avoid `ReferenceError: debounce is not defined`.
 **Action:** Verify the availability of utility functions (like `debounce`) within the specific scope before relying on them, or implement them explicitly using native `setTimeout` APIs.
+## 2026-04-03 - Avoid `new Date()` within tight loops
+**Learning:** Instantiating `new Date(string)` inside `.forEach` or `.filter` loops processing large amounts of items is a performance bottleneck. Date parsing and object creation overhead adds up.
+**Action:** When filtering or comparing based on dates (e.g. ISO 8601 strings from the database), convert the target date to an ISO string outside the loop and compare it directly with the database string value inside the loop. This uses fast string comparison instead of expensive Date object instantiation.
