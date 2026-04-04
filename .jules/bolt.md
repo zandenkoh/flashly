@@ -48,3 +48,6 @@
 ## 2026-04-03 - Avoid `new Date()` within tight loops
 **Learning:** Instantiating `new Date(string)` inside `.forEach` or `.filter` loops processing large amounts of items is a performance bottleneck. Date parsing and object creation overhead adds up.
 **Action:** When filtering or comparing based on dates (e.g. ISO 8601 strings from the database), convert the target date to an ISO string outside the loop and compare it directly with the database string value inside the loop. This uses fast string comparison instead of expensive Date object instantiation.
+## 2026-04-04 - DocumentFragment for DOM Batch Rendering
+**Learning:** Appending DOM elements individually inside a loop that processes many items (e.g., rendering flashcards or notes) causes continuous layout thrashing and severely degrades frontend rendering performance in pure Vanilla JS apps.
+**Action:** When injecting multiple elements into the DOM, always initialize a `DocumentFragment` (`document.createDocumentFragment()`), append the newly created elements to the fragment within the loop, and finally append the entire fragment to the target DOM node once the loop completes.
