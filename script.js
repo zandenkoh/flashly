@@ -488,7 +488,6 @@ function closeAllModals() {
 function showAuth() {
     authView.classList.remove('hidden');
     mainLayout.classList.add('hidden');
-    authModal.classList.add('hidden');
 }
 
 async function loadLandingCarouselDecks() {
