@@ -9,3 +9,7 @@
 ## 2026-04-03 - Form Labels for Accessibility
 **Learning:** Found an accessibility issue pattern specific to this app's components: forms in modals frequently had missing `for` attributes connecting the labels to inputs.
 **Action:** Always verify that labels have a `for` attribute that points to the `id` of the respective input when making forms.
+
+## 2024-05-15 - Required Field Indicators
+**Learning:** Found an accessibility/UX issue where required form fields lacked clear visual indicators.
+**Action:** Added a red asterisk (`<span class="text-danger">*</span>`) to the labels of all form inputs with the `required` attribute to improve visual feedback for users.
