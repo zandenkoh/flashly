@@ -1354,7 +1354,7 @@
                                             style="background: var(--background);"></div>
                                         <div class="p-4 border-t border-border">
                                             <form id="admin-chat-form" class="flex gap-2">
-                                                <input type="text" id="admin-chat-input"
+                                                <input type="text" id="admin-chat-input" aria-label="Reply to admin chat"
                                                     class="flex-1 p-2 rounded border border-border"
                                                     placeholder="Reply..." disabled>
                                                 <button type="submit" class="btn btn-primary" disabled>Send</button>
@@ -1368,7 +1368,7 @@
 
                     <section id="community-view" class="view hidden">
                         <div class="search-container" style="position: relative;">
-                            <input type="text" id="community-search" class="search-input"
+                            <input type="text" id="community-search" class="search-input" aria-label="Search community decks"
                                 placeholder="Search decks by title or creator..." style="padding-right: 40px;">
                             <button id="community-search-btn" class="btn-icon-only" aria-label="Search community"
                                 style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
@@ -1428,7 +1428,7 @@
                             <div id="match-game-area" class="hidden"></div>
                             <div id="gravity-game-area" class="hidden">
                                 <div id="falling-words-zone"></div>
-                                <input type="text" id="gravity-input" placeholder="Type answer here..." autofocus>
+                                <input type="text" id="gravity-input" placeholder="Type answer here..." aria-label="Type answer for gravity game" autofocus>
                             </div>
                         </div>
                     </section>
@@ -1570,7 +1570,7 @@
                         <div class="notes-filters-container">
                             <div class="notes-search-wrapper">
                                 <div class="search-input-group">
-                                    <input type="text" id="notes-search-input" class="modern-search-input"
+                                    <input type="text" id="notes-search-input" class="modern-search-input" aria-label="Search notes"
                                         placeholder="Search by title, subject, or keywords...">
                                     <button id="notes-clear-btn" class="clear-search-btn hidden" aria-label="Clear search">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
@@ -1990,7 +1990,7 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <input type="file" id="csv-upload" accept=".csv" hidden>
+                                    <input type="file" id="csv-upload" accept=".csv" aria-label="Upload CSV file" hidden>
                                     <button id="toggle-select-mode-btn" class="btn btn-outline">
                                         Select
                                     </button>
@@ -2007,7 +2007,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                                     </svg>
-                                    <input type="text" id="card-search-input" placeholder="Search cards in this deck..."
+                                    <input type="text" id="card-search-input" placeholder="Search cards in this deck..." aria-label="Search cards in this deck"
                                         class="search-input">
                                 </div>
                                 <div class="sort-wrapper">
@@ -2492,13 +2492,13 @@
                         <form id="settings-form">
                             <div class="input-group mb-4">
                                 <label
-                                    class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Username</label>
+                                    class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block" for="settings-username">Username</label>
                                 <input type="text" id="settings-username" required placeholder="Enter your username">
                             </div>
 
                             <div class="input-group mb-6">
                                 <label
-                                    class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Email
+                                    class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block" for="settings-email-readonly">Email
                                     Address</label>
                                 <input type="email" id="settings-email-readonly" readonly
                                     style="background: var(--background); cursor: not-allowed; color: var(--text-tertiary);">
@@ -2587,7 +2587,7 @@
                         <div class="settings-section mb-8">
                             <div class="input-group mb-6">
                                 <label
-                                    class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Daily
+                                    class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block" for="settings-daily-limit">Daily
                                     Review Limit</label>
                                 <input type="number" id="settings-daily-limit" value="20" min="5" max="500"
                                     style="max-width: 150px;">
@@ -2597,7 +2597,7 @@
 
                             <div class="input-group mb-6">
                                 <label
-                                    class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Default
+                                    class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block" for="settings-default-separator">Default
                                     Rating Separator</label>
                                 <input type="text" id="settings-default-separator" value="|" style="max-width: 80px;">
                                 <p class="text-xs text-secondary mt-2">Separator used for Bulk Add.</p>
@@ -2727,7 +2727,7 @@
                             </div>
                             <div class="p-3 border-t border-border bg-surface">
                                 <form id="support-chat-form" style="display: flex; gap: 0.5rem;">
-                                    <input type="text" id="support-input" required placeholder="Type a message..."
+                                    <input type="text" id="support-input" required placeholder="Type a message..." aria-label="Type a support message"
                                         style="flex: 1; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border); background: var(--background);">
                                     <button type="submit" class="btn btn-primary btn-sm">Send</button>
                                 </form>
@@ -2768,7 +2768,7 @@
                         </svg>
                         Choose CSV File
                     </button>
-                    <input type="file" id="csv-upload" accept=".csv, .txt" hidden>
+                    <input type="file" id="csv-upload" accept=".csv, .txt" aria-label="Upload CSV or Text file" hidden>
                 </div>
 
                 <form id="bulk-add-form">
@@ -2876,11 +2876,11 @@
                     <form id="deck-settings-form">
                         <input type="hidden" id="deck-settings-id">
                         <div class="settings-row">
-                            <label class="settings-label">Deck Title</label>
+                            <label class="settings-label" for="deck-settings-title">Deck Title</label>
                             <input type="text" id="deck-settings-title" required placeholder="Enter deck title">
                         </div>
                         <div class="settings-row">
-                            <label class="settings-label">Description</label>
+                            <label class="settings-label" for="deck-settings-description">Description</label>
                             <textarea id="deck-settings-description" rows="4"
                                 placeholder="Add a description for this deck..."></textarea>
                         </div>
@@ -3051,7 +3051,7 @@
 
                         <!-- File Upload Section -->
                         <div class="ai-upload-section" style="margin-bottom: 1.5rem;">
-                            <input type="file" id="ai-pdf-upload" accept="application/pdf" class="hidden">
+                            <input type="file" id="ai-pdf-upload" accept="application/pdf" class="hidden" aria-label="Upload PDF for AI generator">
                             <button type="button" id="ai-pdf-upload-trigger"
                                 class="w-full flex items-center justify-center gap-2.5 py-3.5 px-5 bg-[var(--primary-light)] hover:bg-[var(--primary)]/10 text-[var(--primary)] font-semibold text-sm border border-[var(--primary)]/30 rounded-xl transition-all duration-200 shadow-sm hover:shadow active:scale-[0.985]">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -3340,9 +3340,10 @@
 
             <form id="share-form" class="mt-4">
                 <div class="input-group">
-                    <label style="margin-top: 10px;">Add people by email</label>
+                    <label style="margin-top: 10px;" for="share-email">Add people by email</label>
                     <div style="display:flex; gap:0.5rem">
                         <input type="email" id="share-email" placeholder="email@example.com" required style="flex:1">
+                        <label for="share-role" class="sr-only" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(1px, 1px, 1px, 1px); border:0;">Role</label>
                         <select id="share-role" class="form-control" style="width:100px">
                             <option value="viewer">Viewer</option>
                             <option value="editor">Editor</option>
