@@ -48,3 +48,7 @@
 ## 2026-04-03 - Avoid `new Date()` within tight loops
 **Learning:** Instantiating `new Date(string)` inside `.forEach` or `.filter` loops processing large amounts of items is a performance bottleneck. Date parsing and object creation overhead adds up.
 **Action:** When filtering or comparing based on dates (e.g. ISO 8601 strings from the database), convert the target date to an ISO string outside the loop and compare it directly with the database string value inside the loop. This uses fast string comparison instead of expensive Date object instantiation.
+
+## 2024-05-18 - DocumentFragment batching in note list rendering
+**Learning:** Calling `appendChild` inside a loop appending elements directly to the DOM causes layout thrashing and unnecessary reflows which scales poorly for large datasets.
+**Action:** Use `DocumentFragment` to batch DOM manipulations out-of-loop to significantly improve rendering performance.
