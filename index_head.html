@@ -339,37 +339,40 @@
                 </div>
             </section>
 
-            <!-- Community Section -->
+            <!-- Explore the library Section -->
             <section class="landing-page-section">
                 <div class="section-content-wrapper">
                     <div class="landing-text-block">
-                        <span class="feature-pill">Community</span>
-                        <h2>Learn from the best.</h2>
-                        <p>Access thousands of student-made decks and premium notes. GCE 'O' Levels, IB, or
-                            University—whatever you're studying, someone has already mastered it here.</p>
-                        <button class="btn btn-secondary btn-lg"
-                            onclick="state.isGuest = true; showApp(); loadCommunityDecks();">Explore Decks</button>
+                        <span class="feature-pill">The Library</span>
+                        <h2>Explore the library.</h2>
+                        <p>Dive into our humongous collection of academic resources. With over 15,000 free flashcard decks and an extensive marketplace of prelim papers, summary notes, and TYS answers, everything you need to ace your exams is right here.</p>
+                        <div class="hero-btns" style="display:flex; gap:1rem; align-items: center; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-lg"
+                                onclick="state.isGuest = true; showApp(); updateNav('nav-community'); switchView('community-view'); loadCommunityDecks();">Explore Decks</button>
+                            <button class="btn btn-secondary btn-lg"
+                                onclick="state.isGuest = true; showApp(); updateNav('nav-notes'); switchView('notes-view'); loadNotesView();">Notes Marketplace</button>
+                        </div>
                     </div>
                     <div class="landing-visual-block">
                         <div class="community-mockup">
                             <div class="grid grid-cols-2 gap-2" style="gap: 5px;">
                                 <div class="card p-4 text-center"
                                     style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
-                                    <div class="text-2xl mb-1">🧪</div>
-                                    <div class="text-sm font-bold">Pure Chemistry</div>
-                                    <div class="text-xs text-secondary">1.2k Cards</div>
+                                    <div class="text-2xl mb-1">📚</div>
+                                    <div class="text-sm font-bold">15k+ Decks</div>
+                                    <div class="text-xs text-secondary">Community Made</div>
                                 </div>
                                 <div class="card p-4 text-center"
                                     style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
-                                    <div class="text-2xl mb-1">📐</div>
-                                    <div class="text-sm font-bold">A-Maths</div>
-                                    <div class="text-xs text-secondary">850 Cards</div>
+                                    <div class="text-2xl mb-1">📝</div>
+                                    <div class="text-sm font-bold">2k+ Papers</div>
+                                    <div class="text-xs text-secondary">Notes & TYS</div>
                                 </div>
                                 <div class="card p-4 text-center"
-                                    style="border-left: 4px solid var(--primary); margin-bottom: 10px;">
-                                    <div class="text-2xl mb-1">🌍</div>
-                                    <div class="text-sm font-bold">Geography</div>
-                                    <div class="text-xs text-secondary">430 Cards</div>
+                                    style="grid-column: span 2; border-left: 4px solid #8b5cf6;">
+                                    <div class="text-2xl mb-1">✨</div>
+                                    <div class="text-sm font-bold">AI Summaries</div>
+                                    <div class="text-xs text-secondary">Smart Insights for every resource</div>
                                 </div>
                             </div>
                         </div>

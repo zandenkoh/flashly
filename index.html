@@ -297,14 +297,37 @@
                     </div>
                 </section>
 
-                <!-- CAROUSEL SECTION -->
-                <section class="lp-carousel-section" id="landing-carousel">
-                    <div class="lp-carousel-header">
-                        <h2 class="lp-section-title">Popular Decks</h2>
-                        <button class="lp-btn-ghost-cta" onclick="state.isGuest = true; showApp(); updateNav('nav-community'); switchView('community-view'); loadCommunityDecks();">View more</button>
-                    </div>
-                    <div class="lp-carousel-track" id="landing-carousel-track">
-                        <!-- Decks injected by JS -->
+                <!-- EXPLORE THE LIBRARY SECTION -->
+                <section class="lp-detail-section" id="library-explore">
+                    <div class="lp-detail-inner">
+                        <div class="lp-detail-content">
+                            <h2 class="lp-detail-title">Explore the library.</h2>
+                            <p class="lp-detail-text">
+                                Dive into our humongous collection of academic resources. With over 15,000 free flashcard decks and an extensive marketplace of prelim papers, summary notes, and TYS answers, everything you need to ace your exams is right here.
+                            </p>
+                            <div class="hero-btns" style="display:flex; gap:1rem;">
+                                <button class="lp-btn-solid" onclick="state.isGuest = true; showApp(); updateNav('nav-community'); switchView('community-view'); loadCommunityDecks();">Browse Decks</button>
+                                <button class="lp-btn-ghost-cta" onclick="state.isGuest = true; showApp(); updateNav('nav-notes'); switchView('notes-view'); loadNotesView();">Notes Marketplace</button>
+                            </div>
+                        </div>
+                        <div class="lp-detail-visual">
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                <div style="padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 1.5rem; text-align: center; box-shadow: var(--shadow-sm);">
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📚</div>
+                                    <div style="font-weight: 800; font-size: 1.25rem;">15k+</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Flashcard Decks</div>
+                                </div>
+                                <div style="padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 1.5rem; text-align: center; box-shadow: var(--shadow-sm);">
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📝</div>
+                                    <div style="font-weight: 800; font-size: 1.25rem;">2k+</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Study Resources</div>
+                                </div>
+                                <div style="grid-column: span 2; padding: 1.5rem; background: var(--primary-light); border: 1px solid rgba(37, 99, 235, 0.1); border-radius: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+                                    <div style="font-size: 1.5rem;">✨</div>
+                                    <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">AI-powered summaries and smart recommendations for every resource.</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
