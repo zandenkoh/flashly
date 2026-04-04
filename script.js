@@ -7600,6 +7600,9 @@ function renderNotes(notes) {
         "Sec 1-2 (Non-IP)": 'Lower Secondary'
     };
 
+    // ⚡ Bolt: Use DocumentFragment to batch DOM injections and prevent layout thrashing inside loop
+    const fragment = document.createDocumentFragment();
+
     notes.forEach(note => {
         // Clean class name: "GCE 'A' Levels" -> "a-levels"
         const cleanCat = note.category ? note.category.replace(/GCE\s+/i, '').replace(/'/g, '').toLowerCase().replace(/\s+/g, '-') : 'general';
@@ -7633,8 +7636,10 @@ function renderNotes(notes) {
             </div>
         `;
         card.onclick = () => openNote(note);
-        grid.appendChild(card);
+        fragment.appendChild(card);
     });
+
+    grid.appendChild(fragment);
 
     // Update Footer
     if (footer) {
