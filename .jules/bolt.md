@@ -48,3 +48,6 @@
 ## 2026-04-03 - Avoid `new Date()` within tight loops
 **Learning:** Instantiating `new Date(string)` inside `.forEach` or `.filter` loops processing large amounts of items is a performance bottleneck. Date parsing and object creation overhead adds up.
 **Action:** When filtering or comparing based on dates (e.g. ISO 8601 strings from the database), convert the target date to an ISO string outside the loop and compare it directly with the database string value inside the loop. This uses fast string comparison instead of expensive Date object instantiation.
+## 2024-05-18 - DocumentFragment for DOM Batching
+**Learning:** Appending elements directly to a live DOM node within a loop (e.g., `grid.appendChild(card)` inside `notes.forEach`) causes sequential layout thrashing and reflows, which creates a noticeable performance bottleneck when rendering lists of many items.
+**Action:** Always batch DOM injections by attaching elements to a `DocumentFragment` first (`fragment.appendChild(card)`), and then append the fragment to the live DOM node once at the end of the loop.
