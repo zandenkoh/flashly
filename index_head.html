@@ -2078,7 +2078,7 @@
                 <h3>Create New Deck</h3>
                 <form id="create-deck-form">
                     <div class="input-group">
-                        <label for="new-deck-title">Title</label>
+                        <label for="new-deck-title">Title <span class="text-danger">*</span></label>
                         <input type="text" id="new-deck-title" required>
                     </div>
                     <div class="input-group">
@@ -2098,11 +2098,11 @@
                 <form id="card-form">
                     <input type="hidden" id="card-id">
                     <div class="input-group">
-                        <label for="card-front-input">Front</label>
+                        <label for="card-front-input">Front <span class="text-danger">*</span></label>
                         <textarea id="card-front-input" rows="3" required></textarea>
                     </div>
                     <div class="input-group">
-                        <label for="card-back-input">Back</label>
+                        <label for="card-back-input">Back <span class="text-danger">*</span></label>
                         <textarea id="card-back-input" rows="3" required></textarea>
                     </div>
                     <div class="input-group">
@@ -2265,8 +2265,8 @@
 
                         <form id="settings-form">
                             <div class="input-group mb-4">
-                                <label
-                                    class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Username</label>
+                                <label for="settings-username"
+                                    class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Username <span class="text-danger">*</span></label>
                                 <input type="text" id="settings-username" required placeholder="Enter your username">
                             </div>
 
@@ -2479,8 +2479,8 @@
                         <p class="text-secondary mb-6">Found a bug or have a suggestion? Let us know!</p>
                         <form id="feedback-form">
                             <div class="input-group mb-4">
-                                <label class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Your
-                                    Feedback</label>
+                                <label for="feedback-message" class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Your
+                                    Feedback <span class="text-danger">*</span></label>
                                 <textarea id="feedback-message" rows="5" required
                                     style="font-family: inherit; font-size: 0.9rem; border-radius: 8px; border: 1px solid var(--border); background: var(--background); padding: 0.75rem; width: 100%; resize: vertical;"
                                     placeholder="Describe your issue or idea..."></textarea>
@@ -2615,7 +2615,7 @@
                 <h3>Create New Subject</h3>
                 <form id="create-subject-form">
                     <div class="input-group">
-                        <label for="new-subject-name">Subject Name</label>
+                        <label for="new-subject-name">Subject Name <span class="text-danger">*</span></label>
                         <input type="text" id="new-subject-name" required placeholder="e.g., Mathematics">
                     </div>
                     <div class="modal-actions">
@@ -2642,7 +2642,7 @@
                     <form id="deck-settings-form">
                         <input type="hidden" id="deck-settings-id">
                         <div class="settings-row">
-                            <label class="settings-label">Deck Title</label>
+                            <label for="deck-settings-title" class="settings-label">Deck Title <span class="text-danger">*</span></label>
                             <input type="text" id="deck-settings-title" required placeholder="Enter deck title">
                         </div>
                         <div class="settings-row">
@@ -2680,7 +2680,7 @@
                     <input type="hidden" id="rename-item-id">
                     <input type="hidden" id="rename-item-type"> <!-- 'deck' or 'subject' -->
                     <div class="input-group">
-                        <label for="rename-input">Name</label>
+                        <label for="rename-input">Name <span class="text-danger">*</span></label>
                         <input type="text" id="rename-input" required>
                     </div>
                     <div class="input-group hidden" id="rename-description-group">
@@ -2708,11 +2708,11 @@
                 </div>
                 <form id="add-note-form">
                     <div class="input-group">
-                        <label for="note-title">Title</label>
+                        <label for="note-title">Title <span class="text-danger">*</span></label>
                         <input type="text" id="note-title" required placeholder="e.g. 2024 Prelim Paper 1">
                     </div>
                     <div class="input-group">
-                        <label for="note-category">Category (Level)</label>
+                        <label for="note-category">Category (Level) <span class="text-danger">*</span></label>
                         <select id="note-category" class="input-field" required>
                             <option value="GCE 'O' Levels">GCE 'O' Levels</option>
                             <option value="GCE 'A' Levels">GCE 'A' Levels</option>
@@ -2723,7 +2723,7 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label for="note-subject">Subject</label>
+                        <label for="note-subject">Subject <span class="text-danger">*</span></label>
                         <select id="note-subject" class="input-field" required>
                             <option value="General">General</option>
                             <optgroup label="Mathematics">
@@ -2766,7 +2766,7 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label for="note-type">Document Type</label>
+                        <label for="note-type">Document Type <span class="text-danger">*</span></label>
                         <select id="note-type" class="input-field" required>
                             <option value="Notes/Practices">Notes/Practices</option>
                             <option value="Exam Papers">Exam Papers</option>
@@ -2776,7 +2776,7 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label for="note-url">PDF URL (Direct Link)</label>
+                        <label for="note-url">PDF URL (Direct Link) <span class="text-danger">*</span></label>
                         <input type="url" id="note-url" required placeholder="https://example.com/file.pdf">
                     </div>
                     <div class="modal-actions">
@@ -3006,11 +3006,11 @@
 
                 <form id="auth-form">
                     <div class="input-group">
-                        <label for="email">Email address</label>
+                        <label for="email">Email address <span class="text-danger">*</span></label>
                         <input type="email" id="email" required placeholder="you@example.com">
                     </div>
                     <div class="input-group">
-                        <label for="password">Password</label>
+                        <label for="password">Password <span class="text-danger">*</span></label>
                         <input type="password" id="password" required placeholder="••••••••">
                     </div>
                     <button type="submit" id="auth-submit" class="btn btn-primary btn-full">Sign In</button>
@@ -3065,7 +3065,7 @@
             <h3>Create New Group</h3>
             <form id="create-group-form">
                 <div class="input-group">
-                    <label for="new-group-name">Group Name</label>
+                    <label for="new-group-name">Group Name <span class="text-danger">*</span></label>
                     <input type="text" id="new-group-name" required>
                 </div>
                 <div class="modal-actions">
@@ -3081,7 +3081,7 @@
             <h3>Join Group</h3>
             <form id="join-group-form">
                 <div class="input-group">
-                    <label for="join-invite-code">Invite Code</label>
+                    <label for="join-invite-code">Invite Code <span class="text-danger">*</span></label>
                     <input type="text" id="join-invite-code" placeholder="e.g. abcd1234..." required>
                 </div>
                 <div class="modal-actions">
@@ -3106,7 +3106,7 @@
 
             <form id="share-form" class="mt-4">
                 <div class="input-group">
-                    <label style="margin-top: 10px;">Add people by email</label>
+                    <label for="share-email" style="margin-top: 10px;">Add people by email <span class="text-danger">*</span></label>
                     <div style="display:flex; gap:0.5rem">
                         <input type="email" id="share-email" placeholder="email@example.com" required style="flex:1">
                         <select id="share-role" class="form-control" style="width:100px">
@@ -3186,7 +3186,7 @@
             <form id="move-deck-form">
                 <input type="hidden" id="move-deck-id">
                 <div class="input-group">
-                    <label for="move-deck-subject-select">Select Subject</label>
+                    <label for="move-deck-subject-select">Select Subject <span class="text-danger">*</span></label>
                     <select id="move-deck-subject-select" required
                         style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);">
                         <!-- Populated by JS -->
@@ -3207,7 +3207,7 @@
             <form id="add-to-group-form">
                 <input type="hidden" id="add-to-group-deck-id">
                 <div class="input-group">
-                    <label for="add-to-group-select">Select Group</label>
+                    <label for="add-to-group-select">Select Group <span class="text-danger">*</span></label>
                     <select id="add-to-group-select" required
                         style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);">
                         <!-- Populated by JS -->
