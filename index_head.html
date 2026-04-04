@@ -154,7 +154,7 @@
                         <button class="btn btn-text btn-login-toggle">Sign In</button>
                         <button class="btn btn-primary btn-signup-toggle">Get Started</button>
                     </div>
-                    <button id="landing-mobile-menu-toggle" class="mobile-menu-toggle">
+                    <button id="landing-mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Open mobile menu">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                             stroke="currentColor" class="icon-md">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -2075,11 +2075,11 @@
                 <h3>Create New Deck</h3>
                 <form id="create-deck-form">
                     <div class="input-group">
-                        <label>Title</label>
+                        <label for="new-deck-title">Title</label>
                         <input type="text" id="new-deck-title" required>
                     </div>
                     <div class="input-group">
-                        <label>Description (optional)</label>
+                        <label for="new-deck-desc">Description (optional)</label>
                         <textarea id="new-deck-desc" rows="2"></textarea>
                     </div>
                     <div class="modal-actions">
@@ -2095,15 +2095,15 @@
                 <form id="card-form">
                     <input type="hidden" id="card-id">
                     <div class="input-group">
-                        <label>Front</label>
+                        <label for="card-front-input">Front</label>
                         <textarea id="card-front-input" rows="3" required></textarea>
                     </div>
                     <div class="input-group">
-                        <label>Back</label>
+                        <label for="card-back-input">Back</label>
                         <textarea id="card-back-input" rows="3" required></textarea>
                     </div>
                     <div class="input-group">
-                        <label>Tags (comma separated)</label>
+                        <label for="card-tags-input">Tags (comma separated)</label>
                         <input type="text" id="card-tags-input" placeholder="e.g. difficult, math, verb">
                     </div>
                     <div class="modal-actions">
@@ -2118,13 +2118,13 @@
                 <h3>Custom Study Session</h3>
                 <form id="custom-study-form">
                     <div class="input-group">
-                        <label>Filter by Tag</label>
+                        <label for="custom-study-tag-filter">Filter by Tag</label>
                         <select id="custom-study-tag-filter">
                             <option value="">All Tags</option>
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>Max Cards</label>
+                        <label for="custom-study-limit">Max Cards</label>
                         <input type="number" id="custom-study-limit" value="20" min="5" max="100">
                     </div>
                     <div class="modal-actions">
@@ -2544,7 +2544,7 @@
 
                 <form id="bulk-add-form">
                     <div class="input-group">
-                        <label>Pasted Data</label>
+                        <label for="bulk-add-input">Pasted Data</label>
                         <textarea id="bulk-add-input" rows="10"
                             placeholder="Example:&#10;Apple | Red fruit&#10;Banana | Yellow fruit" required
                             style="font-family: inherit; font-size: 0.9rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); padding: 0.75rem; width: 100%; resize: vertical;"></textarea>
@@ -2612,7 +2612,7 @@
                 <h3>Create New Subject</h3>
                 <form id="create-subject-form">
                     <div class="input-group">
-                        <label>Subject Name</label>
+                        <label for="new-subject-name">Subject Name</label>
                         <input type="text" id="new-subject-name" required placeholder="e.g., Mathematics">
                     </div>
                     <div class="modal-actions">
@@ -2677,11 +2677,11 @@
                     <input type="hidden" id="rename-item-id">
                     <input type="hidden" id="rename-item-type"> <!-- 'deck' or 'subject' -->
                     <div class="input-group">
-                        <label>Name</label>
+                        <label for="rename-input">Name</label>
                         <input type="text" id="rename-input" required>
                     </div>
                     <div class="input-group hidden" id="rename-description-group">
-                        <label>Description</label>
+                        <label for="rename-description-input">Description</label>
                         <textarea id="rename-description-input" rows="3"
                             style="font-family: inherit; font-size: inherit; resize: vertical;"></textarea>
                     </div>
@@ -2705,11 +2705,11 @@
                 </div>
                 <form id="add-note-form">
                     <div class="input-group">
-                        <label>Title</label>
+                        <label for="note-title">Title</label>
                         <input type="text" id="note-title" required placeholder="e.g. 2024 Prelim Paper 1">
                     </div>
                     <div class="input-group">
-                        <label>Category (Level)</label>
+                        <label for="note-category">Category (Level)</label>
                         <select id="note-category" class="input-field" required>
                             <option value="GCE 'O' Levels">GCE 'O' Levels</option>
                             <option value="GCE 'A' Levels">GCE 'A' Levels</option>
@@ -2720,7 +2720,7 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>Subject</label>
+                        <label for="note-subject">Subject</label>
                         <select id="note-subject" class="input-field" required>
                             <option value="General">General</option>
                             <optgroup label="Mathematics">
@@ -2763,7 +2763,7 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>Document Type</label>
+                        <label for="note-type">Document Type</label>
                         <select id="note-type" class="input-field" required>
                             <option value="Notes/Practices">Notes/Practices</option>
                             <option value="Exam Papers">Exam Papers</option>
@@ -2773,7 +2773,7 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>PDF URL (Direct Link)</label>
+                        <label for="note-url">PDF URL (Direct Link)</label>
                         <input type="url" id="note-url" required placeholder="https://example.com/file.pdf">
                     </div>
                     <div class="modal-actions">
@@ -3062,7 +3062,7 @@
             <h3>Create New Group</h3>
             <form id="create-group-form">
                 <div class="input-group">
-                    <label>Group Name</label>
+                    <label for="new-group-name">Group Name</label>
                     <input type="text" id="new-group-name" required>
                 </div>
                 <div class="modal-actions">
@@ -3078,7 +3078,7 @@
             <h3>Join Group</h3>
             <form id="join-group-form">
                 <div class="input-group">
-                    <label>Invite Code</label>
+                    <label for="join-invite-code">Invite Code</label>
                     <input type="text" id="join-invite-code" placeholder="e.g. abcd1234..." required>
                 </div>
                 <div class="modal-actions">
@@ -3183,7 +3183,7 @@
             <form id="move-deck-form">
                 <input type="hidden" id="move-deck-id">
                 <div class="input-group">
-                    <label>Select Subject</label>
+                    <label for="move-deck-subject-select">Select Subject</label>
                     <select id="move-deck-subject-select" required
                         style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);">
                         <!-- Populated by JS -->
@@ -3204,7 +3204,7 @@
             <form id="add-to-group-form">
                 <input type="hidden" id="add-to-group-deck-id">
                 <div class="input-group">
-                    <label>Select Group</label>
+                    <label for="add-to-group-select">Select Group</label>
                     <select id="add-to-group-select" required
                         style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);">
                         <!-- Populated by JS -->
