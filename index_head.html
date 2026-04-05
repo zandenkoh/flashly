@@ -2265,13 +2265,13 @@
 
                         <form id="settings-form">
                             <div class="input-group mb-4">
-                                <label
+                                <label for="settings-username"
                                     class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Username</label>
                                 <input type="text" id="settings-username" required placeholder="Enter your username">
                             </div>
 
                             <div class="input-group mb-6">
-                                <label
+                                <label for="settings-email-readonly"
                                     class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Email
                                     Address</label>
                                 <input type="email" id="settings-email-readonly" readonly
@@ -2303,8 +2303,7 @@
                         <h2 class="text-xl font-bold mb-6">Appearance</h2>
 
                         <div class="settings-section mb-8">
-                            <label
-                                class="text-xs font-bold text-secondary uppercase tracking-wider mb-4 block">Theme</label>
+                            <span class="text-xs font-bold text-secondary uppercase tracking-wider mb-4 block">Theme</span>
                             <div class="theme-options-grid"
                                 style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
                                 <div class="theme-option active" data-theme="light"
@@ -2332,9 +2331,8 @@
                         </div>
 
                         <div class="settings-section">
-                            <label
-                                class="text-xs font-bold text-secondary uppercase tracking-wider mb-4 block">Interface
-                                Preferences</label>
+                            <span class="text-xs font-bold text-secondary uppercase tracking-wider mb-4 block">Interface
+                                Preferences</span>
                             <div class="toggle-group" style="display: flex; flex-direction: column; gap: 1rem;">
                                 <div style="display: flex; align-items: center; justify-content: space-between;">
                                     <div>
@@ -2360,7 +2358,7 @@
 
                         <div class="settings-section mb-8">
                             <div class="input-group mb-6">
-                                <label
+                                <label for="settings-daily-limit"
                                     class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Daily
                                     Review Limit</label>
                                 <input type="number" id="settings-daily-limit" value="20" min="5" max="500"
@@ -2370,7 +2368,7 @@
                             </div>
 
                             <div class="input-group mb-6">
-                                <label
+                                <label for="settings-default-separator"
                                     class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Default
                                     Rating Separator</label>
                                 <input type="text" id="settings-default-separator" value="|" style="max-width: 80px;">
@@ -2479,7 +2477,7 @@
                         <p class="text-secondary mb-6">Found a bug or have a suggestion? Let us know!</p>
                         <form id="feedback-form">
                             <div class="input-group mb-4">
-                                <label class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Your
+                                <label for="feedback-message" class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Your
                                     Feedback</label>
                                 <textarea id="feedback-message" rows="5" required
                                     style="font-family: inherit; font-size: 0.9rem; border-radius: 8px; border: 1px solid var(--border); background: var(--background); padding: 0.75rem; width: 100%; resize: vertical;"
@@ -2559,8 +2557,8 @@
                             <div class="setting-col" style="width: 100%;">
                                 <div
                                     style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                                    <label style="font-weight: 600; font-size: 0.85rem;">Define Structure
-                                        Pattern</label>
+                                    <span style="font-weight: 600; font-size: 0.85rem;">Define Structure
+                                        Pattern</span>
                                     <button type="button" id="import-auto-detect-btn" class="btn btn-text btn-xs"
                                         style="font-size: 0.75rem; color: var(--primary);">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -2583,9 +2581,8 @@
                                 style="margin-top: 1rem; padding: 0.75rem; background: var(--surface); border: 1px dashed var(--border); border-radius: 8px;">
                                 <div
                                     style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                                    <label
-                                        style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Live
-                                        Structure Preview</label>
+                                    <span style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Live
+                                        Structure Preview</span>
                                     <span class="text-secondary" style="font-size: 0.7rem;">Tip: Delete header rows from
                                         the data above</span>
                                 </div>
@@ -2860,7 +2857,7 @@
 
                         <!-- Text Input -->
                         <div class="input-group">
-                            <label class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Content
+                            <label for="ai-input-text" class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Content
                                 Source</label>
                             <textarea id="ai-input-text" class="ai-textarea"
                                 placeholder="Paste your study notes, an article, or topic here..."></textarea>
@@ -2873,7 +2870,7 @@
                         <!-- Options Grid -->
                         <div class="ai-options-grid">
                             <div class="input-group">
-                                <label class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Card
+                                <label for="ai-card-count" class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Card
                                     Count</label>
                                 <select id="ai-card-count" class="ai-select">
                                     <option value="5">5 Cards</option>
@@ -2884,7 +2881,7 @@
                             </div>
 
                             <div class="input-group">
-                                <label
+                                <label for="ai-difficulty"
                                     class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Difficulty</label>
                                 <select id="ai-difficulty" class="ai-select">
                                     <option value="simple">Simple / Concepts</option>
@@ -3106,7 +3103,7 @@
 
             <form id="share-form" class="mt-4">
                 <div class="input-group">
-                    <label style="margin-top: 10px;">Add people by email</label>
+                    <label for="share-email" style="margin-top: 10px;">Add people by email</label>
                     <div style="display:flex; gap:0.5rem">
                         <input type="email" id="share-email" placeholder="email@example.com" required style="flex:1">
                         <select id="share-role" class="form-control" style="width:100px">
@@ -3119,14 +3116,14 @@
             </form>
 
             <div id="group-shortcuts-container" class="mt-6 hidden">
-                <label>Group Shortcuts</label>
+                <span style="display:block; font-weight: 600; margin-bottom: 0.5rem;">Group Shortcuts</span>
                 <ul id="group-shortcuts-list" class="mt-2" style="max-height:100px; overflow-y:auto">
                     <!-- Group shortcuts items -->
                 </ul>
             </div>
 
             <div class="share-list-container mt-6">
-                <label>People with access</label>
+                <span style="display:block; font-weight: 600; margin-bottom: 0.5rem;">People with access</span>
                 <ul id="share-list" class="mt-2" style="max-height:160px; overflow-y:auto">
                     <!-- Shared users items -->
                 </ul>
