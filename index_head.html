@@ -2265,7 +2265,7 @@
 
                         <form id="settings-form">
                             <div class="input-group mb-4">
-                                <label
+                                <label for="settings-username"
                                     class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Username</label>
                                 <input type="text" id="settings-username" required placeholder="Enter your username">
                             </div>
@@ -2479,7 +2479,7 @@
                         <p class="text-secondary mb-6">Found a bug or have a suggestion? Let us know!</p>
                         <form id="feedback-form">
                             <div class="input-group mb-4">
-                                <label class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Your
+                                <label for="feedback-message" class="text-xs font-bold text-secondary uppercase tracking-wider mb-2 block">Your
                                     Feedback</label>
                                 <textarea id="feedback-message" rows="5" required
                                     style="font-family: inherit; font-size: 0.9rem; border-radius: 8px; border: 1px solid var(--border); background: var(--background); padding: 0.75rem; width: 100%; resize: vertical;"
@@ -2501,7 +2501,7 @@
                             </div>
                             <div class="p-3 border-t border-border bg-surface">
                                 <form id="support-chat-form" style="display: flex; gap: 0.5rem;">
-                                    <input type="text" id="support-input" required placeholder="Type a message..."
+                                    <input type="text" id="support-input" aria-label="Support message" required placeholder="Type a message..."
                                         style="flex: 1; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border); background: var(--background);">
                                     <button type="submit" class="btn btn-primary btn-sm">Send</button>
                                 </form>
@@ -2642,7 +2642,7 @@
                     <form id="deck-settings-form">
                         <input type="hidden" id="deck-settings-id">
                         <div class="settings-row">
-                            <label class="settings-label">Deck Title</label>
+                            <label for="deck-settings-title" class="settings-label">Deck Title</label>
                             <input type="text" id="deck-settings-title" required placeholder="Enter deck title">
                         </div>
                         <div class="settings-row">
@@ -3106,7 +3106,7 @@
 
             <form id="share-form" class="mt-4">
                 <div class="input-group">
-                    <label style="margin-top: 10px;">Add people by email</label>
+                    <label for="share-email" style="margin-top: 10px;">Add people by email</label>
                     <div style="display:flex; gap:0.5rem">
                         <input type="email" id="share-email" placeholder="email@example.com" required style="flex:1">
                         <select id="share-role" class="form-control" style="width:100px">
