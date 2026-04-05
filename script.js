@@ -7600,6 +7600,12 @@ function renderNotes(notes) {
         "Sec 1-2 (Non-IP)": 'Lower Secondary'
     };
 
+    // ⚡ Bolt Optimization: Use DocumentFragment for batched DOM insertions
+    // What: Create a DocumentFragment and append all note cards to it first, then append the fragment to the DOM.
+    // Why: Appending directly to the DOM in a loop triggers costly layout reflows and repaints for every item.
+    // Impact: Reduces DOM reflows from O(n) to O(1), significantly improving rendering performance for large lists of notes.
+    const fragment = document.createDocumentFragment();
+
     notes.forEach(note => {
         // Clean class name: "GCE 'A' Levels" -> "a-levels"
         const cleanCat = note.category ? note.category.replace(/GCE\s+/i, '').replace(/'/g, '').toLowerCase().replace(/\s+/g, '-') : 'general';
@@ -7633,8 +7639,10 @@ function renderNotes(notes) {
             </div>
         `;
         card.onclick = () => openNote(note);
-        grid.appendChild(card);
+        fragment.appendChild(card);
     });
+
+    grid.appendChild(fragment);
 
     // Update Footer
     if (footer) {
