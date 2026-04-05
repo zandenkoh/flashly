@@ -6776,7 +6776,9 @@ function escapeHtml(text) {
     return text.toString()
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 
 function getSkeletonLoadingCards(count = 3) {
